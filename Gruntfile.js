@@ -16,7 +16,7 @@ module.exports = function(grunt) {
             'git-tag': { cwd: 'app', cmd: 'git tag' },
             'app-build': { cwd: 'app', cmd: 'ionic build --prod --service-worker' },
             'deploy-app': { cwd: '.', cmd: 'firebase deploy' },
-            'set-target-deploy-app': { cwd: '.', cmd: 'firebase target:apply hosting  app referee-upgrade' }
+            'set-target-deploy-app': { cwd: '.', cmd: 'firebase target:apply hosting  upgrade referee-upgrade' }
         },
     });
     grunt.loadNpmTasks('grunt-exec');

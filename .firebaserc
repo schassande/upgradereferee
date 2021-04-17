@@ -1,11 +1,11 @@
 {
   "projects": {
-    "default": "referee-upgrade"
+    "default": "refcoach-676e3"
   },
   "targets": {
-    "referee-upgrade": {
+    "refcoach-676e3": {
       "hosting": {
-        "app": [
+        "upgrade": [
           "referee-upgrade"
         ]
       }
