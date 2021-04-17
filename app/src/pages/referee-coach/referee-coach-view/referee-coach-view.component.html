@@ -1,0 +1,36 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="navBack()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Referee Coach <span *ngIf="coach">{{coach.shortName}}</span></ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)" *ngIf="coach">
+    <div>
+        <div style="text-align: center; margin-top: 20px;">
+            <ion-icon *ngIf="!coach.photo || !coach.photo.url" size="large" name="person"></ion-icon>
+            <img src="{{coach.photo.url}}" *ngIf="coach.photo && coach.photo.url" height="100">
+        </div>
+
+        <div style="margin: 20px 0 0 10px; text-align: center;">
+            <span style="font-size: 1.4em;">{{coach.firstName}} {{coach.lastName}}</span>
+            <br>from {{coachCountry}}
+        </div>
+        <ul>
+            <li>Contact: {{coach.mobilePhones}} {{coach.email}}</li>
+            <li>Speaking languages : {{coachLanguage ? coachLanguage.join(", ") : ''}}</li>
+            <li>Gender: {{coach.gender == 'M' ? 'Male' : (coach.gender == 'F' ? 'Female' : '-')}}</li>
+            <li>Referee coach Level: {{coach.refereeCoach.refereeCoachLevel}}</li>
+        </ul>
+        <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/coach_{{coach.refereeCoach.refereeCoachLevel}}.png" height="100" /></div>
+        <div style="text-align: right;" *ngIf="canEdit()">
+            <ion-button shape="round" (click)="editCoach()" style="margin-bottom: 20px;">Edit</ion-button>
+        </div>
+    </div>
+</ion-content>

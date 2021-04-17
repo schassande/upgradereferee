@@ -1,0 +1,44 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="navBack()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Referee <span *ngIf="referee">{{referee.shortName}}</span></ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)" *ngIf="referee">
+    <div>
+        <div style="text-align: center; margin-top: 20px;">
+            <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person"></ion-icon>
+            <img src="{{referee.photo.url}}" *ngIf="referee.photo && referee.photo.url" height="100">
+        </div>
+
+        <div style="margin: 20px 0 0 10px; text-align: center;">
+            <span style="font-size: 1.4em;">{{referee.firstName}} {{referee.lastName}}</span>
+            <br>from {{refereeCountry}} / {{referee.region}}
+        </div>
+        <ul>
+            <li>Contact: {{referee.mobilePhones}} {{referee.email}}</li>
+            <li>Speaking languages : {{refereeLanguage ? refereeLanguage.join(", ") : ''}}</li>
+            <li>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}</li>
+            <li>Referee Level: {{referee.referee.refereeLevel}}</li>
+            <li>Referee category: {{referee.referee.refereeCategory}}</li>
+            <li *ngIf="referee.referee.nextRefereeLevel">Looking for upgrade?: {{referee.referee.nextRefereeLevel}}</li>
+            <li *ngIf="referee.refereeCoach.refereeCoachLevel">Referee coach Level: {{referee.refereeCoach.refereeCoachLevel}}</li>
+        </ul>
+        <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="100" /></div>
+        <div style="text-align: right;" *ngIf="canEdit()">
+            <ion-button shape="round" routerLink="/user/edit/{{referee.id}}" style="margin-bottom: 20px;">Edit</ion-button>
+        </div>
+        <div style="text-align: right;" *ngIf="canVote()">
+            <ion-button shape="round" routerLink="/upgrade/voting?refereeId={{referee.id}}" style="margin-bottom: 20px;">
+                <ion-icon name="ribbon-outline"></ion-icon>&nbsp;L3+ upgrade vote
+            </ion-button>
+        </div>
+    </div>
+</ion-content>

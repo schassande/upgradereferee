@@ -1,0 +1,33 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/home" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">List of referee coaches</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)">
+    <ion-searchbar [(ngModel)]="searchInput" [showCancelButton]="false" (ionChange)="onSearchBarInput()"></ion-searchbar>
+    <ion-item>
+        <ion-label>Sort by</ion-label>
+        <ion-select [(ngModel)]="sortBy" (ionChange)="onSearchBarInput()">
+            <ion-select-option value="shortName">Short name</ion-select-option>
+            <ion-select-option value="level">Level</ion-select-option>
+        </ion-select>
+    </ion-item>
+    <ion-list>
+        <ion-item *ngFor="let coach of coaches">
+            <ion-avatar slot="start" *ngIf="!coach.photo || !coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="assets/imgs/badge/coach_{{coach.refereeCoach.refereeCoachLevel}}.png" /></ion-avatar>
+            <ion-avatar slot="start" *ngIf="coach.photo && coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="{{coach.photo.url}}"></ion-avatar>
+            <ion-label (click)="refereeCoachSelected($event, coach)" class="listItemButton">
+                {{coach.shortName}}<br> {{coach.firstName}} {{coach.lastName}}<br> {{coach.refereeCoach.refereeCoachLevel}}
+            </ion-label>
+        </ion-item>
+    </ion-list>
+    <div style="margin-bottom: 60px;"></div>
+</ion-content>

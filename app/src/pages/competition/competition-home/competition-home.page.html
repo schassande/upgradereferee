@@ -1,0 +1,62 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/competition/list" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">Competition Home</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="competition && !loading">
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="canEdit && isRefereeCoach()">
+        <ion-row>
+            <ion-col *ngIf="canEdit">
+                <ion-fab-button (click)="onDelete()" style='--background:red; font-size: 1.6em;'>
+                    <ion-icon name="trash"></ion-icon>
+                </ion-fab-button>
+            </ion-col>
+            <ion-col *ngIf="canEdit">
+                <ion-fab-button routerLink="/competition/{{competition.id}}/edit" style='--background:green; font-size: 1.6em;'>
+                    <ion-icon name="create-outline"></ion-icon>
+                </ion-fab-button>
+            </ion-col>
+            <ion-col *ngIf="isRefereeCoach()">
+                <ion-fab-button routerLink="/upgrade/voting" [queryParams]="{competitionId : competition.id }" style='--background:blue; font-size: 1.6em;'>
+                    <ion-icon name="ribbon-outline"></ion-icon>
+                </ion-fab-button>
+            </ion-col>
+        </ion-row>
+    </ion-fab>
+    <div style="margin: 20px 0; text-align: center;">
+        <span style="font-size: 1.4em;">{{competition.name}}</span>
+        <br>in {{competition.country}} / {{competition.region}}
+        <br>Date(s): <span *ngFor="let day of competition.days">{{dateService.date2string(day)}}</span>
+    </div>
+    <ion-list>
+        <ion-item>
+            <ion-label>Category: {{competition.category}}</ion-label>
+        </ion-item>
+        <ion-item-group>
+            <ion-item-divider color="light">Referee Coach ({{competition.refereeCoaches.length}})
+                <ion-icon *ngIf="canEdit" slot="end" name="create-outline" routerLink="/competition/{{competition.id}}/coaches" style="margin-right: 5px;"></ion-icon>
+            </ion-item-divider>
+            <ion-item *ngFor="let coachRef of competition.refereeCoaches">
+                <ion-label>{{coachRef.coachShortName}}</ion-label>
+            </ion-item>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">Referees ({{competition.referees.length}})
+                <ion-icon *ngIf="canEdit" slot="end" name="create-outline" routerLink="/competition/{{competition.id}}/referees" style="margin-right: 5px;"></ion-icon>
+            </ion-item-divider>
+            <ion-item *ngFor="let refereeRef of competition.referees">
+                <ion-label>{{refereeRef.refereeShortName}}</ion-label>
+            </ion-item>
+        </ion-item-group>
+    </ion-list>
+    <div *ngIf="owner" style="font-size:0.7em; text-align: center;"><br>Own by {{owner}}</div>
+</ion-content>

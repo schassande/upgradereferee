@@ -1,0 +1,38 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/home" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">Referee Validation</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)">
+    <div *ngIf="!users" style="margin: 20px auto; text-align: center;">
+        <ion-spinner></ion-spinner>
+    </div>
+    <ion-list *ngIf="users && users.length > 0">
+        <ion-item *ngFor="let user of users">
+            <ion-icon slot="start" *ngIf="user.photo && !user.photo.url" name="person"></ion-icon>
+            <ion-avatar slot="start" *ngIf="user.photo && user.photo.url"><img src="{{user.photo.url}}"></ion-avatar>
+            <ion-label>
+                <div (click)="userSelected(user)">
+                    <span style="font-weight: bold; font-size: 1.2em;">{{user.firstName}} {{user.lastName}} ({{user.shortName}})</span>
+                    <br>from {{user.country}}
+                    <br>having the email: {{user.email}}
+                    <br>With the referee level {{user.referee.refereeLevel}}
+                    <br>Looking for upgrade to {{user.referee.nextRefereeLevel}}/{{user.referee.refereeCategory}}
+                </div>
+                <div style="margin: 10px 0; text-align: center; font-size: 0.8em;">
+                    <ion-button color="success" name="checkmark" shape="round" (click)="validate(user)">validate</ion-button>
+                    <ion-button color="danger" name="close" shape="round" (click)="unvalidate(user)">Reject</ion-button>
+                </div>
+            </ion-label>
+        </ion-item>
+    </ion-list>
+    <div *ngIf="users && users.length === 0" style="margin: 20px auto; text-align: center;">No Referee to validate.</div>
+</ion-content>

@@ -1,0 +1,50 @@
+<ion-header>
+    <ion-toolbar>
+        <span slot="start" style="margin-left: 10px;"><img src="assets/imgs/logo.png" height="30" /></span>
+        <ion-title style="text-align: center;">Login</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <div style="text-align: center; margin-top: 30px;"><img src="assets/imgs/logo.png" height="120" /></div>
+    <div style="text-align: center; margin: 10px 0;">Welcome to Upgrade Referee application !<br><br>
+    </div>
+    <div style="margin: 10px;">This application is used by the European Referee Commission to manage the upgrades of the referees to the level 3, 4 or 5 under the continuous assessment system.
+        <br>The Referee coaches L3+ uses the application to vote during tournament, whereas the candidate referees can consult their upgrade data.
+    </div>
+    <div style="margin: 30px 10px 0 10px;">Please enter your email and your password to log in or create an account.
+    </div>
+    <ion-list>
+        <ion-item>
+            <ion-label position="stacked">Email</ion-label>
+            <ion-input type="email" [(ngModel)]="email" tabindex="1"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label position="stacked">Password</ion-label>
+            <ion-input type="password" [(ngModel)]="password" tabindex="2"></ion-input>
+        </ion-item>
+        <ion-item style="text-align: right;">
+            <ion-label>Remenber on this device&nbsp;</ion-label>
+            <ion-checkbox scope="end " [checked]="savePassword "></ion-checkbox>
+        </ion-item>
+    </ion-list>
+    <div style="text-align: right; margin-right: 10px; ">
+        <a (click)="resetPassword() ">Reset password</a> &nbsp;
+    </div>
+    <div *ngIf="errors && errors.length " style="margin: 5px 20px ">
+        <div style="color: red; ">Errors:</div>
+        <ul>
+            <li *ngFor="let error of errors ">{{error}}</li>
+        </ul>
+    </div>
+    <div style="text-align: center; margin-top: 20px; ">
+        <ion-button shape="round " color="success " size="large " (click)="createAccount()" style="margin-right: 10px;">
+            <ion-icon name="add-outline" scope="start "></ion-icon>&nbsp; Register
+        </ion-button>
+        <ion-button shape="round " size="large " (click)="login() ">
+            <ion-icon name="log-in-outline" scope="start "></ion-icon>&nbsp; Login
+        </ion-button>
+    </div>
+</ion-content>

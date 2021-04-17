@@ -1,0 +1,169 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="cancel()" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">Account {{user ? (user.dataStatus === 'NEW' ? 'Creation' : 'Edition') : ''}}</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="user">
+    <ion-list style="width: 100%;">
+        <ion-item-group style="width: 100%;">
+            <ion-item-divider color="light">General info</ion-item-divider>
+            <ion-item>
+                <ion-label *ngIf="!user.photo || !user.photo.url">No photo</ion-label>
+                <ion-avatar item-start *ngIf="user.photo && user.photo.url"><img src="{{user.photo.url}}"></ion-avatar>
+                <app-camera-icon-comp (photo)="onImage($event)" slot="end" alert="true"></app-camera-icon-comp>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>First name</ion-label>
+                <ion-input type="text" [(ngModel)]="user.firstName" (ionBlur)="updateShortName()" id="firstName" name="firstName" min="3" max="15" #firstName="ngModel" required autofocus tabindex="1"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>Last name</ion-label>
+                <ion-input type="text" [(ngModel)]="user.lastName" (ionBlur)="updateShortName()" id="lastName" name="lastName" min="3" max="25" #lastName="ngModel" required tabindex="2"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>Short Name</ion-label>
+                <ion-input type="text" [(ngModel)]="user.shortName" id="shortName" name="shortName" min="3" max="5" #shortName="ngModel" required tabindex="3"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>Email</ion-label>
+                <ion-input type="text" [(ngModel)]="user.email" id="email" name="email" min="3" max="30" #email="ngModel" required tabindex="4" (ionChange)="checkEmail()"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>Password</ion-label>
+                <ion-input type="password" [(ngModel)]="user.password" max="15" tabindex="5"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label>Region</ion-label>
+                <ion-select [(ngModel)]="user.region" interface="action-sheet" required="true">
+                    <ion-select-option value="Europe">Europe</ion-select-option>
+                    <ion-select-option value="Europe">Australia</ion-select-option>
+                    <ion-select-option value="Europe">New Zealand</ion-select-option>
+                    <ion-select-option value="Europe">Others</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Country</ion-label>
+                <ion-select [(ngModel)]="user.country" interface="action-sheet" required="true">
+                    <ion-select-option value=""></ion-select-option>
+                    <ion-select-option value="Austria">Austria</ion-select-option>
+                    <ion-select-option value="Belgium">Belgium</ion-select-option>
+                    <ion-select-option value="Czech Republic">Czech Republic</ion-select-option>
+                    <ion-select-option value="England">England</ion-select-option>
+                    <ion-select-option value="France">France</ion-select-option>
+                    <ion-select-option value="Germany">Germany</ion-select-option>
+                    <ion-select-option value="Guernesey">Guernesey</ion-select-option>
+                    <ion-select-option value="Hungary">Hungary</ion-select-option>
+                    <ion-select-option value="Ireland">Ireland</ion-select-option>
+                    <ion-select-option value="Italy">Italy</ion-select-option>
+                    <ion-select-option value="Jersey">Jersey</ion-select-option>
+                    <ion-select-option value="Luxembourg">Luxembourg</ion-select-option>
+                    <ion-select-option value="Netherlands">Netherlands</ion-select-option>
+                    <ion-select-option value="Portugal">Portugal</ion-select-option>
+                    <ion-select-option value="Scotland">Scotland</ion-select-option>
+                    <ion-select-option value="Spain">Spain</ion-select-option>
+                    <ion-select-option value="Sweden">Sweden</ion-select-option>
+                    <ion-select-option value="Switzerland">Switzerland</ion-select-option>
+                    <ion-select-option value="Wales">Wales</ion-select-option>
+                    <ion-select-option value="Other">Other</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Gender</ion-label>
+                <ion-select [(ngModel)]="user.gender" interface="action-sheet" required="true">
+                    <ion-select-option value="F">Female</ion-select-option>
+                    <ion-select-option value="M">Male</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label fixed>Mobile phones</ion-label>
+                <ion-input type="phone" [(ngModel)]="user.mobilePhones"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label>Speaking languages</ion-label>
+                <ion-select [(ngModel)]="user.speakingLanguages" multiple="true" interface="action-sheet">
+                    <ion-select-option *ngFor="let lang of constantes.languages" value="{{lang[0]}}">{{lang[1]}}</ion-select-option>
+                </ion-select>
+            </ion-item>
+        </ion-item-group>
+        <ion-item-group *ngIf="user.country">
+            <ion-item-divider color="light">
+                Use the application as the NDR of {{user.country}}?
+                <ion-toggle slot="end" [(ngModel)]="ndrRole" (ionChange)="onNDRRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div class="warningMsg" *ngIf="ndrRole">
+                <img src="assets/imgs/warning-icon.jpg" />
+                <div>Before you can have a full access to this web application as NDR of {{user.country}}, the European Referee Commission must validated this role in the application.</div>
+            </div>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">
+                Use the application as referee?
+                <ion-toggle slot="end" [(ngModel)]="refereeRole" (ionChange)="onRefereeRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div *ngIf="refereeRole">
+                <ion-item>
+                    <ion-label>Current referee Level</ion-label>
+                    <ion-select [(ngModel)]="user.referee.refereeLevel" interface="action-sheet">
+                        <ion-select-option value="EURO_2">European Level 2</ion-select-option>
+                        <ion-select-option value="EURO_3">European Level 3</ion-select-option>
+                        <ion-select-option value="EURO_4">European Level 4</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label>Referee category</ion-label>
+                    <ion-select [(ngModel)]="user.referee.refereeCategory" interface="action-sheet">
+                        <ion-select-option value="JUNIOR">Junior</ion-select-option>
+                        <ion-select-option value="OPEN">Open</ion-select-option>
+                        <ion-select-option value="SENIOR">Senior</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <div *ngIf="refereeRole && !refereeRoleInit" class="warningMsg">
+                    <img src="assets/imgs/warning-icon.jpg" />
+                    <div>Before you can have a full access to this web application as referee, your NDR musr validated your candidacy.</div>
+                </div>
+            </div>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">
+                Use the application as Referee Coach?
+                <ion-toggle slot="end" [(ngModel)]="refereeCoachRole" (ionChange)="onRefereeCoachRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div *ngIf="refereeCoachRole">
+                <ion-item>
+                    <ion-label>Referee coach Level</ion-label>
+                    <ion-select [(ngModel)]="user.refereeCoach.refereeCoachLevel" interface="action-sheet">
+                        <ion-select-option value="EURO_3">European Level 3</ion-select-option>
+                        <ion-select-option value="EURO_4">European Level 4</ion-select-option>
+                        <ion-select-option value="EURO_5">European Level 5</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <div *ngIf="refereeCoachRole && !refereeCoachRoleInit" class="warningMsg">
+                    <img src="assets/imgs/warning-icon.jpg" />
+                    <div>Before you can have a full access to this web application as Referee Coach, your referee coach role in the application must be validated by the Coaching commission of the European Referee Commission.</div>
+                </div>
+            </div>
+        </ion-item-group>
+        <ion-item *ngIf="ndrRole && !ndrRoleInit" style="margin-top: 20px;">
+            <span> I accept the ERC manage my data and I accept the general conditions of the European upgrade system.</span>
+            <ion-checkbox slot="start" [(ngModel)]="acceptCondition"></ion-checkbox>
+        </ion-item>
+    </ion-list>
+    <div round *ngIf="error.length > 0" class="alert alert-danger">
+        Please fix the following problem(s):
+        <ul>
+            <li *ngFor="let er of error">{{er}}</li>
+        </ul>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <ion-button shape="round" color="danger" (click)="deleteAccount()" *ngIf="user.dataStatus !== 'NEW' && !saving">Delete Account</ion-button>
+        <ion-button shape="round" (click)="newUser($event)" [disabled]="firstName.invalid && lastName.invalid && !saving">{{user.dataStatus === 'NEW' ? 'Register' : 'Save'}}</ion-button>
+    </div>
+</ion-content>

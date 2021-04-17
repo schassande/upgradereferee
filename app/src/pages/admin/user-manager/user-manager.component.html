@@ -1,0 +1,86 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/admin" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">User Manager</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)">
+    <div>
+        <div style="margin: 10px; font-weight: bold; font-size: 1.2em;">Account status statistics:</div>
+        <div style="margin-left: 20px;">
+            <div style="width: 50%; display: inline-block; padding: 5px;">Total: {{stats.total}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">No Account: {{stats.noAccount}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Active: {{stats.nbActive}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Pending: {{stats.nbValidationRequired}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">locked: {{stats.nbLocked}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Deleted: {{stats.nbDeleted}}</div>
+        </div>
+    </div>
+    <div>
+        <div style="margin: 10px; font-weight: bold; font-size: 1.2em;">Role statistics:</div>
+        <div style="margin-left: 20px;">
+            <div style="width: 50%; display: inline-block; padding: 5px;">Active Referee: {{stats.activeReferee}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Coach: {{stats.coach}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Ndr: {{stats.ndr}}</div>
+            <div style="width: 50%; display: inline-block; padding: 5px;">Admin: {{stats.admin}}</div>
+        </div>
+    </div>
+    <ion-list>
+        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;">
+            <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px;">
+                <ion-label>List of users</ion-label>
+            </ion-item-divider>
+            <ion-item>
+                <ion-label>Status</ion-label>
+                <ion-select slot="end" (ionChange)="onStatusChange()" [(ngModel)]="status" interface="action-sheet">
+                    <ion-select-option value="">All</ion-select-option>
+                    <ion-select-option value="ACTIVE">ACTIVE</ion-select-option>
+                    <ion-select-option value="LOCKED">LOCKED</ion-select-option>
+                    <ion-select-option value="VALIDATION_REQUIRED">VALIDATION_REQUIRED</ion-select-option>
+                    <ion-select-option value="NO_ACCOUNT">NO_ACCOUNT</ion-select-option>
+                    <ion-select-option value="DELETED">DELETED</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label>Role</ion-label>
+                <ion-select slot="end" (ionChange)="onRoleChange()" [(ngModel)]="role" interface="action-sheet">
+                    <ion-select-option value="">All</ion-select-option>
+                    <ion-select-option value="REFEREE">Referee</ion-select-option>
+                    <ion-select-option value="REFEREE_COACH">Referee Coach</ion-select-option>
+                    <ion-select-option value="NDR">NDR</ion-select-option>
+                    <ion-select-option value="ADMIN">ADMIN</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <div style="margin: 20px; text-align: right;" *ngIf="filteredUsers">{{filteredUsers.length}} user(s) found.</div>
+            <ion-item *ngFor="let user of filteredUsers">
+                <ion-icon slot="start" *ngIf="user.photo && !user.photo.url" name="person"></ion-icon>
+                <ion-avatar slot="start" *ngIf="user.photo && user.photo.url"><img src="{{user.photo.url}}"></ion-avatar>
+                <ion-label>
+                    <span (click)="userSelected(user)">
+                    <span style="font-weight: bold; font-size: 1.2em;">{{user.firstName}} {{user.lastName}} ({{user.shortName}})</span>
+                    <br>{{user.email}}
+                    <br>id: {{user.id}}
+                    <br>Roles: <span *ngFor="let ar of filterApplicationRoles(user.applications)">{{ar.role}}&nbsp;</span>
+                    <span *ngIf="user.demandingApplications.length"><br>Demanding roles: <span *ngFor="let ar of filterApplicationRoles(user.demandingApplications)">{{ar.role}}&nbsp;</span></span>
+                    </span>
+                    <div *ngIf="user.accountStatus !== 'ACTIVE'">Status: <span style="font-weight: bold; font-size: 1.2em; color: red;">{{user.accountStatus}}</span></div>
+                    <div style="margin: 10px 0; text-align: center; font-size: 0.8em;">
+                        <ion-button *ngIf="user.accountStatus === 'ACTIVE'" color="warning" name="lock" shape="round" (click)="lock(user)">Lock</ion-button>
+                        <ion-button *ngIf="user.accountStatus === 'LOCKED'" color="warning" name="unlock" shape="round" (click)="unlock(user)">UnlocK</ion-button>
+                        <ion-button *ngIf="user.accountStatus === 'VALIDATION_REQUIRED'" color="success" name="checkmark" shape="round" (click)="validate(user)">validate</ion-button>
+                        <ion-button *ngIf="user.accountStatus === 'VALIDATION_REQUIRED'" color="danger" name="close" shape="round" (click)="unvalidate(user)">Reject</ion-button>
+                        <ion-button *ngIf="user.accountStatus !== 'NO_ACCOUNT'" name="trash" color="danger" shape="round" (click)="delete(user)">Delete</ion-button>
+                        <ion-button *ngIf="user.accountStatus !== 'NO_ACCOUNT'" name="resetPassword" shape="round" (click)="resetPassword(user)">Reset Pwd</ion-button>
+                    </div>
+                </ion-label>
+            </ion-item>
+        </ion-item-group>
+    </ion-list>
+</ion-content>
