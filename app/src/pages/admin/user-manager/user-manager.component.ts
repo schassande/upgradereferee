@@ -6,6 +6,8 @@ import { ResponseWithData } from './../../../app/service/response';
 import { UserService } from './../../../app/service/UserService';
 import { ToolService } from './../../../app/service/ToolService';
 import { mergeMap, map } from 'rxjs/operators';
+import { DataRegion } from 'src/app/model/common';
+import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 
 @Component({
   selector: 'app-user-manager',
@@ -27,19 +29,23 @@ export class UserManagerComponent implements OnInit {
     activeReferee: 0,
     coach: 0,
     ndr: 0,
-    admin: 0
+    admin: 0,
+    perRegion : []
   };
   status: AccountStatus;
   role: AppRole;
+  region: DataRegion;
 
   constructor(
     private alertCtrl: AlertController,
+    private connectedUserService: ConnectedUserService,
     private navController: NavController,
     private toolService: ToolService,
     private userService: UserService
   ) { }
 
   ngOnInit() {
+    this.region = this.connectedUserService.getCurrentUser().region;
     console.log('UserManagerComponent.ngOnInit');
     this.userService.all().subscribe((response: ResponseWithData<User[]>) => {
       this.users = this.sort(response.data.filter(u => u.applications.filter(ar => ar.name === CurrentApplicationName).length > 0));
@@ -56,8 +62,14 @@ export class UserManagerComponent implements OnInit {
   onRoleChange() {
     this.filterUsers();
   }
+  onRegionChange() {
+    this.filterUsers();
+  }
   filterUsers() {
-    if ((this.toolService.isValidString(this.status) || this.toolService.isValidString(this.role)) && this.users) {
+    if (this.users && (this.toolService.isValidString(this.status)
+                      || this.toolService.isValidString(this.role)
+                      || this.toolService.isValidString(this.region)
+                      )) {
       this.filteredUsers = this.users.filter(u => {
         let keep = true;
         if (keep && this.toolService.isValidString(this.status)) {
@@ -65,6 +77,9 @@ export class UserManagerComponent implements OnInit {
         }
         if (keep && this.toolService.isValidString(this.role)) {
           keep = u.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === this.role).length > 0;
+        }
+        if (keep && this.toolService.isValidString(this.region)) {
+          keep = u.region === this.region;
         }
         return keep;
       });
@@ -103,10 +118,17 @@ export class UserManagerComponent implements OnInit {
       activeReferee: 0,
       coach: 0,
       ndr: 0,
-      admin: 0
+      admin: 0,
+      perRegion: []
     };
     this.users.forEach( (user) => {
       stats.total++;
+      let regionStat = stats.perRegion.find(rs => rs.region === user.region);
+      if (!regionStat) {
+        regionStat = { region: user.region, total: 0, referee: 0, activeReferee: 0 };
+        stats.perRegion.push(regionStat);
+      }
+      regionStat.total++;
       switch (user.accountStatus) {
       case 'ACTIVE':
         stats.nbActive++;
@@ -126,8 +148,10 @@ export class UserManagerComponent implements OnInit {
       }
       if (user.applications.find(ar => ar.name === CurrentApplicationName && ar.role === 'REFEREE')) {
         stats.referee++;
+        regionStat.referee++;
         if (user.accountStatus === 'ACTIVE') {
           stats.activeReferee++;
+          regionStat.activeReferee++;
         }
       }
       if (user.applications.find(ar => ar.name === CurrentApplicationName && ar.role === 'REFEREE_COACH')) {
@@ -141,6 +165,7 @@ export class UserManagerComponent implements OnInit {
       }
     });
     this.stats = stats;
+    console.log(this.stats);
   }
   lock(user: User) {
     user.accountStatus = 'LOCKED';
