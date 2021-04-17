@@ -49,6 +49,10 @@ export interface CompetitionDayVote {
     vote: Upgradable;
     /** Does the vote is closed */
     closed: boolean;
+    /** Comment about the vote */
+    commentForReferee: string;
+    /** Comment about the vote */
+    commentForCoach: string;
 }
 /** A vote about a referee during a day of a competition by a referee coach */
 export interface CompetitionDayRefereeCoachVote extends  CompetitionDayVote, PersistentData {

@@ -5,7 +5,7 @@
                 <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title>L3+ upgrade Voting</ion-title>
+        <ion-title>Upgrade Voting</ion-title>
         <ion-buttons slot="end">
             <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
         </ion-buttons>
@@ -42,31 +42,60 @@
             <ion-label>Referee: </ion-label>
             <div *ngIf="referee && !referees && !showRefereeSelector">{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
             <div *ngIf="filteredReferees && filteredReferees.length === 0 && showRefereeSelector" style="font-weight: bold;">No referee to upgrade in this competition</div>
-            <ion-select [(ngModel)]="refereeId" style="text-align: center;" interface="action-sheet" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (ionChange)="onRefereeChange()">
+            <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (ionChange)="onRefereeChange()">
                 <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="vote">
-            <ion-radio-group [value]="vote.vote" (ionChange)="onVoteChange()">
-                <ion-list-header>
-                    <ion-label>Vote: </ion-label>
-                </ion-list-header>
-                <ion-item>
-                    <ion-label>Yes</ion-label>
-                    <ion-radio slot="start" value="Yes" [disabled]="vote.closed"></ion-radio>
-                </ion-item>
-                <ion-item>
-                    <ion-label>Abstein</ion-label>
-                    <ion-radio slot="start" value="Abstein" [disabled]="vote.closed"></ion-radio>
-                </ion-item>
-                <ion-item>
-                    <ion-label>Not yet</ion-label>
-                    <ion-radio slot="start" value="No" [disabled]="vote.closed"></ion-radio>
-                </ion-item>
-            </ion-radio-group>
-        </ion-item>
+        <div *ngIf="referee">
+            <div style="text-align: center; margin-top: 20px;">
+                <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person"></ion-icon>
+                <img src="{{referee.photo.url}}" *ngIf="referee.photo && referee.photo.url" height="100">
+            </div>
+            <div style="margin: 10px 0 30px 10px; text-align: center;">
+                <span style="font-size: 1.4em;">{{referee.firstName}} {{referee.lastName}}</span>
+                <br>from {{referee.country}} / {{referee.region}}
+                <br>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}
+                <br><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="70" />
+                <br>Referee category: {{referee.referee.refereeCategory}}
+            </div>
+        </div>
+        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote">
+            <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px; font-weight: bold; width: 100%;">
+                Vote for upgrade to {{referee.referee.nextRefereeLevel}}
+            </ion-item-divider>
+            <div style="text-align: center;">
+                <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
+            </div>
+            <ion-item>
+                <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
+                    <ion-item>
+                        <ion-label>Yes competent to the referee level </ion-label>
+                        <ion-radio slot="start" value="Yes" color="success"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Abstein</ion-label>
+                        <ion-radio slot="start" value="Abstein" color="primary"></ion-radio>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Not yet competent</ion-label>
+                        <ion-radio slot="start" value="No" color="danger"></ion-radio>
+                    </ion-item>
+                </ion-radio-group>
+            </ion-item>
+            <div class="comment-warning">Visible by the referee</div>
+            <ion-item>
+                <ion-label>Public<br>comment</ion-label>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+            </ion-item>
+            <div class="comment-warning">Visible by the referee coaches only</div>
+            <ion-item>
+                <ion-label>Private<br>comment</ion-label>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+            </ion-item>
+        </ion-item-group>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
             <ion-spinner></ion-spinner>
         </div>
     </ion-list>
+    <div style="height: 50px;"></div>
 </ion-content>

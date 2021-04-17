@@ -57,4 +57,12 @@ export class DateService {
   public nextDay(date: Date): Date {
     return moment(date.getTime()).add(1, 'days').toDate();
   }
+
+  public to00h00(day: Date): Date {
+    day.setUTCMinutes(0);
+    day.setUTCSeconds(0);
+    day.setUTCHours(0);
+    day.setUTCMilliseconds(0);
+    return day;
+  }
 }

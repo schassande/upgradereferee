@@ -7,6 +7,7 @@ import { CompetitionDayRefereeCoachVote } from '../model/upgrade';
 import { Observable } from 'rxjs';
 import { ResponseWithData } from './response';
 import { ToolService } from './ToolService';
+import { DateService } from './DateService';
 
 @Injectable()
 export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataService<CompetitionDayRefereeCoachVote> {
@@ -15,6 +16,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
         appSettingsService: AppSettingsService,
         db: AngularFirestore,
         toastController: ToastController,
+        private dateService: DateService,
         private toolService: ToolService
     ) {
         super(appSettingsService, db, toastController);
@@ -35,7 +37,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
         : Observable<ResponseWithData<CompetitionDayRefereeCoachVote>> {
         return this.queryOne(this.getCollectionRef()
             .where('competitionId', '==', competitionId)
-            .where('day', '==', day)
+            .where('day', '==', this.dateService.to00h00(day))
             .where('coach.coachId', '==', coachId)
             .where('referee.refereeId', '==', refereeId)
             , 'default');
