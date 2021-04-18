@@ -36,7 +36,7 @@
             <ion-button shape="round" routerLink="/user/edit/{{referee.id}}" style="margin-bottom: 20px;">Edit</ion-button>
         </div>
         <div style="text-align: right;" *ngIf="canVote()">
-            <ion-button shape="round" routerLink="/upgrade/voting?refereeId={{referee.id}}" style="margin-bottom: 20px;">
+            <ion-button shape="round" routerLink="/upgrade/voting" [queryParams]="{refereeId : referee.id }" style="margin-bottom: 20px;">
                 <ion-icon name="ribbon-outline"></ion-icon>&nbsp;L3+ upgrade vote
             </ion-button>
         </div>

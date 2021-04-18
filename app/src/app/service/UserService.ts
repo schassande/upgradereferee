@@ -564,15 +564,24 @@ export class UserService  extends RemotePersistentDataService<User> {
         if (!referee.referee || !coach.refereeCoach) {
             return false;
         }
-        if (referee.referee.nextRefereeLevel === 'EURO_3') {
-            return coach.refereeCoach.refereeCoachLevel === 'EURO_3'
-                ||  coach.refereeCoach.refereeCoachLevel === 'EURO_4'
-                ||  coach.refereeCoach.refereeCoachLevel === 'EURO_5';
-        } else if (referee.referee.nextRefereeLevel === 'EURO_4') {
-            return coach.refereeCoach.refereeCoachLevel === 'EURO_4'
-                ||  coach.refereeCoach.refereeCoachLevel === 'EURO_5';
-        } else if (referee.referee.nextRefereeLevel === 'EURO_5') {
-            return coach.refereeCoach.refereeCoachLevel === 'EURO_5';
+        return this.canVoteLevel(
+            referee.referee.nextRefereeLevel,
+            coach.refereeCoach.refereeCoachLevel);
+    }
+
+    public canVoteLevel(refereeLevel: RefereeLevel, refereeCoachLevel: RefereeCoachLevel) {
+        if (!refereeLevel || !refereeCoachLevel) {
+            return false;
+        }
+        if (refereeLevel === 'EURO_3') {
+            return refereeCoachLevel === 'EURO_3'
+                ||  refereeCoachLevel === 'EURO_4'
+                ||  refereeCoachLevel === 'EURO_5';
+        } else if (refereeLevel === 'EURO_4') {
+            return refereeCoachLevel === 'EURO_4'
+                ||  refereeCoachLevel === 'EURO_5';
+        } else if (refereeLevel === 'EURO_5') {
+            return refereeCoachLevel === 'EURO_5';
         }
         return false;
     }

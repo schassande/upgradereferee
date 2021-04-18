@@ -1,3 +1,172 @@
-<p>
-  competition-votes works!
-</p>
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="navBack()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Upgrade Voting</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)">
+    <ion-list>
+        <ion-item *ngIf="competition && competition.days.length > 0">
+            <ion-label style="font-weight: bold;">Day: </ion-label>
+            <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" (ionChange)="onDayChange($event)">
+                <ion-select-option *ngFor="let d of competition.days" value="{{dateService.date2string(d)}}">{{dateService.date2string(d)}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item *ngIf="upgradeLevels">
+            <ion-label style="font-weight: bold;">Upgrade to: </ion-label>
+            <ion-select [(ngModel)]="upgradeLevel" style="text-align: center;" interface="action-sheet" (ionChange)="onUpgradeLevelChange()">
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item *ngIf="filteredReferees">
+            <ion-label style="font-weight: bold;">Referee: </ion-label>
+            <div *ngIf="filteredReferees.length === 0" style="font-weight: bold;">No referee to upgrade in this competition</div>
+            <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees.length> 0" (ionChange)="onRefereeChange()">
+                <ion-select-option value="-">All</ion-select-option>
+                <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <div *ngIf="referee" style="border-bottom: 1px solid lightgrey;">
+            <div style="text-align: center; width:30%; display: inline-block;">
+                <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>
+                <img src="{{referee.photo.url}}" *ngIf="referee.photo && referee.photo.url" height="100">
+            </div>
+            <div style="margin: 10px 0; text-align: center; width:40%; display: inline-block;">
+                <div style="font-size: 1.4em; font-weight: bold;">{{referee.firstName}}</div>
+                <div style="font-size: 1.4em; font-weight: bold;">{{referee.lastName}}</div>
+                <div>from {{referee.country}} / {{referee.region}}</div>
+                <div>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}</div>
+            </div>
+            <div style="text-align: center; width:30%; display: inline-block;">
+                <div style="margin: 0 auto;"><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="70" /></div>
+                <div style="margin: 0 auto;">Cat: {{referee.referee.refereeCategory}}</div>
+            </div>
+        </div>
+        <div *ngIf="referee && vote">
+            <div style="text-align: center;">
+                <div style="padding: 10px; font-weight: bold; font-size: 1.4em;">Votes for upgrade</div>
+                <img style="height: 70px;" src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" />
+            </div>
+            <div style="clear: both;"></div>
+            <ion-grid class="coachVotes">
+                <ion-row class="header-row">
+                    <ion-col size="4" style="text-align: right;">Coach</ion-col>
+                    <ion-col size="2" style="text-align: center;">Not Yet</ion-col>
+                    <ion-col size="2" style="text-align: center;">Abstein</ion-col>
+                    <ion-col size="2" style="text-align: center;">Yes</ion-col>
+                </ion-row>
+                <ion-radio-group *ngFor="let rcvote of coachVotes" [value]="rcvote" disabled="true" name="vote{{rcvote.coach.coachShortName}}" style="width: 100%; margin-bottom: 10px;">
+                    <ion-row class="coachVotes-row">
+                        <ion-col size="4" style="text-align: right;">{{rcvote.coach.coachShortName}}</ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="No" color="danger"></ion-radio>
+                        </ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="Abstein" color="primary"></ion-radio>
+                        </ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="Yes" color="success"></ion-radio>
+                        </ion-col>
+                    </ion-row>
+                </ion-radio-group>
+                <ion-row class="coachVotes-row">
+                    <ion-col size="4" style="text-align: right; font-weight: bold;">Total</ion-col>
+                    <ion-col size="2" style="text-align: center;">{{totalNo}}</ion-col>
+                    <ion-col size="2" style="text-align: center;">{{totalAbstein}}</ion-col>
+                    <ion-col size="2" style="text-align: center;">{{totalYes}}</ion-col>
+                </ion-row>
+                <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="votePanel" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
+                    <ion-row class="coachVotes-row coachVotes-row-panel">
+                        <ion-col size="4" style="text-align: right; font-weight: bold;">Panel</ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="No" color="danger" style="display: inline-block;"></ion-radio>
+                        </ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="Abstein" color="primary" style="display: inline-block;"></ion-radio>
+                        </ion-col>
+                        <ion-col size="2" style="text-align: center;">
+                            <ion-radio value="Yes" color="success" style="display: inline-block;"></ion-radio>
+                        </ion-col>
+                    </ion-row>
+                </ion-radio-group>
+            </ion-grid>
+            <div class="comment-warning">Visible by the referee</div>
+            <ion-item>
+                <ion-label>Public<br>comment</ion-label>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+            </ion-item>
+            <div class="comment-warning">Visible by the referee coaches only</div>
+            <ion-item>
+                <ion-label>Private<br>comment</ion-label>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+            </ion-item>
+            <div>
+                <ion-button style="float: right;" (click)="savePanelVote()" shape="round" size="normal">Save</ion-button>
+            </div>
+        </div>
+
+        <div *ngIf="!referee && (panelVotes.length > 0 || refereesWithoutPanelVote.length > 0)">
+            <ion-grid fixed="true" class="rsPanelVotes">
+                <ion-row class="title-row">
+                    <ion-col size="12">Panel Upgrade votes</ion-col>
+                </ion-row>
+                <ion-row class="header-row">
+                    <ion-col size="2">Level</ion-col>
+                    <ion-col size="3">Referee</ion-col>
+                    <ion-col size="2">Decision</ion-col>
+                    <ion-col size="2">Status</ion-col>
+                    <ion-col size="3">Action</ion-col>
+                </ion-row>
+                <ion-row *ngFor="let ref of refereesWithoutPanelVote">
+                    <ion-col size="2" class="level-col">
+                        <img src="assets/imgs/badge/{{ref.referee.nextRefereeLevel}}.png" alt="{{ref.referee.nextRefereeLevel}}" />
+                    </ion-col>
+                    <ion-col size="3">{{ref.shortName}}</ion-col>
+                    <ion-col size="2"></ion-col>
+                    <ion-col size="2" class="todo">Todo</ion-col>
+                    <ion-col size="3" class="action-col">
+                        <ion-button (click)="showPanelVote(ref.id)" shape="round" size="small">
+                            <ion-icon name="eye-outline"></ion-icon>
+                        </ion-button>
+                    </ion-col>
+                </ion-row>
+                <ion-row *ngFor="let pvote of panelVotes">
+                    <ion-col size="2" class="level-col">
+                        <img src="assets/imgs/badge/{{pvote.upgradeLevel}}.png" alt="{{pvote.upgradeLevel}}" height="70" />
+                    </ion-col>
+                    <ion-col size="3">{{pvote.referee.refereeShortName}}</ion-col>
+                    <ion-col size="2">{{pvote.vote}}</ion-col>
+                    <ion-col size="2">{{pvote.closed ? 'Closed' : 'Open'}}</ion-col>
+                    <ion-col size="3" class="action-col">
+                        <ion-button *ngIf="!pvote.closed" (click)="closePanelVote(pvote)" shape="round" size="small" color="warning">
+                            <ion-icon name="lock-closed-outline"></ion-icon>
+                        </ion-button>
+                        <ion-button *ngIf="!pvote.closed" (click)="showPanelVote(pvote.referee.refereeId)" shape="round" size="small">
+                            <ion-icon name="eye-outline"></ion-icon>
+                        </ion-button>
+
+                    </ion-col>
+                </ion-row>
+                <ion-row *ngIf="hasOpenVote">
+                    <ion-col size="12" class="action-col" style="text-align: right;">
+                        <ion-button (click)="closeAll()" shape="round" size="small" color="warning">
+                            <ion-icon name="lock-closed-outline"></ion-icon>&nbsp;Close all
+                        </ion-button>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </div>
+        <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
+            <ion-spinner></ion-spinner>
+        </div>
+    </ion-list>
+    <div style="height: 50px;"></div>
+</ion-content>

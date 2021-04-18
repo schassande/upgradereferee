@@ -94,7 +94,6 @@ export class VotingComponent implements OnInit {
       }),
       map(() => this.print())
     ).subscribe();
-
   }
 
   private print() {
@@ -236,7 +235,7 @@ export class VotingComponent implements OnInit {
     if (this.referees && this.referees.length > 0) {
       if (this.upgradeLevel) {
         this.filteredReferees = this.referees.filter((ref) => ref.referee.nextRefereeLevel === this.upgradeLevel);
-        console.log('After level filtering => ' + this.referees.length + ' => ' + this.filterReferees.length + ' referees.');
+        console.log('After level filtering => ' + this.referees.length + ' => ' + this.filteredReferees.length + ' referees.');
       } else {
         this.filteredReferees = this.referees;
         console.log('No level filtering => ' + this.filteredReferees.length + ' referees.');
@@ -305,6 +304,9 @@ export class VotingComponent implements OnInit {
       // the referee is not a registered account as Referee
       return false;
     }
+    if (!this.userService.canVote(this.referee, this.coach) && !this.connectedUserService.isAdmin()) {
+      return false;
+    }
     return true;
   }
 
@@ -345,6 +347,7 @@ export class VotingComponent implements OnInit {
         refereeShortName: this.referee.shortName,
         refereeId: this.refereeId
       },
+      upgradeLevel: this.referee.referee.nextRefereeLevel,
       vote: 'Abstein',
       commentForCoach: '-',
       commentForReferee: '-',

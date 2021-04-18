@@ -1,6 +1,7 @@
 import { Upgradable } from './coaching';
 import { PersistentData } from './common';
 import { CoachRef, RefereeRef } from './competition';
+import { RefereeLevel } from './user';
 
 /**
  * The upgrade decision about a referee during a competition by the panel of the referee coaches.
@@ -45,6 +46,8 @@ export interface CompetitionDayVote {
     day: Date;
     /** The evaluated referee */
     referee: RefereeRef;
+    /** The level to upgrade */
+    upgradeLevel: RefereeLevel;
     /** The vote value */
     vote: Upgradable;
     /** Does the vote is closed */

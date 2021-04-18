@@ -9,6 +9,7 @@ import { HelpService } from './../../../app/service/HelpService';
 import { DateService } from './../../../app/service/DateService';
 import { Competition } from './../../../app/model/competition';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { User } from 'src/app/model/user';
 
 @Component({
   selector: 'app-competition-home',
@@ -21,6 +22,7 @@ export class CompetitionHomePage implements OnInit {
   loading = false;
   owner: string;
   canEdit = false;
+  coach: User;
 
   constructor(
     private alertCtrl: AlertController,
@@ -35,6 +37,7 @@ export class CompetitionHomePage implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.coach = this.connectedUserService.getCurrentUser();
     this.helpService.setHelp('competition-list');
     this.loadCompetition().subscribe(() => {
       this.changeDetectorRef.detectChanges();
@@ -105,5 +108,8 @@ export class CompetitionHomePage implements OnInit {
   }
   isRefereeCoach() {
     return this.connectedUserService.isRefereeCoach();
+  }
+  isAdmin() {
+    return this.connectedUserService.isAdmin();
   }
 }

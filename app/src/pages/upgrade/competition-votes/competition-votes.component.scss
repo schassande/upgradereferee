@@ -1,0 +1,74 @@
+.comment {
+    margin: 5px;
+    border: 1px solid #cccccc;
+}
+
+.comment-warning {
+    display: block;
+    width: 100%;
+    text-align: right;
+    font-style: italic;
+    padding-right: 20px;
+    font-size: 0.8em;
+}
+
+.coachVotes .title-row,
+.rsPanelVotes .title-row {
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.coachVotes .title-row {
+    height: 50px;
+    padding: 0;
+    text-align: center;
+}
+
+.coachVotes .title-row img {
+    height: 50px;
+}
+
+.coachVotes .header-row,
+.rsPanelVotes .header-row {
+    font-weight: bold;
+    background-color: lightgray;
+}
+
+.coachVotes ion-row,
+.coachVotes ion-radio-group,
+.coachVotes-row,
+.rsPanelVotes ion-row {
+    padding: 5px 0;
+    border-bottom: 1px solid grey;
+}
+
+.coachVotes-row-panel,
+.rsPanelVotes ion-row:last-of-type {
+    padding: 5px 0;
+    border-bottom: none ! important;
+}
+
+.coachVotes ion-col,
+.rsPanelVotes ion-col {
+    text-align: center;
+    vertical-align: middle;
+    height: 50px;
+    padding-top: 15px;
+}
+
+.rsPanelVotes .action-col {
+    padding-top: 10px;
+}
+
+.rsPanelVotes .level-col {
+    padding-top: 0;
+}
+
+.rsPanelVotes .level-col img {
+    height: 50px;
+}
+
+.rsPanelVotes .todo {
+    color: red;
+    font-weight: bold;
+}

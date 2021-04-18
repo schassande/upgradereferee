@@ -16,8 +16,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
         appSettingsService: AppSettingsService,
         db: AngularFirestore,
         toastController: ToastController,
-        private dateService: DateService,
-        private toolService: ToolService
+        private dateService: DateService
     ) {
         super(appSettingsService, db, toastController);
     }
@@ -30,7 +29,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
         return 4;
     }
     protected adjustFieldOnLoad(item: CompetitionDayRefereeCoachVote) {
-        // TODO adjust day
+        item.day = this.adjustDate(item.day, this.dateService);
     }
 
     getVote(competitionId: string, day: Date, coachId: string, refereeId: string)
