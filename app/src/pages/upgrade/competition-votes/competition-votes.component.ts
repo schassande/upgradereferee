@@ -280,7 +280,9 @@ export class CompetitionVotesComponent implements OnInit {
       commentForCoach: '-',
       commentForReferee: '-',
       closed: false,
-      coaches: []
+      coaches: this.competition.refereeCoaches,
+      yesCoaches: this.coachVotes.filter(cv => cv.vote === 'Yes').map(cv => cv.coach),
+      isMultiDayCompetition: this.competition.days.length > 1
     };
     // compute vote from total
     if ((this.totalYes - this.totalNo) > 0) {

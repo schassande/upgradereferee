@@ -11,6 +11,7 @@ import { environment } from '../../environments/environment';
 import { RefereeService } from 'src/app/service/RefereeService';
 import { ResponseWithData } from 'src/app/service/response';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
+import { UpgradeCriteriaService } from 'src/app/service/UpgradeCriteriaService';
 
 
 /**
@@ -40,6 +41,7 @@ export class SettingsPage implements OnInit {
     private connectedUserService: ConnectedUserService,
     private navController: NavController,
     private refereeService: RefereeService,
+    private upgradeCriteriaService: UpgradeCriteriaService,
     private userService: UserService
   ) {
   }
@@ -176,6 +178,10 @@ export class SettingsPage implements OnInit {
         return of(null);
       })
     );
+  }
+
+  initUpgradeCriteria() {
+    this.upgradeCriteriaService.initData().subscribe();
   }
 
   toggleDebugInfo() {

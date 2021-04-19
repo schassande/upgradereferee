@@ -44,6 +44,8 @@ export interface CompetitionDayVote {
     competitionId: string;
     /** Day of the competition */
     day: Date;
+    /** is the competition is a multi day event */
+    isMultiDayCompetition: boolean;
     /** The evaluated referee */
     referee: RefereeRef;
     /** The level to upgrade */
@@ -59,13 +61,15 @@ export interface CompetitionDayVote {
 }
 /** A vote about a referee during a day of a competition by a referee coach */
 export interface CompetitionDayRefereeCoachVote extends  CompetitionDayVote, PersistentData {
-    /** The the voting coach */
+    /** The voting coach */
     coach: CoachRef;
  }
 /** The panel upgrade decision about a referee during a day of a competition by the panel */
 export interface CompetitionDayPanelVote extends  CompetitionDayVote, PersistentData {
-    /** The the voting coach */
+    /** The  coach */
     coaches: CoachRef[];
+    /** The Yes voting coach */
+    yesCoaches: CoachRef[];
 }
 
 export interface RefereeUpgrade extends PersistentData {
@@ -73,16 +77,22 @@ export interface RefereeUpgrade extends PersistentData {
     referee: RefereeRef;
     /** The level to upgrade */
     upgradeLevel: RefereeLevel;
-    /** The vote value */
+    /** The status of the upgrade. Only 2 possible values: 'Yes' or 'No' */
     upgradeStatus: Upgradable;
-    statusDate: Date;
-    /** Number of competition which is multi-day */
-    multiDay: number;
-    yesRefereeCoach: number;
+    /** the date of the upgrade status */
+    upagrdeStatusDate: Date;
+    /** the ids of competition which is multi-day */
+    multiDayCompetitionIds: string[];
+    /** the reference to the referee coach already voting Yes */
+    yesRefereeCoaches: CoachRef[];
+    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C3+ */
     c3PanelVoteIds: string[];
+    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C4+ */
     c4PanelVoteIds: string[];
+    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C5 */
     c5PanelVoteIds: string[];
 }
+
 /**
  * Definition the upgrade criteria for a referee upgrade.
  */
@@ -95,8 +105,8 @@ export interface UpgradeCriteria extends PersistentData {
     /** The level to upgrade */
     upgradeLevel: RefereeLevel;
 
-    /** Number of competition which is multi-day */
-    multiDayRequired: number;
+    /** Number of required competition which must be multi-day */
+    multiDayCompetitionRequired: number;
 
     /** Number of required referee coach with the expected level (or higher) said yes */
     yesRefereeCoachRequired: number;
