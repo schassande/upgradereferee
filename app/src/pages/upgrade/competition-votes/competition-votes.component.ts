@@ -444,23 +444,33 @@ export class CompetitionVotesComponent implements OnInit {
   private performClosePanelVote(pvote: CompetitionDayPanelVote) {
     // close the vote of the referee coaches for the day of the competition
     forkJoin(this.competition.refereeCoaches.map(
-      rc => this.competitionDayRefereeCoachVoteService.getVote(this.competitionId, this.day, rc.coachId, this.refereeId).pipe(
+      rc => this.competitionDayRefereeCoachVoteService.getVote(pvote.competitionId, pvote.day, rc.coachId, pvote.referee.refereeId).pipe(
         mergeMap((rvote) => {
-          if (rvote.data && !rvote.data.closed) {
-            rvote.data.closed = true;
-            return this.competitionDayRefereeCoachVoteService.save(rvote.data);
+          if (rvote.data) {
+            if (!rvote.data.closed) {
+              rvote.data.closed = true;
+              console.log('Closing coach vote ' + rvote.data.id);
+              return this.competitionDayRefereeCoachVoteService.save(rvote.data);
+            } else {
+              console.log('Coach vote ' + rvote.data.id + ' already closed.');
+            }
           } else {
-            return of('');
+            console.warn('No coach vote for the (competition=' + pvote.competitionId
+              + ', day=' + this.dateService.date2string(pvote.day) + ', coach=' + rc.coachId
+              + ', refereee=' + pvote.referee.refereeId + ') !!!!');
           }
+          return of('');
         })
       )
     )).pipe(
       mergeMap(() => {
         // close the vote of the panel for the day of the competition
         if (!pvote.closed) {
+          console.log('Closing panel vote ' + pvote.id);
           pvote.closed = true;
           return this.competitionDayPanelVoteService.save(pvote);
         } else {
+          console.log('Panel vote ' + pvote.id + ' already closed.');
           return of('');
         }
       }),
