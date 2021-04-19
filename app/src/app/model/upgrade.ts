@@ -67,3 +67,55 @@ export interface CompetitionDayPanelVote extends  CompetitionDayVote, Persistent
     /** The the voting coach */
     coaches: CoachRef[];
 }
+
+export interface RefereeUpgrade extends PersistentData {
+    /** The evaluated referee */
+    referee: RefereeRef;
+    /** The level to upgrade */
+    upgradeLevel: RefereeLevel;
+    /** The vote value */
+    upgradeStatus: Upgradable;
+    statusDate: Date;
+    /** Number of competition which is multi-day */
+    multiDay: number;
+    yesRefereeCoach: number;
+    c3PanelVoteIds: string[];
+    c4PanelVoteIds: string[];
+    c5PanelVoteIds: string[];
+}
+/**
+ * Definition the upgrade criteria for a referee upgrade.
+ */
+export interface UpgradeCriteria extends PersistentData {
+    /** Date (included) since the criteria is applied */
+    beginDate: Date;
+    /** Date (included) until the criteria is applied */
+    endDate: Date;
+
+    /** The level to upgrade */
+    upgradeLevel: RefereeLevel;
+
+    /** Number of competition which is multi-day */
+    multiDayRequired: number;
+
+    /** Number of required referee coach with the expected level (or higher) said yes */
+    yesRefereeCoachRequired: number;
+
+    /** Number of Category 3+ competition days required in the window */
+    c3DaysRequired: number;
+    /** Number of Category 4+ competition days required in the window */
+    c4DaysRequired: number;
+    /** Number of Category 5 competition days required in the window */
+    c5DaysRequired: number;
+    /** Number of competition days required in the window */
+    daysRequired: number;
+
+    /** Number of yes days required in the window */
+    totalYesRequired: number;
+    /** Number of yes C3 days required in the window */
+    c3YesRequired: number;
+    /** Number of yes C4 days required in the window */
+    c4YesRequired: number;
+    /** Number of yes C5 days required in the window */
+    c5YesRequired: number;
+}
