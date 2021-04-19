@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap, Params } from '@angular/router';
-import { NavController } from '@ionic/angular';
+import { AlertController, NavController } from '@ionic/angular';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
 import { Competition } from 'src/app/model/competition';
@@ -24,6 +24,7 @@ export class CompetitionVotesComponent implements OnInit {
 
   /** The flag of data loading */
   loading = true;
+  dirty = false;
   /** Id of the selected competition. This id can be given in parameter of the page. Can be null */
   competitionId: string;
   /** Competition object selected. Can be null */
@@ -87,6 +88,7 @@ export class CompetitionVotesComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private alertCtrl: AlertController,
     private competitionDayRefereeCoachVoteService: CompetitionDayRefereeCoachVoteService,
     private competitionDayPanelVoteService: CompetitionDayPanelVoteService,
     private competitionService: CompetitionService,
@@ -249,10 +251,11 @@ export class CompetitionVotesComponent implements OnInit {
               this.createPanelVote();
             }
           }),
-          map(() => this.loading = false)
+          map(() => { this.loading = false; this.dirty = false; })
         );
     } else {
       this.loading = false;
+      this.dirty = false;
       this.vote = null;
       return of('');
     }
@@ -291,48 +294,59 @@ export class CompetitionVotesComponent implements OnInit {
 
   loadCoachVotes(): Observable<any> {
     this.loading = true;
-    this.coachVotes = [];
+    const coachVotesL = [];
     console.log(`Looking for Coach Votes (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, referee=${this.refereeId})`);
     if (this.competition && this.refereeId && this.day) {
       return forkJoin(this.competition.refereeCoaches.map(
         rc => this.competitionDayRefereeCoachVoteService.getVote(this.competitionId, this.day, rc.coachId, this.refereeId).pipe(
           map(rcvote => {
             if (rcvote.data) {
-              this.coachVotes.push(rcvote.data);
+              coachVotesL.push(rcvote.data);
               console.log(`Coach ${rc.coachShortName} has a vote: ${rcvote.data.id}`);
             } else {
               console.log(`No vote by the coach ${rc.coachShortName}`);
             }
           }),
         )
-      )).pipe(map(() => this.loading = false));
+      )).pipe(map(() => {
+        this.loading = false;
+        this.dirty = false;
+        this.coachVotes = coachVotesL;
+      }));
     } else {
       this.loading = false;
+      this.dirty = false;
       return of('');
     }
   }
 
   private loadPanelVotesOfReferees(): Observable<any> {
     this.loading = true;
-    this.panelVotes = [];
-    this.hasOpenVote = false;
+    let hasOpenVoteL = false;
+    const panelVotesL = [];
     console.log(`Looking for Panel Votes for filtered referees (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, referees=${this.filteredReferees.length})`);
     if (this.competition && this.day) {
       return forkJoin(this.filteredReferees.map(
         ref => this.competitionDayPanelVoteService.getVote(this.competitionId, this.day, ref.id).pipe(
           map(rpvote => {
             if (rpvote.data) {
-              this.panelVotes.push(rpvote.data);
+              panelVotesL.push(rpvote.data);
               console.log(`Referee ${ref.shortName} has a panel vote: ${rpvote.data.id}`);
-              this.hasOpenVote = this.hasOpenVote || !rpvote.data.closed;
+              hasOpenVoteL = hasOpenVoteL || !rpvote.data.closed;
             } else {
               console.log(`No panel vote for the referee ${ref.shortName}`);
             }
           }),
         )
-      )).pipe(map(() => this.loading = false));
+      )).pipe(map(() => {
+        this.loading = false;
+        this.dirty = false;
+        this.hasOpenVote = hasOpenVoteL;
+        this.panelVotes = panelVotesL;
+      }));
     } else {
       this.loading = false;
+      this.dirty = false;
       return of('');
     }
   }
@@ -371,30 +385,64 @@ export class CompetitionVotesComponent implements OnInit {
   }
 
   onVoteChange() {
-    // console.log('onVoteChange()\n' +  JSON.stringify(this.vote, null, 2));
+    console.log('onVoteChange(): ' +  this.dirty);
     if (!this.toolService.isValidString(this.vote.commentForCoach)) {
       this.vote.commentForCoach = '-';
     }
     if (!this.toolService.isValidString(this.vote.commentForReferee)) {
       this.vote.commentForReferee = '-';
     }
+    this.dirty = true;
   }
 
   savePanelVote() {
     this.competitionDayPanelVoteService.save(this.vote).pipe(
       map((rvote) => {
         this.vote = rvote.data;
+        this.dirty = false;
       })
     ).subscribe();
   }
 
   closePanelVote(pvote: CompetitionDayPanelVote) {
-    this.competitionDayPanelVoteService.save(pvote).subscribe();
+    this.alertCtrl.create({
+      message: 'Do you really want to close the panel vote for the referee ' + pvote.referee.refereeShortName
+        + '?<br>Decision will be published to the referee.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel'},
+        {
+          text: 'Close vote',
+          handler: () => {
+            pvote.closed = true;
+            this.competitionDayPanelVoteService.save(pvote).subscribe(() => this.computeHasOpen());
+          }
+        }
+      ]
+    }).then(alert => alert.present() );
+  }
+  private computeHasOpen() {
+    this.hasOpenVote = this.panelVotes.filter(pv => !pv.closed).length > 0;
+  }
+  closeAll() {
+    this.alertCtrl.create({
+      message: 'Do you really want to close the panel vote for all the selected referees?<br>Decision will be published to the referee.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel'},
+        {
+          text: 'Close votes',
+          handler: () => {
+            this.panelVotes.forEach((pv) => {
+              if (!pv.closed) {
+                pv.closed = true;
+                this.competitionDayPanelVoteService.save(pv).subscribe(() => this.computeHasOpen());
+              }
+            });
+          }
+        }
+      ]
+    }).then(alert => alert.present() );
   }
 
-  closeAll() {
-    // TODO
-  }
   navBack() {
     this.navController.navigateRoot([`/competition/${this.competitionId}/home`]);
   }

@@ -59,11 +59,11 @@
             <ion-grid class="coachVotes">
                 <ion-row class="header-row">
                     <ion-col size="4" style="text-align: right;">Coach</ion-col>
-                    <ion-col size="2" style="text-align: center;">Not Yet</ion-col>
-                    <ion-col size="2" style="text-align: center;">Abstein</ion-col>
-                    <ion-col size="2" style="text-align: center;">Yes</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteNo">Not Yet</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteAbstein">Abstein</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteYes">Yes</ion-col>
                 </ion-row>
-                <ion-radio-group *ngFor="let rcvote of coachVotes" [value]="rcvote" disabled="true" name="vote{{rcvote.coach.coachShortName}}" style="width: 100%; margin-bottom: 10px;">
+                <ion-radio-group *ngFor="let rcvote of coachVotes" [value]="rcvote.vote" disabled="true" name="vote{{rcvote.coach.coachShortName}}" style="width: 100%; margin-bottom: 10px;">
                     <ion-row class="coachVotes-row">
                         <ion-col size="4" style="text-align: right;">{{rcvote.coach.coachShortName}}</ion-col>
                         <ion-col size="2" style="text-align: center;">
@@ -79,9 +79,9 @@
                 </ion-radio-group>
                 <ion-row class="coachVotes-row">
                     <ion-col size="4" style="text-align: right; font-weight: bold;">Total</ion-col>
-                    <ion-col size="2" style="text-align: center;">{{totalNo}}</ion-col>
-                    <ion-col size="2" style="text-align: center;">{{totalAbstein}}</ion-col>
-                    <ion-col size="2" style="text-align: center;">{{totalYes}}</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteNo">{{totalNo}}</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteAbstein">{{totalAbstein}}</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteYes">{{totalYes}}</ion-col>
                 </ion-row>
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="votePanel" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
                     <ion-row class="coachVotes-row coachVotes-row-panel">
@@ -109,7 +109,7 @@
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
             <div>
-                <ion-button style="float: right;" (click)="savePanelVote()" shape="round" size="normal">Save</ion-button>
+                <ion-button style="float: right;" (click)="savePanelVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">Save</ion-button>
             </div>
         </div>
 
@@ -121,7 +121,7 @@
                 <ion-row class="header-row">
                     <ion-col size="2">Level</ion-col>
                     <ion-col size="3">Referee</ion-col>
-                    <ion-col size="2">Decision</ion-col>
+                    <ion-col size="2">Vote</ion-col>
                     <ion-col size="2">Status</ion-col>
                     <ion-col size="3">Action</ion-col>
                 </ion-row>
@@ -143,7 +143,7 @@
                         <img src="assets/imgs/badge/{{pvote.upgradeLevel}}.png" alt="{{pvote.upgradeLevel}}" height="70" />
                     </ion-col>
                     <ion-col size="3">{{pvote.referee.refereeShortName}}</ion-col>
-                    <ion-col size="2">{{pvote.vote}}</ion-col>
+                    <ion-col size="2" class="vote{{pvote.vote}}">{{pvote.vote}}</ion-col>
                     <ion-col size="2">{{pvote.closed ? 'Closed' : 'Open'}}</ion-col>
                     <ion-col size="3" class="action-col">
                         <ion-button *ngIf="!pvote.closed" (click)="closePanelVote(pvote)" shape="round" size="small" color="warning">

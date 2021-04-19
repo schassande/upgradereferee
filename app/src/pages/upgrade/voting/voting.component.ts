@@ -20,6 +20,7 @@ import { UserService } from 'src/app/service/UserService';
 })
 export class VotingComponent implements OnInit {
 
+  dirty = false;
   /** Id of the selected competition. This id can be given in parameter of the page. Can be null */
   competitionId: string;
   /** Competition object selected. Can be null */
@@ -304,7 +305,7 @@ export class VotingComponent implements OnInit {
       // the referee is not a registered account as Referee
       return false;
     }
-    if (!this.userService.canVote(this.referee, this.coach) && !this.connectedUserService.isAdmin()) {
+    if (!this.userService.canVote(referee, this.coach) && !this.connectedUserService.isAdmin()) {
       return false;
     }
     return true;
@@ -324,10 +325,11 @@ export class VotingComponent implements OnInit {
               this.createVote();
             }
           }),
-          map(() => this.loading = false)
+          map(() => { this.loading = false; this.dirty = false; })
         );
     } else {
       this.loading = false;
+      this.dirty = false;
       this.vote = null;
       return of('');
     }
@@ -357,6 +359,7 @@ export class VotingComponent implements OnInit {
         coachId: this.coach.id
       }
     };
+    this.dirty = true;
   }
 
   onCompetitionChange() {
@@ -394,10 +397,13 @@ export class VotingComponent implements OnInit {
 
   onVoteChange() {
     // console.log('onVoteChange()\n' +  JSON.stringify(this.vote, null, 2));
+    this.dirty = true;
+  }
+  saveVote() {
     this.competitionDayRefereeCoachVoteService.save(this.vote).pipe(
       map((rvote) => {
         this.vote = rvote.data;
-        // console.log('Vote saved: ', this.vote);
+        this.dirty = false;
       })
     ).subscribe();
   }

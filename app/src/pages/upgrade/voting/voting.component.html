@@ -46,17 +46,20 @@
                 <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="referee">
-            <div style="text-align: center; margin-top: 20px;">
-                <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person"></ion-icon>
+        <div *ngIf="referee" style="border-bottom: 1px solid lightgrey;">
+            <div style="text-align: center; width:30%; display: inline-block;">
+                <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>
                 <img src="{{referee.photo.url}}" *ngIf="referee.photo && referee.photo.url" height="100">
             </div>
-            <div style="margin: 10px 0 30px 10px; text-align: center;">
-                <span style="font-size: 1.4em;">{{referee.firstName}} {{referee.lastName}}</span>
-                <br>from {{referee.country}} / {{referee.region}}
-                <br>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}
-                <br><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="70" />
-                <br>Referee category: {{referee.referee.refereeCategory}}
+            <div style="margin: 10px 0; text-align: center; width:40%; display: inline-block;">
+                <div style="font-size: 1.4em; font-weight: bold;">{{referee.firstName}}</div>
+                <div style="font-size: 1.4em; font-weight: bold;">{{referee.lastName}}</div>
+                <div>from {{referee.country}} / {{referee.region}}</div>
+                <div>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}</div>
+            </div>
+            <div style="text-align: center; width:30%; display: inline-block;">
+                <div style="margin: 0 auto;"><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="70" /></div>
+                <div style="margin: 0 auto;">Cat: {{referee.referee.refereeCategory}}</div>
             </div>
         </div>
         <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote">
@@ -69,15 +72,15 @@
             <ion-item>
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
                     <ion-item>
-                        <ion-label>Yes competent to the referee level </ion-label>
+                        <ion-label style="color: green; font-weight: bold;">Yes, competent</ion-label>
                         <ion-radio slot="start" value="Yes" color="success"></ion-radio>
                     </ion-item>
                     <ion-item>
-                        <ion-label>Abstein</ion-label>
+                        <ion-label style="color: blue; font-weight: bold;">Abstein</ion-label>
                         <ion-radio slot="start" value="Abstein" color="primary"></ion-radio>
                     </ion-item>
                     <ion-item>
-                        <ion-label>Not yet competent</ion-label>
+                        <ion-label style="color: red; font-weight: bold;">Not yet competent</ion-label>
                         <ion-radio slot="start" value="No" color="danger"></ion-radio>
                     </ion-item>
                 </ion-radio-group>
@@ -92,6 +95,9 @@
                 <ion-label>Private<br>comment</ion-label>
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
+            <div>
+                <ion-button style="float: right;" (click)="saveVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">Save</ion-button>
+            </div>
         </ion-item-group>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
             <ion-spinner></ion-spinner>
