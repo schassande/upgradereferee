@@ -413,16 +413,13 @@ export class CompetitionVotesComponent implements OnInit {
         {
           text: 'Close vote',
           handler: () => {
-            pvote.closed = true;
-            this.competitionDayPanelVoteService.save(pvote).subscribe(() => this.computeHasOpen());
+            this.performClosePanelVote(pvote);
           }
         }
       ]
     }).then(alert => alert.present() );
   }
-  private computeHasOpen() {
-    this.hasOpenVote = this.panelVotes.filter(pv => !pv.closed).length > 0;
-  }
+
   closeAll() {
     this.alertCtrl.create({
       message: 'Do you really want to close the panel vote for all the selected referees?<br>Decision will be published to the referee.',
@@ -433,14 +430,47 @@ export class CompetitionVotesComponent implements OnInit {
           handler: () => {
             this.panelVotes.forEach((pv) => {
               if (!pv.closed) {
-                pv.closed = true;
-                this.competitionDayPanelVoteService.save(pv).subscribe(() => this.computeHasOpen());
+                this.performClosePanelVote(pv);
               }
             });
           }
         }
       ]
     }).then(alert => alert.present() );
+  }
+
+  private performClosePanelVote(pvote: CompetitionDayPanelVote) {
+    // close the vote of the referee coaches for the day of the competition
+    forkJoin(this.competition.refereeCoaches.map(
+      rc => this.competitionDayRefereeCoachVoteService.getVote(this.competitionId, this.day, rc.coachId, this.refereeId).pipe(
+        mergeMap((rvote) => {
+          if (rvote.data && !rvote.data.closed) {
+            rvote.data.closed = true;
+            return this.competitionDayRefereeCoachVoteService.save(rvote.data);
+          } else {
+            return of('');
+          }
+        })
+      )
+    )).pipe(
+      mergeMap(() => {
+        // close the vote of the panel for the day of the competition
+        if (!pvote.closed) {
+          pvote.closed = true;
+          return this.competitionDayPanelVoteService.save(pvote);
+        } else {
+          return of('');
+        }
+      }),
+      map(() => this.computeHasOpen()), // in order to hide the close button
+      map(() => {
+        // TODO call a function to compute the referee upgrade on server side
+      })
+    ).subscribe();
+  }
+
+  private computeHasOpen() {
+    this.hasOpenVote = this.panelVotes.filter(pv => !pv.closed).length > 0;
   }
 
   navBack() {

@@ -31,12 +31,17 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
         item.day = this.adjustDate(item.day, this.dateService);
     }
 
-    getVote(competitionId: string, day: Date, refereeId: string)
-        : Observable<ResponseWithData<CompetitionDayPanelVote>> {
+    getVote(competitionId: string, day: Date, refereeId: string): Observable<ResponseWithData<CompetitionDayPanelVote>> {
         return this.queryOne(this.getCollectionRef()
             .where('competitionId', '==', competitionId)
             .where('day', '==', this.dateService.to00h00(day))
             .where('referee.refereeId', '==', refereeId)
+            , 'default');
+    }
+    findClosedVotesByReferee(refereeId: string): Observable<ResponseWithData<CompetitionDayPanelVote[]>> {
+        return this.query(this.getCollectionRef()
+            .where('referee.refereeId', '==', refereeId)
+            .where('closed', '==', 'true')
             , 'default');
     }
 }

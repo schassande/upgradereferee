@@ -73,15 +73,18 @@
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
                     <ion-item>
                         <ion-label style="color: green; font-weight: bold;">Yes, competent</ion-label>
-                        <ion-radio slot="start" value="Yes" color="success"></ion-radio>
+                        <ion-icon slot="start" name="checkmark-outline" size="large" color="success" *ngIf="vote.closed && vote.vote === 'Yes'"></ion-icon>
+                        <ion-radio slot="start" value="Yes" color="success" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
                         <ion-label style="color: blue; font-weight: bold;">Abstein</ion-label>
-                        <ion-radio slot="start" value="Abstein" color="primary"></ion-radio>
+                        <ion-icon slot="start" name="radio-button-on-outline" size="large" color="primary" *ngIf="vote.closed && vote.vote === 'Abstein'"></ion-icon>
+                        <ion-radio slot="start" value="Abstein" color="primary" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
                         <ion-label style="color: red; font-weight: bold;">Not yet competent</ion-label>
-                        <ion-radio slot="start" value="No" color="danger"></ion-radio>
+                        <ion-icon slot="start" name="close-outline" size="large" color="danger" *ngIf="vote.closed && vote.vote === 'No'"></ion-icon>
+                        <ion-radio slot="start" value="No" color="danger" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                 </ion-radio-group>
             </ion-item>
@@ -95,7 +98,7 @@
                 <ion-label>Private<br>comment</ion-label>
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
-            <div>
+            <div *ngIf="!vote.closed">
                 <ion-button style="float: right;" (click)="saveVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">Save</ion-button>
             </div>
         </ion-item-group>
