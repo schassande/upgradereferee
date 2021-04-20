@@ -7,6 +7,7 @@ import { CompetitionDayPanelVote, RefereeUpgrade } from '../model/upgrade';
 import { DateService } from './DateService';
 import { ResponseWithData } from './response';
 import { Observable, of } from 'rxjs';
+import { AngularFireFunctions } from '@angular/fire/functions';
 
 @Injectable()
 export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUpgrade> {
@@ -15,6 +16,7 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
         appSettingsService: AppSettingsService,
         db: AngularFirestore,
         toastController: ToastController,
+        private angularFireFunctions: AngularFireFunctions,
         private dateService: DateService
     ) {
         super(appSettingsService, db, toastController);
@@ -44,5 +46,8 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
             .orderBy('upgradeStatus', 'desc')
             .limit(10)
             , 'default');
+    }
+    public computeRefereeUpgrade(coachId: string, refereeId: string): Observable<RefereeUpgrade> {
+        return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({coachId, refereeId});
     }
 }

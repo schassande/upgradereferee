@@ -128,4 +128,6 @@ export interface UpgradeCriteria extends PersistentData {
     c4YesRequired: number;
     /** Number of yes C5 days required in the window */
     c5YesRequired: number;
+    /** the duration (number of months) of the validation of a day vote. After this delay the vote is ignored. */
+    dayVoteDuration: number;
 }

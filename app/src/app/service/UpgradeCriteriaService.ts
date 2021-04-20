@@ -56,7 +56,8 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
                 totalYesRequired: 3,
                 c3YesRequired: 3,
                 c4YesRequired: 0,
-                c5YesRequired: 0
+                c5YesRequired: 0,
+                dayVoteDuration: 12
             },
             {
                 id: 'EURO4_2021',
@@ -76,7 +77,8 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
                 totalYesRequired: 4,
                 c3YesRequired: 0,
                 c4YesRequired: 2,
-                c5YesRequired: 0
+                c5YesRequired: 0,
+                dayVoteDuration: 12
             },
             {
                 id: 'EURO5_2021',
@@ -96,7 +98,8 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
                 totalYesRequired: 6,
                 c3YesRequired: 0,
                 c4YesRequired: 0,
-                c5YesRequired: 2
+                c5YesRequired: 2,
+                dayVoteDuration: 12
             }
         ];
         return forkJoin(euroCriteria.map(c =>
