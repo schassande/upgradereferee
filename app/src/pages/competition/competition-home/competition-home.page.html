@@ -42,7 +42,7 @@
     <div style="margin: 20px 0; text-align: center;">
         <span style="font-size: 1.4em;">{{competition.name}}</span>
         <br>in {{competition.country}} / {{competition.region}}
-        <br>Date(s): <span *ngFor="let day of competition.days">{{dateService.date2string(day)}}</span>
+        <br>Date(s):<span *ngFor="let day of competition.days">&nbsp;{{dateService.date2string(day)}}&nbsp;&nbsp;</span>
     </div>
     <ion-list>
         <ion-item>

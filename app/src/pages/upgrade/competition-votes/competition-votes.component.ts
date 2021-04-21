@@ -14,6 +14,7 @@ import { DateService } from 'src/app/service/DateService';
 import { ResponseWithData } from 'src/app/service/response';
 import { ToolService } from 'src/app/service/ToolService';
 import { UserService } from 'src/app/service/UserService';
+import { RefereeUpgradeService } from 'src/app/service/RefereeUpgradeService';
 
 @Component({
   selector: 'app-competition-votes',
@@ -96,6 +97,7 @@ export class CompetitionVotesComponent implements OnInit {
     public dateService: DateService,
     private navController: NavController,
     private toolService: ToolService,
+    private refereeUpgradeService: RefereeUpgradeService,
     private userService: UserService,
   ) { }
 
@@ -270,6 +272,7 @@ export class CompetitionVotesComponent implements OnInit {
       lastUpdate: new Date(),
       version: 0,
       competitionId: this.competitionId,
+      competitionCategory: this.competition.category,
       day: this.dateService.to00h00(this.day),
       referee: {
         refereeShortName: this.referee.shortName,
@@ -476,7 +479,11 @@ export class CompetitionVotesComponent implements OnInit {
       }),
       map(() => this.computeHasOpen()), // in order to hide the close button
       map(() => {
-        // TODO call a function to compute the referee upgrade on server side
+        // Call a function to compute the referee upgrade on server side
+        this.refereeUpgradeService.computeRefereeUpgrade(this.coach.id, pvote.referee.refereeId, pvote.day)
+          .subscribe(
+            data => console.log('computeRefereeUpgrade Ok', data),
+            err => console.log('computeRefereeUpgrade Error', err));
       })
     ).subscribe();
   }

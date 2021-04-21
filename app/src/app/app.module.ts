@@ -75,6 +75,8 @@ import { RefereeViewPage } from 'src/pages/referee/referee-view/referee-view';
 import { VotingComponent } from 'src/pages/upgrade/voting/voting.component';
 import { RefereeVotesComponent } from 'src/pages/upgrade/referee-votes/referee-votes.component';
 import { CompetitionVotesComponent } from 'src/pages/upgrade/competition-votes/competition-votes.component';
+import { RefereeUpgradeService } from './service/RefereeUpgradeService';
+import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
 
 
 @NgModule({
@@ -125,7 +127,9 @@ import { CompetitionVotesComponent } from 'src/pages/upgrade/competition-votes/c
     LocalDatabaseService,
     OfflinesService,
     RefereeService,
+    RefereeUpgradeService,
     ToolService,
+    UpgradeCriteriaService,
     UserService,
     UserGroupService,
     VersionService,

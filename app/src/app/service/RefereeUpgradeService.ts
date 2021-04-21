@@ -47,7 +47,11 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
             .limit(10)
             , 'default');
     }
-    public computeRefereeUpgrade(coachId: string, refereeId: string): Observable<RefereeUpgrade> {
-        return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({coachId, refereeId});
+    public computeRefereeUpgrade(coachId: string, refereeId: string, day: Date): Observable<RefereeUpgrade> {
+        return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({
+            coachId,
+            refereeId,
+            day: this.dateService.date2string(day)
+        });
     }
 }

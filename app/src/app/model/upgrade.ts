@@ -1,6 +1,6 @@
 import { Upgradable } from './coaching';
 import { PersistentData } from './common';
-import { CoachRef, RefereeRef } from './competition';
+import { CoachRef, CompetitionCategory, RefereeRef } from './competition';
 import { RefereeLevel } from './user';
 
 /**
@@ -70,6 +70,7 @@ export interface CompetitionDayPanelVote extends  CompetitionDayVote, Persistent
     coaches: CoachRef[];
     /** The Yes voting coach */
     yesCoaches: CoachRef[];
+    competitionCategory: CompetitionCategory;
 }
 
 export interface RefereeUpgrade extends PersistentData {
