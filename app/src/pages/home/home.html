@@ -21,6 +21,13 @@
         <ion-item detail routerLink="/upgrade/voting" *ngIf="isRefereeCoach()">
             <ion-label class="menu-entry">Voting</ion-label>
         </ion-item>
+        <ion-item detail routerLink="/referee/votes/{{currentUser.id}}" *ngIf="isReferee()">
+            <ion-icon slot="end" name="caret-up-circle-outline"></ion-icon>
+        </ion-item>
+        <ion-item detail routerLink="/upgrade/criteria">
+            <ion-label class="menu-entry">Upgrade criteria</ion-label>
+        </ion-item>
+
         <ion-item detail routerLink="/settings">
             <ion-label class="menu-entry">Settings</ion-label>
         </ion-item>

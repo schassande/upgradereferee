@@ -5,8 +5,9 @@ import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
 import { CompetitionDayPanelVote } from '../model/upgrade';
 import { DateService } from './DateService';
-import { ResponseWithData } from './response';
-import { Observable } from 'rxjs';
+import { ResponseWithData, Response } from './response';
+import { Observable, forkJoin, of } from 'rxjs';
+import { mergeMap } from 'rxjs/operators';
 
 @Injectable()
 export class CompetitionDayPanelVoteService extends RemotePersistentDataService<CompetitionDayPanelVote> {
@@ -33,7 +34,7 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
 
     getVote(competitionId: string, day: Date, refereeId: string): Observable<ResponseWithData<CompetitionDayPanelVote>> {
         return this.queryOne(this.getCollectionRef()
-            .where('competitionId', '==', competitionId)
+            .where('competitionRef.competitionId', '==', competitionId)
             .where('day', '==', this.dateService.to00h00(day))
             .where('referee.refereeId', '==', refereeId)
             , 'default');
@@ -43,5 +44,15 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
             .where('referee.refereeId', '==', refereeId)
             .where('closed', '==', 'true')
             , 'default');
+    }
+    onCompetitionDelete(competitionId: string): Observable<Response[]> {
+        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default')
+            .pipe(mergeMap((rvs) => {
+                if (rvs.data && rvs.data.length > 0) {
+                    return forkJoin(rvs.data.map(v => this.delete(v.id)));
+                } else {
+                    return of([{error: null}]);
+                }
+            }));
     }
 }

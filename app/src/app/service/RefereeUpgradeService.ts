@@ -31,6 +31,9 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
     }
     protected adjustFieldOnLoad(item: RefereeUpgrade) {
         item.upagrdeStatusDate = this.adjustDate(item.upagrdeStatusDate, this.dateService);
+        item.c3PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
+        item.c4PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
+        item.c5PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
     }
 
     public getLastRefereeUpgrade(refereeId: string): Observable<ResponseWithData<RefereeUpgrade>> {
@@ -43,7 +46,7 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
     public find10LastRefereeUpgrades(refereeId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
         return this.query(this.getCollectionRef()
             .where('referee.refereeId', '==', refereeId)
-            .orderBy('upgradeStatus', 'desc')
+            .orderBy('upagrdeStatusDate', 'desc')
             .limit(10)
             , 'default');
     }

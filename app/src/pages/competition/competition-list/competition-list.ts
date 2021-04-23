@@ -2,7 +2,7 @@ import { ConnectedUserService } from './../../../app/service/ConnectedUserServic
 import { HelpService } from './../../../app/service/HelpService';
 import { ResponseWithData } from './../../../app/service/response';
 import { Competition } from './../../../app/model/competition';
-import { NavController, AlertController } from '@ionic/angular';
+import { NavController, AlertController, LoadingController } from '@ionic/angular';
 import { CompetitionService } from './../../../app/service/CompetitionService';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DateService } from 'src/app/service/DateService';
@@ -32,6 +32,7 @@ export class CompetitionListPage implements OnInit {
     private connectedUserService: ConnectedUserService,
     private changeDetectorRef: ChangeDetectorRef,
     public dateService: DateService,
+    private loadingController: LoadingController,
     private helpService: HelpService,
     private navController: NavController
     ) {
@@ -87,8 +88,14 @@ export class CompetitionListPage implements OnInit {
         { text: 'Cancel', role: 'cancel'},
         {
           text: 'Delete',
-          handler: () => {
-            this.competitionService.delete(competition.id).subscribe(() => this.searchCompetition());
+          handler: async () => {
+            const loading = await this.loadingController.create({ message: 'Deleting competition ...'});
+            loading.present();
+            this.competitionService.delete(competition.id).subscribe(() => {
+              loading.dismiss();
+              this.searchCompetition();
+            },
+            () => loading.dismiss());
           }
         }
       ]

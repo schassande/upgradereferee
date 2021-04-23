@@ -1,5 +1,5 @@
 import { ConnectedUserService } from './../../../app/service/ConnectedUserService';
-import { User } from './../../../app/model/user';
+import { CurrentApplicationName, User } from './../../../app/model/user';
 import { ToolService } from './../../../app/service/ToolService';
 import { ResponseWithData } from './../../../app/service/response';
 import { mergeMap, map, catchError } from 'rxjs/operators';
@@ -237,7 +237,9 @@ export class CompetitionRefereesPage implements OnInit {
       ]
     }).then( (alert) => alert.present() );
   }
-
+  isUpgradableReferee(referee: User) {
+    return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
+  }
   back() {
     if (this.competition.id) {
       this.navController.navigateRoot(`/competition/${this.competition.id}/home`);

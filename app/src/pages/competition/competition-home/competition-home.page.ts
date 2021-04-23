@@ -3,7 +3,7 @@ import { mergeMap, map, catchError } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { ConnectedUserService } from './../../../app/service/ConnectedUserService';
 import { CompetitionService } from './../../../app/service/CompetitionService';
-import { NavController, AlertController } from '@ionic/angular';
+import { NavController, AlertController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
 import { HelpService } from './../../../app/service/HelpService';
 import { DateService } from './../../../app/service/DateService';
@@ -24,6 +24,7 @@ export class CompetitionHomePage implements OnInit {
   canEdit = false;
   coach: User;
 
+
   constructor(
     private alertCtrl: AlertController,
     private changeDetectorRef: ChangeDetectorRef,
@@ -31,6 +32,7 @@ export class CompetitionHomePage implements OnInit {
     private competitionService: CompetitionService,
     public dateService: DateService,
     private helpService: HelpService,
+    private loadingController: LoadingController,
     private navController: NavController,
     private route: ActivatedRoute,
     public userService: UserService
@@ -99,8 +101,15 @@ export class CompetitionHomePage implements OnInit {
         { text: 'Cancel', role: 'cancel'},
         {
           text: 'Delete',
-          handler: () => {
-            this.navController.navigateRoot('/competition/list');
+          handler: async () => {
+            const loading = await this.loadingController.create({ message: 'Deleting competition ...'});
+            loading.present();
+            this.competitionService.delete(competition.id)
+              .subscribe(() => {
+                loading.dismiss();
+                this.navController.navigateRoot('/competition/list');
+              },
+              () => loading.dismiss());
           }
         }
       ]

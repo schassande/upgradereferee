@@ -6,7 +6,7 @@ import { ToastController } from '@ionic/angular';
 import { UpgradeCriteria } from '../model/upgrade';
 import { DateService } from './DateService';
 import { of, forkJoin, Observable } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 import { RefereeLevel } from '../model/user';
 import { ResponseWithData } from './response';
 
@@ -108,12 +108,19 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
     }
 
     public getUpgradeCriteria(refereeLevel: RefereeLevel, applicationDate: Date): Observable<ResponseWithData<UpgradeCriteria>> {
-        return this.queryOne(this.getCollectionRef()
+        return this.query(this.getCollectionRef()
             .where('beginDate', '<=', applicationDate)
-            .where('endDate', '>=', applicationDate)
             .where('upgradeLevel', '==', refereeLevel)
             .orderBy('beginDate', 'desc')
             .limit(1)
-            , 'default');
+            , 'default').pipe(
+                map(ruc => {
+                    if (ruc.data && ruc.data.length > 0) {
+                        return { data : ruc.data[0], error: null };
+                    } else {
+                        return { data: null, error: ruc.error};
+                    }
+                })
+            );
     }
 }

@@ -26,6 +26,7 @@ import { CompetitionVotesComponent } from 'src/pages/upgrade/competition-votes/c
 import { RefereeVotesComponent } from 'src/pages/upgrade/referee-votes/referee-votes.component';
 import { VotingComponent } from 'src/pages/upgrade/voting/voting.component';
 import { RefereeCoachGuard } from './RefereeCoachGuard';
+import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 
 const routes: Routes = [
   { path: 'admin', component: AdminHomeComponent, canActivate: [AdminGuard] },
@@ -41,6 +42,7 @@ const routes: Routes = [
   { path: 'competition/:id/votes', component: CompetitionVotesComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
 
   { path: 'upgrade/voting', component: VotingComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
+  { path: 'upgrade/criteria', component: UpgradeCriteriaComponent, canActivate: [AuthGuard] },
 
   { path: 'home', component: HomePage, canActivate: [AuthGuard]},
 

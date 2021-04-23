@@ -1,14 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { NavController } from '@ionic/angular';
-import { throwError } from 'rxjs';
+import { throwError, forkJoin, of, Observable } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { CompetitionDayPanelVote } from 'src/app/model/upgrade';
+import { Competition } from 'src/app/model/competition';
+import { CompetitionDayPanelVote, RefereeUpgrade, UpgradeCriteria } from 'src/app/model/upgrade';
 import { CurrentApplicationName, User } from 'src/app/model/user';
 import { CompetitionDayPanelVoteService } from 'src/app/service/CompetitionDayPanelVoteService';
+import { CompetitionService } from 'src/app/service/CompetitionService';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 import { DateService } from 'src/app/service/DateService';
+import { RefereeUpgradeService } from 'src/app/service/RefereeUpgradeService';
 import { ToolService } from 'src/app/service/ToolService';
+import { UpgradeCriteriaService } from 'src/app/service/UpgradeCriteriaService';
 import { UserService } from 'src/app/service/UserService';
 
 @Component({
@@ -22,20 +26,26 @@ export class RefereeVotesComponent implements OnInit {
   refereeId: string;
   /** User object selected representing the referee. Can be null */
   referee: User;
-  /** The list of the panel votes. */
-  votes: CompetitionDayPanelVote[] = [];
+
+  refereeUpgradeId: string;
+  refereeUpgrade: RefereeUpgrade;
+  refereeUpgrades: RefereeUpgrade[];
+  upgradeCriteria: UpgradeCriteria;
+
+  loading = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private competitionDayPanelVoteService: CompetitionDayPanelVoteService,
     private connectedUserService: ConnectedUserService,
     public dateService: DateService,
     private navController: NavController,
-    private toolService: ToolService,
+    private refereeUpgradeService: RefereeUpgradeService,
+    private upgradeCriteriaService: UpgradeCriteriaService,
     private userService: UserService,
   ) {}
 
   ngOnInit() {
+    this.loading = true;
     this.activatedRoute.paramMap.pipe(
       map((params: ParamMap) => {
         this.refereeId = params.get('id');
@@ -57,14 +67,29 @@ export class RefereeVotesComponent implements OnInit {
           throwError('User (' + this.refereeId + ') has not role of REFEREE.');
         }
       }),
-      mergeMap(() => this.competitionDayPanelVoteService.findClosedVotesByReferee(this.refereeId)),
-      map(rvotes => {
-        this.votes = rvotes.data;
+      mergeMap(() => this.refereeUpgradeService.find10LastRefereeUpgrades(this.refereeId)),
+      map(rru => {
+        this.refereeUpgrades = rru.data;
+        console.log('this.refereeUpgrades', this.refereeUpgrades);
+        this.loading = false;
+
+        if (this.refereeUpgrades && this.refereeUpgrades.length > 0) {
+          this.refereeUpgradeId = this.refereeUpgrades[0].id;
+          this.onRefereeUpgradeChange();
+        }
       })
     ).subscribe();
   }
 
-  navBack() {}
+  onRefereeUpgradeChange() {
+    this.refereeUpgrade = this.refereeUpgrades.find(ru2 => ru2.id === this.refereeUpgradeId);
+    this.upgradeCriteriaService.get(this.refereeUpgrade.upgradeCriteriaId)
+      .subscribe(ruc => this.upgradeCriteria = ruc.data);
+  }
+
+  navBack() {
+    this.navController.navigateRoot(['/home']);
+  }
 
   onSwipe($event) {}
 }

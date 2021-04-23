@@ -343,7 +343,7 @@ export class VotingComponent implements OnInit {
       creationDate: new Date(),
       lastUpdate: new Date(),
       version: 0,
-      competitionId: this.competitionId,
+      competitionRef: {competitionId: this.competitionId, competitionName: this.competition.name},
       isMultiDayCompetition: this.competition.days.length > 1,
       day: this.dateService.to00h00(this.day),
       referee: {

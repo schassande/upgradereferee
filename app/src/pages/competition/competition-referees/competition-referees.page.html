@@ -49,6 +49,7 @@
                     {{referee.shortName}}<br> {{referee.firstName}} {{referee.lastName}}<br> {{referee.referee.refereeLevel}} ({{referee.referee.refereeCategory}})
                 </ion-label>
                 <ion-icon slot="end" name="trash" (click)="deleteReferee(referee)"></ion-icon>
+                <ion-icon slot="end" name="caret-up-circle-outline" *ngIf="isUpgradableReferee(referee)" routerLink="/referee/votes/{{referee.id}}"></ion-icon>
             </ion-item>
         </ion-item-group>
     </ion-list>

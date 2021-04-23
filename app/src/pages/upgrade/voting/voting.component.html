@@ -28,7 +28,7 @@
             <ion-label>Day: </ion-label>
             <ion-input readonly="true" type="text" *ngIf="!showDaySelector">{{dateService.date2string(day)}}</ion-input>
             <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" *ngIf="showDaySelector" (ionChange)="onDayChange($event)">
-                <ion-select-option *ngFor="let d of competition.days" value="{{dateService.date2string(d)}}">{{dateService.date2string(d)}}</ion-select-option>
+                <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
             </ion-select>
         </ion-item>
         <ion-item *ngIf="upgradeLevels">

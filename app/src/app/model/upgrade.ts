@@ -1,6 +1,6 @@
 import { Upgradable } from './coaching';
 import { PersistentData } from './common';
-import { CoachRef, CompetitionCategory, RefereeRef } from './competition';
+import { CoachRef, CompetitionCategory, CompetitionRef, RefereeRef } from './competition';
 import { RefereeLevel } from './user';
 
 /**
@@ -40,8 +40,8 @@ export interface UpgradeVote {
 }
 /** A vote during a day of a competition */
 export interface CompetitionDayVote {
-    /** Identifier of the competition where the referee has been observed */
-    competitionId: string;
+    /** the competition where the referee has been observed */
+    competitionRef: CompetitionRef;
     /** Day of the competition */
     day: Date;
     /** is the competition is a multi day event */
@@ -82,16 +82,18 @@ export interface RefereeUpgrade extends PersistentData {
     upgradeStatus: Upgradable;
     /** the date of the upgrade status */
     upagrdeStatusDate: Date;
-    /** the ids of competition which is multi-day */
-    multiDayCompetitionIds: string[];
+    /** the ompetition which are multi-day */
+    multiDayCompetitionRefs: CompetitionRef[];
     /** the reference to the referee coach already voting Yes */
     yesRefereeCoaches: CoachRef[];
-    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C3+ */
-    c3PanelVoteIds: string[];
-    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C4+ */
-    c4PanelVoteIds: string[];
-    /** the list of the CompetitionPanelVote identifiers retained for the upragde decision in the category C5 */
-    c5PanelVoteIds: string[];
+    /** the list of the CompetitionPanelVote retained for the upragde decision in the category C3+ */
+    c3PanelVotes: CompetitionDayPanelVote[];
+    /** the list of the CompetitionPanelVote retained for the upragde decision in the category C4+ */
+    c4PanelVotes: CompetitionDayPanelVote[];
+    /** the list of the CompetitionPanelVote retained for the upragde decision in the category C5 */
+    c5PanelVotes: CompetitionDayPanelVote[];
+    /** the identifier of the UpgradeCriteria used for the evaluation */
+    upgradeCriteriaId: string;
 }
 
 /**

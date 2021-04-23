@@ -31,8 +31,9 @@
             <ion-avatar slot="start" *ngIf="!referee.photo || !referee.photo.url" (click)="refereeSelected($event, referee)"><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" /></ion-avatar>
             <ion-avatar slot="start" *ngIf="referee.photo && referee.photo.url" (click)="refereeSelected($event, referee)"><img src="{{referee.photo.url}}"></ion-avatar>
             <ion-label (click)="refereeSelected($event, referee)" class="listItemButton">
-                {{referee.shortName}}<br> {{referee.firstName}} {{referee.lastName}}<br> {{referee.referee.refereeLevel}} ({{referee.referee.refereeCategory}})
+                {{referee.shortName}}<br> {{referee.firstName}} {{referee.lastName}}<br> {{referee.referee.refereeLevel.replace('_', ' ')}} ({{referee.referee.refereeCategory}})
             </ion-label>
+            <img slot="end" src="assets/imgs/logo.png" height="30" *ngIf="referee.accountStatus !== 'NO_ACCOUNT' && referee.referee.nextRefereeLevel" />
         </ion-item>
     </ion-list>
     <div style="margin-bottom: 60px;"></div>

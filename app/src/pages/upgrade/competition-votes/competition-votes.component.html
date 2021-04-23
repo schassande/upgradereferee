@@ -16,7 +16,7 @@
         <ion-item *ngIf="competition && competition.days.length > 0">
             <ion-label style="font-weight: bold;">Day: </ion-label>
             <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" (ionChange)="onDayChange($event)">
-                <ion-select-option *ngFor="let d of competition.days" value="{{dateService.date2string(d)}}">{{dateService.date2string(d)}}</ion-select-option>
+                <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
             </ion-select>
         </ion-item>
         <ion-item *ngIf="upgradeLevels">
@@ -153,7 +153,9 @@
                         <ion-button (click)="showPanelVote(pvote.referee.refereeId)" shape="round" size="small">
                             <ion-icon name="eye-outline"></ion-icon>
                         </ion-button>
-
+                        <ion-button *ngIf="pvote.closed" shape="round" size="small" routerLink="/referee/votes/{{pvote.referee.refereeId}}">
+                            <ion-icon slot="end" name="caret-up-circle-outline"></ion-icon>
+                        </ion-button>
                     </ion-col>
                 </ion-row>
                 <ion-row *ngIf="hasOpenVote">

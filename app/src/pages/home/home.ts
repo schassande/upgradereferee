@@ -38,6 +38,9 @@ export class HomePage implements OnInit {
   public isNdr() {
     return this.connectedUserService.isNDR();
   }
+  public isReferee() {
+    return this.connectedUserService.isReferee();
+  }
 
   ngOnInit() {
     this.helpService.setHelp('home');

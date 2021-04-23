@@ -77,6 +77,7 @@ import { RefereeVotesComponent } from 'src/pages/upgrade/referee-votes/referee-v
 import { CompetitionVotesComponent } from 'src/pages/upgrade/competition-votes/competition-votes.component';
 import { RefereeUpgradeService } from './service/RefereeUpgradeService';
 import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
+import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 
 
 @NgModule({
@@ -93,6 +94,7 @@ import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
     SettingsPage,
     UserEditPage, UserLoginComponent, UserWaitingValidationPage,
     CameraIconComponent, UserSelectorComponent,
+    UpgradeCriteriaComponent,
     VotingComponent,
   ],
   entryComponents: [AppComponent, HomePage, RefereeSelectPage,

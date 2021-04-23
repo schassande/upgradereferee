@@ -5,12 +5,123 @@
                 <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title>Upgrade Voting</ion-title>
+        <ion-title>Referee upgrade</ion-title>
         <ion-buttons slot="end">
             <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
         </ion-buttons>
     </ion-toolbar>
 </ion-header>
 <ion-content (swipe)="onSwipe($event)">
-
+    <ion-card *ngIf="referee">
+        <ion-card-header>
+            <ion-title>{{referee.firstName}} {{referee.lastName}}</ion-title>
+            <ion-card-subtitle style="text-align: center;">from {{referee.country}} / {{referee.region}}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content style="text-align: center;">
+            <img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" alt="{{referee.referee.refereeLevel}}" height="70" />
+            <div>{{referee.referee.refereeCategory}}</div>
+        </ion-card-content>
+    </ion-card>
+    <ion-select [(ngModel)]="refereeUpgradeId" style="text-align: center;" interface="action-sheet" (ionChange)="onRefereeUpgradeChange()">
+        <ion-select-option *ngFor="let ru of refereeUpgrades" value="{{ru.id}}">{{ dateService.date2string(ru.upagrdeStatusDate) }}</ion-select-option>
+    </ion-select>
+    <ion-card *ngIf="!loading && refereeUpgrade">
+        <ion-card-header>
+            <ion-title>
+                <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
+                <div>Upgrade decision:
+                    <span style="font-weight: bold; color: red;" *ngIf="refereeUpgrade.upgradeStatus !== 'Yes'">Not Yet</span>
+                    <span style="font-weight: bold; color: green;" *ngIf="refereeUpgrade.upgradeStatus === 'Yes'">Yes</span>
+                </div>
+            </ion-title>
+        </ion-card-header>
+        <ion-card-content *ngIf="upgradeCriteria">
+            <ion-list>
+                <ion-item *ngIf="upgradeCriteria.yesRefereeCoachRequired">
+                    <ion-label>Number of referee coaches voting Yes: {{ refereeUpgrade.yesRefereeCoaches.length }} / {{upgradeCriteria.yesRefereeCoachRequired}}</ion-label>
+                </ion-item>
+                <ion-item *ngIf="upgradeCriteria.multiDayCompetitionRequired">
+                    <ion-label>Multi day<br>competition {{refereeUpgrade.multiDayCompetitionRefs}} / {{upgradeCriteria.multiDayCompetitionRequired}}</ion-label>
+                    <ul>
+                        <li *ngFor="let cid of refereeUpgrade.multiDayCompetitionRefs">{{cid.competitionName}}</li>
+                    </ul>
+                    <div *ngIf="upgradeCriteria.multiDayCompetitionRequired">{{upgradeCriteria.multiDayCompetitionRequired}} multi days competitions are required.</div>
+                </ion-item>
+            </ion-list>
+            <div *ngIf="upgradeCriteria.totalYesRequired">{{upgradeCriteria.totalYesRequired}} Yes days are required.</div>
+            <div *ngIf="upgradeCriteria.daysRequired">{{upgradeCriteria.daysRequired}} days are required.</div>
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="!loading && upgradeCriteria && upgradeCriteria.c5DaysRequired > 0">
+        <ion-card-header style="background-color: black; color: white;">
+            <ion-title style="font-weight: bold;">Competition days retained for C5</ion-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list>
+                <ion-item *ngFor="let pv of refereeUpgrade.c5PanelVotes">
+                    <div slot="start" style="width: 85px;">{{dateService.date2string(pv.day)}}</div>
+                    <ion-label>
+                        {{pv.competitionRef.competitionName}}
+                        <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: {{pv.commentForReferee}}</div>
+                    </ion-label>
+                    <div slot="end">
+                        <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold;">Yes</span>
+                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                    </div>
+                </ion-item>
+            </ion-list>
+            <div *ngIf="refereeUpgrade.c5PanelVotes.length < upgradeCriteria.c5DaysRequired">{{upgradeCriteria.c5DaysRequired - refereeUpgrade.c5PanelVotes.length}} C5 competition day(s) are missing.</div>
+            <div *ngIf="upgradeCriteria.c5YesRequired > 0">{{upgradeCriteria.c5YesRequired}} Yes vote(s) are required.</div>
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="!loading && upgradeCriteria && upgradeCriteria.c4DaysRequired > 0">
+        <ion-card-header style="background-color: red; color: white;">
+            <ion-title style="font-weight: bold;">Competition days retained for C4+</ion-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list>
+                <ion-item *ngFor="let pv of refereeUpgrade.c4PanelVotes">
+                    <div slot="start" style="width: 85px;">{{dateService.date2string(pv.day)}}</div>
+                    <ion-label>
+                        {{pv.competitionRef.competitionName}}
+                        <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: {{pv.commentForReferee}}</div>
+                    </ion-label>
+                    <div slot="end">
+                        <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
+                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                    </div>
+                </ion-item>
+            </ion-list>
+            <div *ngIf="refereeUpgrade.c4PanelVotes.length < upgradeCriteria.c4DaysRequired">{{upgradeCriteria.c4DaysRequired - refereeUpgrade.c4PanelVotes.length}} C4+ competition days are missing.</div>
+            <div *ngIf="upgradeCriteria.c4YesRequired > 0">{{upgradeCriteria.c4YesRequired}} Yes vote(s) are required.</div>
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="!loading && upgradeCriteria && upgradeCriteria.c3DaysRequired > 0">
+        <ion-card-header style="background-color: yellow; color: black;">
+            <ion-title style="font-weight: bold;">Competition days retained for C3+</ion-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list>
+                <ion-item *ngFor="let pv of refereeUpgrade.c3PanelVotes">
+                    <div slot="start" style="width: 85px;">{{dateService.date2string(pv.day)}}</div>
+                    <ion-label>
+                        {{pv.competitionRef.competitionName}}
+                        <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: {{pv.commentForReferee}}</div>
+                    </ion-label>
+                    <div slot="end">
+                        <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
+                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                    </div>
+                </ion-item>
+            </ion-list>
+            <div *ngIf="refereeUpgrade.c3PanelVotes.length < upgradeCriteria.c3DaysRequired">{{upgradeCriteria.c3DaysRequired - refereeUpgrade.c3PanelVotes.length}} C3+ competition day(s) are missing.</div>
+            <div *ngIf="upgradeCriteria.c3YesRequired > 0">{{upgradeCriteria.c3YesRequired}} Yes vote(s) are required.</div>
+        </ion-card-content>
+    </ion-card>
 </ion-content>

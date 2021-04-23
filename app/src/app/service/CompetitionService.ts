@@ -3,11 +3,14 @@ import { DateService } from './DateService';
 import { Competition } from './../model/competition';
 import { ConnectedUserService } from './ConnectedUserService';
 import { AngularFirestore, Query } from '@angular/fire/firestore';
-import { Observable, forkJoin, of } from 'rxjs';
-import { ResponseWithData } from './response';
+import { Observable, forkJoin, of, throwError } from 'rxjs';
+import { ResponseWithData, Response } from './response';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
-import { IonItemSliding, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
+import { map, mergeMap } from 'rxjs/operators';
+import { CompetitionDayPanelVoteService } from './CompetitionDayPanelVoteService';
+import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -15,6 +18,8 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     constructor(
         appSettingsService: AppSettingsService,
         db: AngularFirestore,
+        private competitionDayPanelVoteService: CompetitionDayPanelVoteService,
+        private competitionDayRefereeCoachVoteService: CompetitionDayRefereeCoachVoteService,
         private connectedUserService: ConnectedUserService,
         private dateService: DateService,
         toastController: ToastController
@@ -97,5 +102,18 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
             return of({data: null, error: null});
         }
         return this.queryOne(this.getCollectionRef().where('name', '==', name), 'default');
+    }
+
+    public delete(competitionId: string): Observable<Response> {
+        return of('').pipe(
+            mergeMap(() => forkJoin([
+                this.competitionDayPanelVoteService.onCompetitionDelete(competitionId),
+                this.competitionDayRefereeCoachVoteService.onCompetitionDelete(competitionId)]
+                )),
+            mergeMap(() => {
+                console.log('Deleting competition ...');
+                return super.delete(competitionId);
+            })
+        );
     }
 }

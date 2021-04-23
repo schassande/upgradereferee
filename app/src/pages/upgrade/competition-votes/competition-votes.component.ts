@@ -271,7 +271,7 @@ export class CompetitionVotesComponent implements OnInit {
       creationDate: new Date(),
       lastUpdate: new Date(),
       version: 0,
-      competitionId: this.competitionId,
+      competitionRef: { competitionId: this.competitionId, competitionName: this.competition.name },
       competitionCategory: this.competition.category,
       day: this.dateService.to00h00(this.day),
       referee: {
@@ -447,7 +447,8 @@ export class CompetitionVotesComponent implements OnInit {
   private performClosePanelVote(pvote: CompetitionDayPanelVote) {
     // close the vote of the referee coaches for the day of the competition
     forkJoin(this.competition.refereeCoaches.map(
-      rc => this.competitionDayRefereeCoachVoteService.getVote(pvote.competitionId, pvote.day, rc.coachId, pvote.referee.refereeId).pipe(
+      rc => this.competitionDayRefereeCoachVoteService.getVote(
+          pvote.competitionRef.competitionId, pvote.day, rc.coachId, pvote.referee.refereeId).pipe(
         mergeMap((rvote) => {
           if (rvote.data) {
             if (!rvote.data.closed) {
@@ -458,7 +459,7 @@ export class CompetitionVotesComponent implements OnInit {
               console.log('Coach vote ' + rvote.data.id + ' already closed.');
             }
           } else {
-            console.warn('No coach vote for the (competition=' + pvote.competitionId
+            console.warn('No coach vote for the (competition=' + pvote.competitionRef.competitionId
               + ', day=' + this.dateService.date2string(pvote.day) + ', coach=' + rc.coachId
               + ', refereee=' + pvote.referee.refereeId + ') !!!!');
           }

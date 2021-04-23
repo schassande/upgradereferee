@@ -1,0 +1,112 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/home">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title>Upgrade Criteria</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <div *ngIf="upgradeCriterias && upgradeCriterias.length">
+        <ion-select [(ngModel)]="upgradeCriteriaId" style="text-align: center;" interface="action-sheet">
+            <ion-select-option *ngFor="let uc of upgradeCriterias" value="{{uc.id}}">{{uc.upgradeLevel}}</ion-select-option>
+        </ion-select>
+        <div *ngIf="upgradeCriteria">
+            <ion-card>
+                <div style="text-align: center;">
+                    <img src="assets/imgs/badge/{{upgradeCriteria.upgradeLevel}}.png" alt="{{upgradeCriteria.upgradeLevel}}" height="70" />
+                </div>
+                <ion-list>
+                    <ion-item>
+                        <ion-label>Begin date: </ion-label>
+                        <div style="font-weight: bold;">{{dateService.date2string(upgradeCriteria.beginDate)}}</div>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>End date: </ion-label>
+                        <div style="font-weight: bold;">{{dateService.date2string(upgradeCriteria.endDate)}}</div>
+                    </ion-item>
+                </ion-list>
+            </ion-card>
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Global criteria</ion-card-title>
+                </ion-card-header>
+                <ion-list>
+                    <ion-item>
+                        <ion-label>Nb competition days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.daysRequired}} days</div>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Nb total of Yes days required:</ion-label>
+                        <div style="font-weight: bold;"> {{upgradeCriteria.totalYesRequired}} days</div>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Day performance expire delay: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.dayVoteDuration}} months</div>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Nb of multi days competitions required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.multiDayCompetitionRequired}}</div>
+                    </ion-item>
+                    <ion-item>
+                        <ion-label>Nb of referee coaches voting Yes: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.yesRefereeCoachRequired}}</div>
+                    </ion-item>
+                </ion-list>
+            </ion-card>
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Category 5 criteria</ion-card-title>
+                </ion-card-header>
+                <ion-list>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb Category 5 days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c5DaysRequired}}</div>
+                    </ion-item>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb C5 Yes days required:</ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c5YesRequired}}</div>
+                    </ion-item>
+                </ion-list>
+            </ion-card>
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Category 4+ criteria</ion-card-title>
+                </ion-card-header>
+                <ion-list>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb C4+ days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c4DaysRequired}}</div>
+                    </ion-item>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb C4+ Yes days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c4YesRequired}}</div>
+                    </ion-item>
+                </ion-list>
+            </ion-card>
+            <ion-card>
+                <ion-card-header>
+                    <ion-card-title>Category 3+ criteria</ion-card-title>
+                </ion-card-header>
+                <ion-list>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb C3+ days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c3DaysRequired}}</div>
+                    </ion-item>
+                    <ion-item style="margin-left: 30px;">
+                        <ion-label>Nb C3+ Yes days required: </ion-label>
+                        <div style="font-weight: bold;">{{upgradeCriteria.c3YesRequired}}</div>
+                    </ion-item>
+                </ion-list>
+            </ion-card>
+        </div>
+    </div>
+    <div *ngIf="!upgradeCriterias || upgradeCriterias.length === 0">
+        No upgrade criteria found.
+    </div>
+</ion-content>

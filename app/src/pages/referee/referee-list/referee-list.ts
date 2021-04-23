@@ -2,7 +2,7 @@ import { HelpService } from './../../../app/service/HelpService';
 import { Component, OnInit } from '@angular/core';
 import { ModalController, NavController } from '@ionic/angular';
 import { ResponseWithData } from '../../../app/service/response';
-import { Referee } from '../../../app/model/user';
+import { Referee, User } from '../../../app/model/user';
 import { UserService } from 'src/app/service/UserService';
 
 /**
@@ -18,7 +18,7 @@ import { UserService } from 'src/app/service/UserService';
 })
 export class RefereeListPage implements OnInit {
 
-  referees: Referee[];
+  referees: User[];
   error: any;
   searchInput: string;
   sortBy: string;
@@ -37,12 +37,12 @@ export class RefereeListPage implements OnInit {
   }
 
   private searchReferee() {
-    this.userService.searchReferees(this.searchInput).subscribe((response: ResponseWithData<Referee[]>) => {
+    this.userService.searchReferees(this.searchInput).subscribe((response: ResponseWithData<User[]>) => {
       this.referees = this.sortReferees(response.data);
       this.error = response.error;
     });
   }
-  private sortReferees(referees: Referee[]): Referee[] {
+  private sortReferees(referees: User[]): User[] {
     if (!referees) {
       return referees;
     }
