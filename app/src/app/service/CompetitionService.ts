@@ -57,11 +57,11 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     public searchCompetitions(text: string,
                               options: 'default' | 'server' | 'cache' = 'default'): Observable<ResponseWithData<Competition[]>> {
         const str = text !== null && text && text.trim().length > 0 ? text.trim() : null;
-        return str ?
-            super.filter(this.allO(options), (item: Competition) => {
-                return this.stringContains(str, item.name);
-            })
-            : this.allO(options);
+        let res = this.query(this.getCollectionRef().where('region', '==', this.connectedUserService.getCurrentUser().region), options);
+        if (str) {
+            res = super.filter(res, (item: Competition) => this.stringContains(str, item.name));
+        }
+        return res;
     }
 
     public filterCompetitionsByCoach(competitions: Competition[], coachId: string): Competition[] {

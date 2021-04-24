@@ -113,7 +113,8 @@ export class CompetitionRefereesPage implements OnInit {
   }
 
   async addReferee() {
-    const modal = await this.modalController.create({ component: UserSelectorComponent, });
+    const modal = await this.modalController.create({ component: UserSelectorComponent,
+      componentProps: { role: 'REFEREE', region: this.connectedUserService.getCurrentUser().region}  });
     modal.onDidDismiss().then( (data) => {
       const sharedWith: SharedWith = data.data as SharedWith;
       if (!sharedWith || !sharedWith.users) {
@@ -232,6 +233,7 @@ export class CompetitionRefereesPage implements OnInit {
             this.toolService.deleteFromArrayById(this.competition.referees, referee.id, 'refereeId');
             // remove the referee from the local list
             this.toolService.deleteFromArrayById(this.referees, referee.id);
+            this.competitionService.save(this.competition).subscribe();
           }
         }
       ]

@@ -1,6 +1,6 @@
 import { UserService } from './../../../app/service/UserService';
 import { mergeMap, map, catchError } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { ConnectedUserService } from './../../../app/service/ConnectedUserService';
 import { CompetitionService } from './../../../app/service/CompetitionService';
 import { NavController, AlertController, LoadingController } from '@ionic/angular';
@@ -9,7 +9,8 @@ import { HelpService } from './../../../app/service/HelpService';
 import { DateService } from './../../../app/service/DateService';
 import { Competition } from './../../../app/model/competition';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { User } from 'src/app/model/user';
+import { CurrentApplicationName, User } from 'src/app/model/user';
+import { ResponseWithData } from 'src/app/service/response';
 
 @Component({
   selector: 'app-competition-home',
@@ -19,6 +20,7 @@ import { User } from 'src/app/model/user';
 export class CompetitionHomePage implements OnInit {
 
   competition: Competition;
+  referees: User[] = [];
   loading = false;
   owner: string;
   canEdit = false;
@@ -63,6 +65,7 @@ export class CompetitionHomePage implements OnInit {
         }
         return this.competition;
       }),
+      mergeMap(() => this.loadReferees()),
       // load competition owner info
       mergeMap( () => {
         this.owner = '';
@@ -90,6 +93,44 @@ export class CompetitionHomePage implements OnInit {
         return this.competition;
       })
     );
+  }
+  private loadReferees(): Observable<User[]> {
+    console.log('loadReferees');
+    if (!this.competition.referees || this.competition.referees.length === 0) {
+      this.referees = [];
+      return of(this.referees);
+    }
+    const obs: Observable<User>[] = [];
+    const newReferees: User[] = [];
+    this.competition.referees.forEach((ref) => {
+      if (ref.refereeId !== null) {
+        obs.push(this.userService.get(ref.refereeId).pipe(
+              map((res: ResponseWithData<User>) => {
+                  if (res.data) {
+                    newReferees.push(res.data);
+                  } else {
+                      console.error('Referee ' + ref.refereeId + ' does not exist !');
+                  }
+                  return res.data;
+              }))
+            );
+      } else {
+        console.log('null refereeId, ref.refereeShortName', ref.refereeShortName);
+      }
+    });
+    if (obs.length === 0) {
+      this.referees = [];
+      return of(this.referees);
+    }
+    return forkJoin(obs).pipe(
+      map(() => {
+        this.referees = newReferees;
+        return this.referees;
+      })
+    );
+  }
+  isUpgradableReferee(referee: User) {
+    return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
   }
   onDelete() {
     this.deleteCompetition(this.competition);

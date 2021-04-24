@@ -53,11 +53,19 @@ export class RefereeViewPage implements OnInit {
   isRefereeCoach(): boolean {
     return this.connectedUserService.isRefereeCoach();
   }
+  isAdmin(): boolean {
+    return this.connectedUserService.isAdmin();
+  }
   navBack() {
     this.navController.navigateRoot( ['/referee/list']);
   }
   canVote() {
     return this.isRefereeCoach() && this.userService.canVote(this.referee, this.connectedUserService.getCurrentUser());
+  }
+  canViewUpgrade() {
+    return this.connectedUserService.getCurrentUser().id === this.referee.id
+      || this.canVote()
+      || this.userService.isNdrOf(this.referee, this.connectedUserService.getCurrentUser());
   }
 
   private setRefereeId(id: string) {

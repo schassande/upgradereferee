@@ -395,7 +395,26 @@ export class VotingComponent implements OnInit {
     this.referee = this.referees.find(r => r.id === this.refereeId);
     this.loadVote().subscribe();
   }
-
+  previousReferee() {
+    let idx = this.referees.findIndex(r => r.id === this.refereeId);
+    if (idx >= 0) {
+      if (idx === 0) {
+        idx = this.referees.length - 1;
+      } else {
+        idx = idx - 1;
+      }
+      this.refereeId = this.referees[idx].id;
+      this.onRefereeChange();
+    }
+  }
+  nextReferee() {
+    let idx = this.referees.findIndex(r => r.id === this.refereeId);
+    if (idx >= 0) {
+      idx = (idx + 1 ) % this.referees.length;
+      this.refereeId = this.referees[idx].id;
+      this.onRefereeChange();
+    }
+  }
   onVoteChange() {
     // console.log('onVoteChange()\n' +  JSON.stringify(this.vote, null, 2));
     this.dirty = true;

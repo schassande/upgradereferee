@@ -37,6 +37,12 @@
             </ion-col>
         </ion-row>
     </ion-fab>
+    <ion-card *ngIf="competition && !loading">
+        <ion-card-header style="text-align: center;">
+            <ion-card-title>{{competition.name}}</ion-card-title>
+            <ion-card-subtitle>in {{competition.country}} / {{competition.region}}</ion-card-subtitle>
+        </ion-card-header>
+    </ion-card>
     <ion-list *ngIf="competition && !loading">
         <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;">
             <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px;">
@@ -48,8 +54,8 @@
                 <ion-label class="listItemButton">
                     {{referee.shortName}}<br> {{referee.firstName}} {{referee.lastName}}<br> {{referee.referee.refereeLevel}} ({{referee.referee.refereeCategory}})
                 </ion-label>
-                <ion-icon slot="end" name="trash" (click)="deleteReferee(referee)"></ion-icon>
-                <ion-icon slot="end" name="caret-up-circle-outline" *ngIf="isUpgradableReferee(referee)" routerLink="/referee/votes/{{referee.id}}"></ion-icon>
+                <ion-icon slot="end" size="large" name="trash" (click)="deleteReferee(referee)"></ion-icon>
+                <img slot="end" src="assets/imgs/logo.png" height="30" *ngIf="isUpgradableReferee(referee)" routerLink="/referee/votes/{{referee.id}}" />
             </ion-item>
         </ion-item-group>
     </ion-list>

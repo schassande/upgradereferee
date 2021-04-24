@@ -10,12 +10,13 @@ import { ResponseWithData, Response } from './response';
 import { Observable, of, from, Subject } from 'rxjs';
 import { ConnectedUserService } from './ConnectedUserService';
 import { Injectable } from '@angular/core';
-import { User, CONSTANTES, AuthProvider, CurrentApplicationName, AppRole, RefereeLevel, RefereeCoachLevel } from './../model/user';
+import { User, CONSTANTES, AuthProvider, CurrentApplicationName, AppRole, RefereeLevel, RefereeCoachLevel, ApplicationRole } from './../model/user';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { mergeMap, map, catchError } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
 import { PersistentDataFilter } from './PersistentDataFonctions';
 import { DataRegion } from '../model/common';
+import { ToolService } from './ToolService';
 
 @Injectable()
 export class UserService  extends RemotePersistentDataService<User> {
@@ -30,7 +31,8 @@ export class UserService  extends RemotePersistentDataService<User> {
         private alertCtrl: AlertController,
         private loadingController: LoadingController,
         private angularFireFunctions: AngularFireFunctions,
-        private angularFireAuth: AngularFireAuth
+        private angularFireAuth: AngularFireAuth,
+        private toolService: ToolService
     ) {
         super(appSettingsService, db, toastController);
     }
@@ -461,19 +463,24 @@ export class UserService  extends RemotePersistentDataService<User> {
     public searchUsers(criteria: UserSearchCriteria):
             Observable<ResponseWithData<User[]>> {
         let q: Query<User> = this.getCollectionRef();
-        if (criteria.role) {
-            q = q.where('applications', 'array-contains', { name : CurrentApplicationName, role: criteria.role});
+        if (this.toolService.isValidString(criteria.role)) {
+            console.log('filter by role ' + criteria.role + ' of ' + CurrentApplicationName);
+            q = q.where('applications', 'array-contains', {name: CurrentApplicationName, role: criteria.role});
         }
-        if (criteria.region) {
+        if (this.toolService.isValidString(criteria.region)) {
+            console.log('filter by region ' + criteria.region);
             q = q.where('region', '==', criteria.region);
         }
-        if (criteria.country) {
+        if (this.toolService.isValidString(criteria.country)) {
+            console.log('filter by country ' + criteria.country);
             q = q.where('country', '==', criteria.country);
         }
-        if (criteria.refereeLevel) {
+        if (this.toolService.isValidString(criteria.refereeLevel)) {
+            console.log('filter by refereeLevel ' + criteria.refereeLevel);
             q = q.where('referee.refereeLevel', '==', criteria.refereeLevel);
         }
-        if (criteria.refereeCoachLevel) {
+        if (this.toolService.isValidString(criteria.refereeCoachLevel)) {
+            console.log('filter by refereeCoachLevel ' + criteria.refereeCoachLevel);
             q = q.where('refereeCoach.refereeCoachLevel', '==', criteria.refereeCoachLevel);
         }
         return super.filter(this.query(q, 'default'), this.getFilterByText(criteria.text));
@@ -569,6 +576,10 @@ export class UserService  extends RemotePersistentDataService<User> {
             coach.refereeCoach.refereeCoachLevel);
     }
 
+    public isNdrOf(referee: User, user: User) {
+        return user.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === 'NDR')
+            && referee.country === user.country;
+    }
     public canVoteLevel(refereeLevel: RefereeLevel, refereeCoachLevel: RefereeCoachLevel) {
         if (!refereeLevel || !refereeCoachLevel) {
             return false;

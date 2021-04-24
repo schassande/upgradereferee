@@ -1,5 +1,5 @@
 import { CoachDataSharingAgreement, RefereeDataSharingAgreement } from './privacy';
-import { PersistentData, DataRegion } from './common';
+import { PersistentData, DataRegion, DATA_REGIONS } from './common';
 import { GameCategory } from './game';
 
 export type RefereeCoachLevel = 'NONE' | 'EURO_0' | 'EURO_1' | 'EURO_2' | 'EURO_3' |'EURO_4' |'EURO_5'
@@ -104,7 +104,8 @@ export const CONSTANTES = {
     europeanCountries:  EUROPEAN_COUNTRIES,
     languages: LANGUAGES,
     refereeCoachLevels: REFEREE_COACH_LEVELS,
-    refereeLevels: REFEREE_LEVELS
+    refereeLevels: REFEREE_LEVELS,
+    regions: DATA_REGIONS
 };
 
 export interface Person extends PersistentData {

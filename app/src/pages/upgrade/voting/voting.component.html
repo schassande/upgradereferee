@@ -39,10 +39,11 @@
             </ion-select>
         </ion-item>
         <ion-item *ngIf="competition">
-            <ion-label>Referee: </ion-label>
             <div *ngIf="referee && !referees && !showRefereeSelector">{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
             <div *ngIf="filteredReferees && filteredReferees.length === 0 && showRefereeSelector" style="font-weight: bold;">No referee to upgrade in this competition</div>
-            <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (ionChange)="onRefereeChange()">
+            <ion-icon slot="start" name="chevron-back" size="large" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (click)="previousReferee()"></ion-icon>
+            <ion-icon slot="start" name="chevron-forward" size="large" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (click)="nextReferee()"></ion-icon>
+            <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (ionChange)="onRefereeChange()" style="width: 100%; text-align: center;">
                 <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
             </ion-select>
         </ion-item>
@@ -64,7 +65,7 @@
         </div>
         <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote">
             <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px; font-weight: bold; width: 100%;">
-                Vote for upgrade to {{referee.referee.nextRefereeLevel}}
+                Vote for upgrade to {{referee.referee.nextRefereeLevel}} <span *ngIf="vote.closed">&nbsp;(closed)</span>
             </ion-item-divider>
             <div style="text-align: center;">
                 <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
@@ -73,16 +74,19 @@
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
                     <ion-item>
                         <ion-label style="color: green; font-weight: bold;">Yes, competent</ion-label>
+                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Yes'" style="width: 30px;"></div>
                         <ion-icon slot="start" name="checkmark-outline" size="large" color="success" *ngIf="vote.closed && vote.vote === 'Yes'"></ion-icon>
                         <ion-radio slot="start" value="Yes" color="success" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
                         <ion-label style="color: blue; font-weight: bold;">Abstein</ion-label>
+                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Abstein'" style="width: 30px;"></div>
                         <ion-icon slot="start" name="radio-button-on-outline" size="large" color="primary" *ngIf="vote.closed && vote.vote === 'Abstein'"></ion-icon>
                         <ion-radio slot="start" value="Abstein" color="primary" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
                         <ion-label style="color: red; font-weight: bold;">Not yet competent</ion-label>
+                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'No'" style="width: 30px;"></div>
                         <ion-icon slot="start" name="close-outline" size="large" color="danger" *ngIf="vote.closed && vote.vote === 'No'"></ion-icon>
                         <ion-radio slot="start" value="No" color="danger" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>

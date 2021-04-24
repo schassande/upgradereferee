@@ -32,18 +32,24 @@
             <li *ngIf="referee.refereeCoach.refereeCoachLevel">Referee coach Level: {{referee.refereeCoach.refereeCoachLevel}}</li>
         </ul>
         <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/{{referee.referee.refereeLevel}}.png" height="100" /></div>
-        <div style="text-align: right;" *ngIf="canEdit()">
-            <ion-button shape="round" routerLink="/user/edit/{{referee.id}}" style="margin-bottom: 20px;">Edit</ion-button>
-        </div>
-        <div style="text-align: right;" *ngIf="canVote()">
-            <ion-button shape="round" routerLink="/upgrade/voting" [queryParams]="{refereeId : referee.id }" style="margin-bottom: 20px;">
+        <div style="text-align: center; margin: 10px;" *ngIf="canVote()">
+            <ion-button shape="round" routerLink="/upgrade/voting" [queryParams]="{refereeId : referee.id }" style="width: 100%;">
                 <ion-icon name="ribbon-outline"></ion-icon>&nbsp;L3+ upgrade vote
             </ion-button>
         </div>
-        <div style="text-align: right;">
-            <ion-button shape="round" routerLink="/referee/votes/{{referee.id}}" style="margin-bottom: 20px;">
+        <div style="text-align: center; margin: 10px;" *ngIf="canViewUpgrade()">
+            <ion-button shape="round" routerLink="/referee/votes/{{referee.id}}" style="width: 100%;">
                 Referee upgrade
             </ion-button>
+        </div>
+        <div style="text-align: center; margin: 10px;" *ngIf="canEdit()">
+            <ion-button shape="round" routerLink="/user/edit/{{referee.id}}" style="width: 100%;">Edit</ion-button>
+        </div>
+        <div *ngIf="isAdmin()" style="margin: 10px;">
+            Application roles:
+            <ul>
+                <li *ngFor="let ar of referee.applications"> {{ar.name}} - {{ar.role}}</li>
+            </ul>
         </div>
     </div>
 </ion-content>

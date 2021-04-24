@@ -39,31 +39,50 @@
             </ion-col>
         </ion-row>
     </ion-fab>
-    <div style="margin: 20px 0; text-align: center;">
-        <span style="font-size: 1.4em;">{{competition.name}}</span>
-        <br>in {{competition.country}} / {{competition.region}}
-        <br>Date(s):<span *ngFor="let day of competition.days">&nbsp;{{dateService.date2string(day)}}&nbsp;&nbsp;</span>
-    </div>
-    <ion-list>
-        <ion-item>
-            <ion-label>Category: {{competition.category}}</ion-label>
-        </ion-item>
-        <ion-item-group>
-            <ion-item-divider color="light">Referee Coach ({{competition.refereeCoaches.length}})
-                <ion-icon *ngIf="canEdit" slot="end" name="create-outline" routerLink="/competition/{{competition.id}}/coaches" style="margin-right: 5px;"></ion-icon>
-            </ion-item-divider>
-            <ion-item *ngFor="let coachRef of competition.refereeCoaches" routerLink="/referee-coach/view/{{coachRef.coachId}}">
-                <ion-label>{{coachRef.coachShortName}} <span *ngIf="coachRef.coachId === competition.refereePanelDirectorId">(Director)</span></ion-label>
-            </ion-item>
-        </ion-item-group>
-        <ion-item-group>
-            <ion-item-divider color="light">Referees ({{competition.referees.length}})
-                <ion-icon *ngIf="canEdit" slot="end" name="create-outline" routerLink="/competition/{{competition.id}}/referees" style="margin-right: 5px;"></ion-icon>
-            </ion-item-divider>
-            <ion-item *ngFor="let refereeRef of competition.referees" routerLink="/referee/view/{{refereeRef.refereeId}}">
-                <ion-label>{{refereeRef.refereeShortName}}</ion-label>
-            </ion-item>
-        </ion-item-group>
-    </ion-list>
-    <div *ngIf="owner" style="font-size:0.7em; text-align: center;"><br>Own by {{owner}}</div>
+    <ion-card>
+        <ion-card-header style="text-align: center;">
+            <ion-card-title>{{competition.name}}</ion-card-title>
+            <ion-card-subtitle>in {{competition.country}} / {{competition.region}}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+            Date(s):
+            <div style="text-align: center;">
+                <div *ngFor="let day of competition.days">{{dateService.date2string(day)}}</div>
+            </div>
+            <div>Category: {{competition.category}}</div>
+            <div *ngIf="owner"><br>Own by {{owner}}</div>
+        </ion-card-content>
+    </ion-card>
+    <ion-card>
+        <ion-card-header>
+            <ion-card-title style="text-align: center;">
+                <span>Referee Coach Panel ({{competition.refereeCoaches.length}})</span>
+                <ion-icon *ngIf="canEdit" size="large" name="create-outline" routerLink="/competition/{{competition.id}}/coaches" style="float: right;"></ion-icon>
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list>
+                <ion-item *ngFor="let coachRef of competition.refereeCoaches" routerLink="/referee-coach/view/{{coachRef.coachId}}">
+                    <ion-label>{{coachRef.coachShortName}} <span *ngIf="coachRef.coachId === competition.refereePanelDirectorId">(Director)</span></ion-label>
+                </ion-item>
+            </ion-list>
+        </ion-card-content>
+    </ion-card>
+    <ion-card *ngIf="referees">
+        <ion-card-header style="text-align: center;">
+            <ion-card-title>
+                <span>Referees ({{referees.length}})</span>
+                <ion-icon *ngIf="canEdit" size="large" name="create-outline" routerLink="/competition/{{competition.id}}/referees" style="float: right;"></ion-icon>
+            </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+            <ion-list>
+                <ion-item *ngFor="let referee of referees">
+                    <ion-label>{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</ion-label>
+                    <ion-icon slot="end" name="eye-outline" routerLink="/referee/view/{{referee.id}}"></ion-icon>
+                    <img slot="end" src="assets/imgs/logo.png" height="30" *ngIf="isUpgradableReferee(referee)" routerLink="/referee/votes/{{referee.id}}" />
+                </ion-item>
+            </ion-list>
+        </ion-card-content>
+    </ion-card>
 </ion-content>
