@@ -8,6 +8,7 @@ import { DateService } from './DateService';
 import { ResponseWithData } from './response';
 import { Observable, of } from 'rxjs';
 import { AngularFireFunctions } from '@angular/fire/functions';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUpgrade> {
@@ -50,11 +51,15 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
             .limit(10)
             , 'default');
     }
-    public computeRefereeUpgrade(coachId: string, refereeId: string, day: Date): Observable<RefereeUpgrade> {
+    public computeRefereeUpgrade(refereeId: string, day: Date): Observable<RefereeUpgrade> {
         return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({
-            coachId,
             refereeId,
             day: this.dateService.date2string(day)
-        });
+        }).pipe(
+            map(ru => {
+                this.adjustFieldOnLoad(ru);
+                return ru;
+            })
+        );
     }
 }

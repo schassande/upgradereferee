@@ -481,7 +481,7 @@ export class CompetitionVotesComponent implements OnInit {
       map(() => this.computeHasOpen()), // in order to hide the close button
       map(() => {
         // Call a function to compute the referee upgrade on server side
-        this.refereeUpgradeService.computeRefereeUpgrade(this.coach.id, pvote.referee.refereeId, pvote.day)
+        this.refereeUpgradeService.computeRefereeUpgrade(pvote.referee.refereeId, pvote.day)
           .subscribe(
             data => console.log('computeRefereeUpgrade Ok', data),
             err => console.log('computeRefereeUpgrade Error', err));

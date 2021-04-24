@@ -33,6 +33,7 @@ export class RefereeVotesComponent implements OnInit {
   upgradeCriteria: UpgradeCriteria;
 
   loading = false;
+  computing = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -86,7 +87,23 @@ export class RefereeVotesComponent implements OnInit {
     this.upgradeCriteriaService.get(this.refereeUpgrade.upgradeCriteriaId)
       .subscribe(ruc => this.upgradeCriteria = ruc.data);
   }
-
+  onRecomputeUpgrade() {
+    this.computing = true;
+    this.refereeUpgradeService.computeRefereeUpgrade(this.refereeId, this.refereeUpgrade.upagrdeStatusDate).subscribe(
+      ru => {
+        console.log('onRecomputeUpgrade()', ru);
+        const idx = this.refereeUpgrades.findIndex(ru2 => ru2.id === ru.id);
+        console.log('onRecomputeUpgrade() idx=' + idx);
+        if (idx >= 0) {
+          this.refereeUpgrades[idx] = ru;
+          if (ru.id === this.refereeUpgrade.id) {
+            this.refereeUpgrade = ru;
+          }
+        }
+        this.computing = false;
+      }
+    );
+  }
   navBack() {
     this.navController.navigateRoot(['/home']);
   }

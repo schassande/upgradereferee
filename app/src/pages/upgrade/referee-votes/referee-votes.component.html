@@ -124,4 +124,9 @@
             <div *ngIf="upgradeCriteria.c3YesRequired > 0">{{upgradeCriteria.c3YesRequired}} Yes vote(s) are required.</div>
         </ion-card-content>
     </ion-card>
+    <div style="text-align: center;">
+        <ion-button [disabled]="computing" (click)="onRecomputeUpgrade()" shape="round">
+            <ion-icon name="refresh-sharp"></ion-icon>&nbsp;Re Compute
+        </ion-button>
+    </div>
 </ion-content>
