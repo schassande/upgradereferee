@@ -78,6 +78,7 @@ import { CompetitionVotesComponent } from 'src/pages/upgrade/competition-votes/c
 import { RefereeUpgradeService } from './service/RefereeUpgradeService';
 import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
 import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
+import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
 
 
 @NgModule({
@@ -86,7 +87,7 @@ import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upg
     CoachValidationComponent,
     CompetitionSelectorComponent,
     CompetitionListPage, CompetitionEditComponent, CompetitionHomePage, CompetitionCoachesPage, CompetitionRefereesPage,
-    CompetitionVotesComponent,
+    CompetitionVotesComponent, CompetitionUpgradesComponent,
     HomePage, HelpWidgetComponent,
     NdrValidationComponent,
     RefereeCoachListComponent, RefereeCoachViewComponent,

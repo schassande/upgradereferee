@@ -1,0 +1,46 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="back()">
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">Competition Upgrades</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content>
+    <ion-card *ngIf="competition">
+        <ion-card-header style="text-align: center;">
+            <ion-card-title>{{competition.name}}</ion-card-title>
+            <ion-card-subtitle>in {{competition.country}} / {{competition.region}}</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+            Date(s):
+            <div style="text-align: center;">
+                <div *ngFor="let day of competition.days">{{dateService.date2string(day)}}</div>
+            </div>
+            <div>Category: {{competition.category}}</div>
+        </ion-card-content>
+    </ion-card>
+    <div *ngIf="!loading && upgrades && upgrades.length === 0" style="margin: 20px; text-align: center;"> No upgrade during the competition</div>
+    <ion-list *ngIf="!loading && upgrades && upgrades.length > 0">
+        <ion-item>
+            <ion-select (ionChange)="onSortChange()" [(ngModel)]="sort" interface="action-sheet">
+                <ion-select-option value="Level-Date">Sort By level then by date</ion-select-option>
+                <ion-select-option value="Date-Level">Sort By date then by level</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item *ngFor="let ru of upgrades">
+            <div slot="start">{{this.dateService.date2string(ru.upgrade.decisionDate)}}</div>
+            <div><span style="font-size: 1.2em; font-weight: bold;">{{ru.referee.shortName}} - {{ru.referee.firstName}} {{ru.referee.lastName}}</span>
+                <br>{{ru.referee.country}} / {{ru.referee.region}}
+            </div>
+            <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/{{ru.upgrade.upgradeLevel}}.png" height="100" /></div>
+        </ion-item>
+    </ion-list>
+    <ion-button *ngIf="hasUnpublished" shape="round" style="width: 100%; margin: 20px 10px; padding: 5px;">Publish All</ion-button>
+</ion-content>

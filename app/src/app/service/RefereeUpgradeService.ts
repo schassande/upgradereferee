@@ -9,6 +9,7 @@ import { ResponseWithData } from './response';
 import { Observable, of } from 'rxjs';
 import { AngularFireFunctions } from '@angular/fire/functions';
 import { map } from 'rxjs/operators';
+import { Upgradable } from '../model/coaching';
 
 @Injectable()
 export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUpgrade> {
@@ -31,7 +32,7 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
         return 4;
     }
     protected adjustFieldOnLoad(item: RefereeUpgrade) {
-        item.upagrdeStatusDate = this.adjustDate(item.upagrdeStatusDate, this.dateService);
+        item.decisionDate = this.adjustDate(item.decisionDate, this.dateService);
         item.c3PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
         item.c4PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
         item.c5PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
@@ -40,14 +41,14 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
     public getLastRefereeUpgrade(refereeId: string): Observable<ResponseWithData<RefereeUpgrade>> {
         return this.queryOne(this.getCollectionRef()
             .where('referee.refereeId', '==', refereeId)
-            .orderBy('upgradeStatus', 'desc')
+            .orderBy('decision', 'desc')
             .limit(1)
             , 'default');
     }
     public find10LastRefereeUpgrades(refereeId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
         return this.query(this.getCollectionRef()
             .where('referee.refereeId', '==', refereeId)
-            .orderBy('upagrdeStatusDate', 'desc')
+            .orderBy('decisionDate', 'desc')
             .limit(10)
             , 'default');
     }
@@ -61,5 +62,17 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
                 return ru;
             })
         );
+    }
+    public findRefereeUpgradeByDate(decisionDate: Date, decision: Upgradable): Observable<ResponseWithData<RefereeUpgrade[]>> {
+        return this.query(this.getCollectionRef()
+            .where('decisionDate', '==', decisionDate)
+            .where('decision', '==', decision)
+            , 'default');
+    }
+    public findRefereeUpgradeByCompetition(competitionId: string, decision: Upgradable): Observable<ResponseWithData<RefereeUpgrade[]>> {
+        return this.query(this.getCollectionRef()
+            .where('competitionId', '==', competitionId)
+            .where('decision', '==', decision)
+            , 'default');
     }
 }

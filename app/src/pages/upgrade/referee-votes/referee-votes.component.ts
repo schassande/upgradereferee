@@ -89,7 +89,7 @@ export class RefereeVotesComponent implements OnInit {
   }
   onRecomputeUpgrade() {
     this.computing = true;
-    this.refereeUpgradeService.computeRefereeUpgrade(this.refereeId, this.refereeUpgrade.upagrdeStatusDate).subscribe(
+    this.refereeUpgradeService.computeRefereeUpgrade(this.refereeId, this.refereeUpgrade.decisionDate).subscribe(
       ru => {
         console.log('onRecomputeUpgrade()', ru);
         const idx = this.refereeUpgrades.findIndex(ru2 => ru2.id === ru.id);
