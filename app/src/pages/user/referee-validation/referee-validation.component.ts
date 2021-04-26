@@ -28,9 +28,8 @@ export class RefereeValidationComponent implements OnInit {
   }
 
   private updateUserList(): Observable<User[]> {
-    return this.userService.findPendingValidations(this.role,
-      this.connectedUserService.getCurrentUser().country).pipe(
-
+    const country = this.connectedUserService.isAdmin() ? null : this.connectedUserService.getCurrentUser().country;
+    return this.userService.findPendingValidations(this.role, country).pipe(
       map((rusers) => {
       this.users = rusers.data;
       return this.users;

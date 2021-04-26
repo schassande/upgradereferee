@@ -160,6 +160,7 @@ export class UserEditPage implements OnInit {
       accountId: null,
       accountStatus: 'VALIDATION_REQUIRED',
       applications: [],
+      demandingApplications: [],
       region: 'Europe',
       version: 0,
       creationDate : new Date(),

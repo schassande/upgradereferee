@@ -128,7 +128,7 @@
                 </ion-item>
                 <div *ngIf="refereeRole && !refereeRoleInit" class="warningMsg">
                     <img src="assets/imgs/warning-icon.jpg" />
-                    <div>Before you can have a full access to this web application as referee, your NDR musr validated your candidacy.</div>
+                    <div>Before you can have a full access to this web application as referee, your NDR must validated your candidacy.</div>
                 </div>
             </div>
         </ion-item-group>
@@ -152,7 +152,7 @@
                 </div>
             </div>
         </ion-item-group>
-        <ion-item *ngIf="ndrRole && !ndrRoleInit" style="margin-top: 20px;">
+        <ion-item *ngIf="user.dataStatus === 'NEW'" style="margin-top: 20px;">
             <span> I accept the ERC manage my data and I accept the general conditions of the European upgrade system.</span>
             <ion-checkbox slot="start" [(ngModel)]="acceptCondition"></ion-checkbox>
         </ion-item>
