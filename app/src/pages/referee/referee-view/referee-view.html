@@ -50,6 +50,8 @@
             <ul>
                 <li *ngFor="let ar of referee.applications"> {{ar.name}} - {{ar.role}}</li>
             </ul>
+            <br>Account status: {{referee.accountStatus}}
+            <br>Firebase Id: {{referee.accountId}}
         </div>
     </div>
 </ion-content>

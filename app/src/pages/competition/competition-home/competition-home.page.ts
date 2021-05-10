@@ -24,7 +24,7 @@ export class CompetitionHomePage implements OnInit {
   loading = false;
   owner: string;
   canEdit = false;
-  coach: User;
+  user: User;
 
 
   constructor(
@@ -41,7 +41,7 @@ export class CompetitionHomePage implements OnInit {
   ) { }
 
   ngOnInit() {
-    this.coach = this.connectedUserService.getCurrentUser();
+    this.user = this.connectedUserService.getCurrentUser();
     this.helpService.setHelp('competition-list');
     this.loadCompetition().subscribe(() => {
       this.changeDetectorRef.detectChanges();
@@ -58,9 +58,6 @@ export class CompetitionHomePage implements OnInit {
         this.competition = rcompetition.data;
         if (!this.competition) {
           // the competition has not been found => back to list of competition
-          this.navController.navigateRoot('/competition/list');
-        } else  if (!this.competitionService.authorized(this.competition, this.connectedUserService.getCurrentUser().id)) {
-          // the coach is not allowed to access to this competition
           this.navController.navigateRoot('/competition/list');
         }
         return this.competition;

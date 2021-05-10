@@ -60,12 +60,14 @@ export class RefereeViewPage implements OnInit {
     this.navController.navigateRoot( ['/referee/list']);
   }
   canVote() {
-    return this.isRefereeCoach() && this.userService.canVote(this.referee, this.connectedUserService.getCurrentUser());
+    return this.referee.accountStatus === 'ACTIVE' && this.isRefereeCoach()
+      && this.userService.canVote(this.referee, this.connectedUserService.getCurrentUser());
   }
   canViewUpgrade() {
-    return this.connectedUserService.getCurrentUser().id === this.referee.id
-      || this.canVote()
-      || this.userService.isNdrOf(this.referee, this.connectedUserService.getCurrentUser());
+    return this.referee.accountStatus === 'ACTIVE'
+      && (this.connectedUserService.getCurrentUser().id === this.referee.id
+        || this.canVote()
+        || this.userService.isNdrOf(this.referee, this.connectedUserService.getCurrentUser()));
   }
 
   private setRefereeId(id: string) {

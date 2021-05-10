@@ -50,7 +50,7 @@ const routes: Routes = [
 
   { path: 'referee/list', component: RefereeListPage, canActivate: [AuthGuard] },
   { path: 'referee/view/:id', component: RefereeViewPage, canActivate: [AuthGuard] },
-  { path: 'referee/votes/:id', component: RefereeVotesComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
+  { path: 'referee/votes/:id', component: RefereeVotesComponent, canActivate: [AuthGuard] },
   // MODAL { path: 'referee/select', component: RefereeSelectPage, canActivate: [AuthGuard] },
 
   { path: 'referee-coach/list', component: RefereeCoachListComponent, canActivate: [AuthGuard] },

@@ -2,8 +2,9 @@ import { HelpService } from './../../../app/service/HelpService';
 import { Component, OnInit } from '@angular/core';
 import { ModalController, NavController } from '@ionic/angular';
 import { ResponseWithData } from '../../../app/service/response';
-import { Referee, User } from '../../../app/model/user';
-import { UserService } from 'src/app/service/UserService';
+import { CONSTANTES, Referee, RefereeLevel, User } from '../../../app/model/user';
+import { UserSearchCriteria, UserService } from 'src/app/service/UserService';
+import { DataRegion } from 'src/app/model/common';
 
 /**
  * Generated class for the RefereeListPage page.
@@ -18,10 +19,16 @@ import { UserService } from 'src/app/service/UserService';
 })
 export class RefereeListPage implements OnInit {
 
+  region: DataRegion = 'Europe';
+  country: string = null;
+  refereeLevel: RefereeLevel = null;
+  constantes = CONSTANTES;
   referees: User[];
   error: any;
   searchInput: string;
   sortBy: string;
+  applicationUser = true;
+  loading = false;
 
   constructor(
     private helpService: HelpService,
@@ -36,10 +43,20 @@ export class RefereeListPage implements OnInit {
     this.searchReferee();
   }
 
-  private searchReferee() {
-    this.userService.searchReferees(this.searchInput).subscribe((response: ResponseWithData<User[]>) => {
+  public searchReferee() {
+    const criteria: UserSearchCriteria = {
+      role : 'REFEREE',
+      region: this.region,
+      country : this.country,
+      text : this.searchInput,
+      refereeLevel : this.refereeLevel,
+      accountStatus: this.applicationUser ? 'ACTIVE' : null
+    };
+    this.loading = true;
+    this.userService.searchUsers(criteria).subscribe((response: ResponseWithData<User[]>) => {
       this.referees = this.sortReferees(response.data);
       this.error = response.error;
+      this.loading = false;
     });
   }
   private sortReferees(referees: User[]): User[] {

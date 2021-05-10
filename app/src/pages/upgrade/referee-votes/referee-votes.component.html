@@ -22,7 +22,7 @@
             <div>{{referee.referee.refereeCategory}}</div>
         </ion-card-content>
     </ion-card>
-    <ion-select [(ngModel)]="refereeUpgradeId" style="text-align: center;" interface="action-sheet" (ionChange)="onRefereeUpgradeChange()">
+    <ion-select [(ngModel)]="refereeUpgradeId" style="text-align: center;" interface="action-sheet" (ionChange)="onRefereeUpgradeChange()" *ngIf="!loading && refereeUpgrades.length > 0">
         <ion-select-option *ngFor="let ru of refereeUpgrades" value="{{ru.id}}">{{ dateService.date2string(ru.decisionDate) }}</ion-select-option>
     </ion-select>
     <ion-card *ngIf="!loading && refereeUpgrade">
@@ -124,9 +124,13 @@
             <div *ngIf="upgradeCriteria.c3YesRequired > 0">{{upgradeCriteria.c3YesRequired}} Yes vote(s) are required.</div>
         </ion-card-content>
     </ion-card>
-    <div style="text-align: center;">
+    <div style="text-align: center; margin-top: 20px;" *ngIf="!loading && refereeUpgrades.length === 0">
+        No upgrade information available.
+    </div>
+    <div style="text-align: center;" *ngIf="refereeUpgrade">
         <ion-button [disabled]="computing" (click)="onRecomputeUpgrade()" shape="round">
             <ion-icon name="refresh-sharp"></ion-icon>&nbsp;Re Compute
+            <ion-spinner *ngIf="computing" style="margin-left: 10px;"></ion-spinner>
         </ion-button>
     </div>
 </ion-content>

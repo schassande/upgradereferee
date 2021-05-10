@@ -6,6 +6,7 @@ import { NavController, AlertController, LoadingController } from '@ionic/angula
 import { CompetitionService } from './../../../app/service/CompetitionService';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DateService } from 'src/app/service/DateService';
+import { User } from 'src/app/model/user';
 
 /**
  * Generated class for the CompetitionListPage page.
@@ -25,6 +26,7 @@ export class CompetitionListPage implements OnInit {
   searchInput: string;
   loading = false;
   canCreate = false;
+  currentUser: User;
 
   constructor(
     private alertCtrl: AlertController,
@@ -40,6 +42,7 @@ export class CompetitionListPage implements OnInit {
 
   ngOnInit() {
     this.helpService.setHelp('competition-list');
+    this.currentUser = this.connectedUserService.getCurrentUser();
     this.canCreate = this.connectedUserService.isRefereeCoach() || this.connectedUserService.isAdmin();
     setTimeout(() => {
       this.doRefresh(null);
@@ -59,8 +62,7 @@ export class CompetitionListPage implements OnInit {
     // console.log('searchCompetition(' + this.searchInput + ')');
     this.competitionService.searchCompetitions(this.searchInput, forceServer ? 'server' : 'default')
       .subscribe((response: ResponseWithData<Competition[]>) => {
-        this.competitions = this.competitionService.sortCompetitions(
-          this.competitionService.filterCompetitionsByCoach(response.data, this.connectedUserService.getCurrentUser().id), true);
+        this.competitions = this.competitionService.sortCompetitions(response.data, true);
         this.loading = false;
         if (event) {
           event.target.complete();

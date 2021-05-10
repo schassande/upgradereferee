@@ -33,11 +33,12 @@
         <ion-item *ngFor="let competition of competitions">
             <ion-label style="border: none;" class="listItemButton" (click)="competitionSelected(competition)">{{competition.name}}
                 <br>{{dateService.date2string(competition.date)}}, {{competition.country}}</ion-label>
-            <ion-icon slot="end" name="trash" (click)="deleteCompetition(competition)"></ion-icon>
+            <ion-icon slot="end" name="trash" (click)="deleteCompetition(competition)" *ngIf="competition.ownerId === currentUser.id"></ion-icon>
         </ion-item>
     </ion-list>
     <p *ngIf="!competitions || competitions.length == 0" style="margin: 70px 10px 0 10px; text-align: center; font-style: italic;">
-        Use this section to declare competitions. For each competition, you declare the list of referees and the list of referee coaches.
+        <span *ngIf="canCreate">Use this section to declare competitions. For each competition, you declare the list of referees and the list of referee coaches.</span>
+        <span *ngIf="!canCreate">No competition has been found.</span>
     </p>
     <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="canCreate">
         <ion-row>

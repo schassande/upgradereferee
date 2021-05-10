@@ -10,7 +10,8 @@ import { ResponseWithData, Response } from './response';
 import { Observable, of, from, Subject } from 'rxjs';
 import { ConnectedUserService } from './ConnectedUserService';
 import { Injectable } from '@angular/core';
-import { User, CONSTANTES, AuthProvider, CurrentApplicationName, AppRole, RefereeLevel, RefereeCoachLevel, ApplicationRole } from './../model/user';
+import { User, CONSTANTES, AuthProvider, CurrentApplicationName, AppRole, RefereeLevel,
+    RefereeCoachLevel, ApplicationRole, AccountStatus } from './../model/user';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { mergeMap, map, catchError } from 'rxjs/operators';
 import * as firebase from 'firebase/app';
@@ -483,6 +484,10 @@ export class UserService  extends RemotePersistentDataService<User> {
             console.log('filter by refereeCoachLevel ' + criteria.refereeCoachLevel);
             q = q.where('refereeCoach.refereeCoachLevel', '==', criteria.refereeCoachLevel);
         }
+        if (this.toolService.isValidString(criteria.accountStatus)) {
+            console.log('filter by accountStatus ' + criteria.accountStatus);
+            q = q.where('accountStatus', '==', criteria.accountStatus);
+        }
         return super.filter(this.query(q, 'default'), this.getFilterByText(criteria.text));
     }
 
@@ -604,4 +609,5 @@ export interface UserSearchCriteria {
     country?: string;
     refereeLevel?: RefereeLevel;
     refereeCoachLevel?: RefereeCoachLevel;
+    accountStatus?: AccountStatus;
 }

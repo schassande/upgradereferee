@@ -7,7 +7,6 @@ import { ResponseWithData } from '../../app/service/response';
 
 import { DataRegion, SharedWith } from './../../app/model/common';
 import { AppRole, CONSTANTES, RefereeCoachLevel, RefereeLevel, User } from './../../app/model/user';
-import { Observable } from 'rxjs';
 import { ToolService } from 'src/app/service/ToolService';
 
 @Component({
