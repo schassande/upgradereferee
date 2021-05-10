@@ -8,5 +8,5 @@ export const environment = {
     storageBucket: 'refcoach-676e3.appspot.com',
     messagingSenderId: '252857255317'
   },
-  version: '0.1.7-2021-04-25T06:55:59.755Z'
+  version: '0.1.8-2021-05-10T11:24:08.463Z'
 };
