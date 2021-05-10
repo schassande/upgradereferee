@@ -263,7 +263,7 @@ export class UserService  extends RemotePersistentDataService<User> {
                 if (ruser.data) { // Login with success
                     console.log('UserService.loginWithEmailNPassword(' + email + '): login with success');
                     if (savePassword) {
-                        console.log('UserService.askPasswordToLogin(' + email + '): store password.');
+                        console.log('UserService.loginWithEmailNPassword(' + email + '): store password.');
                         // The user is ok to store password in settings on local device
                         this.appSettingsService.setLastUser(email, password);
                     }
