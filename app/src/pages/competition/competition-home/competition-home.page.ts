@@ -127,7 +127,9 @@ export class CompetitionHomePage implements OnInit {
     );
   }
   isUpgradableReferee(referee: User) {
-    return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
+    return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0
+      && referee.accountStatus === 'ACTIVE'
+      && referee.referee.nextRefereeLevel;
   }
   onDelete() {
     this.deleteCompetition(this.competition);

@@ -24,7 +24,7 @@
                 <ion-select-option *ngFor="let c of competitions" value="{{c.id}}">{{c.name}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="competition && (day || (showDaySelector && competition.days.length > 0))">
+        <ion-item *ngIf="competition">
             <ion-label>Day: </ion-label>
             <ion-input readonly="true" type="text" *ngIf="!showDaySelector">{{dateService.date2string(day)}}</ion-input>
             <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" *ngIf="showDaySelector" (ionChange)="onDayChange($event)">
@@ -63,7 +63,7 @@
                 <div style="margin: 0 auto;">Cat: {{referee.referee.refereeCategory}}</div>
             </div>
         </div>
-        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote">
+        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote && referee">
             <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px; font-weight: bold; width: 100%;">
                 Vote for upgrade to {{referee.referee.nextRefereeLevel}} <span *ngIf="vote.closed">&nbsp;(closed)</span>
             </ion-item-divider>

@@ -120,7 +120,8 @@ export class CompetitionVotesComponent implements OnInit {
         console.error(err);
         this.navBack();
         return of(err);
-      })
+      }),
+      map(() => this.loading = false)
     ).subscribe();
   }
 
@@ -412,11 +413,11 @@ export class CompetitionVotesComponent implements OnInit {
   closePanelVote(pvote: CompetitionDayPanelVote) {
     this.alertCtrl.create({
       message: 'Do you really want to close the panel vote for the referee ' + pvote.referee.refereeShortName
-        + '?<br>Decision will be published to the referee.',
+        + '?<br>Referee coach decisions and the panel decision cannot be changed later.',
       buttons: [
         { text: 'Cancel', role: 'cancel'},
         {
-          text: 'Close vote',
+          text: 'Close votes',
           handler: () => {
             this.performClosePanelVote(pvote);
           }

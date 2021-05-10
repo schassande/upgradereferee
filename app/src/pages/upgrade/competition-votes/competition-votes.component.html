@@ -13,13 +13,17 @@
 </ion-header>
 <ion-content (swipe)="onSwipe($event)">
     <ion-list>
-        <ion-item *ngIf="competition && competition.days.length > 0">
+        <ion-item *ngIf="competition">
+            <ion-label style="font-weight: bold;">Competition: </ion-label>
+            <ion-label>{{competition.name}}</ion-label>
+        </ion-item>
+        <ion-item *ngIf="competition && competition.days.length > 0  && filteredReferees && filteredReferees.length > 0">
             <ion-label style="font-weight: bold;">Day: </ion-label>
             <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" (ionChange)="onDayChange($event)">
                 <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="upgradeLevels">
+        <ion-item *ngIf="upgradeLevels && filteredReferees && filteredReferees.length > 0">
             <ion-label style="font-weight: bold;">Upgrade to: </ion-label>
             <ion-select [(ngModel)]="upgradeLevel" style="text-align: center;" interface="action-sheet" (ionChange)="onUpgradeLevelChange()">
                 <ion-select-option value="">All</ion-select-option>
@@ -27,8 +31,8 @@
             </ion-select>
         </ion-item>
         <ion-item *ngIf="filteredReferees">
-            <ion-label style="font-weight: bold;">Referee: </ion-label>
-            <div *ngIf="filteredReferees.length === 0" style="font-weight: bold;">No referee to upgrade in this competition</div>
+            <ion-label *ngIf="filteredReferees.length> 0" style="font-weight: bold;">Referee: </ion-label>
+            <div *ngIf="filteredReferees.length === 0" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
             <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees.length> 0" (ionChange)="onRefereeChange()">
                 <ion-select-option value="-">All</ion-select-option>
                 <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
@@ -52,13 +56,13 @@
         </div>
         <div *ngIf="referee && vote">
             <div style="text-align: center;">
-                <div style="padding: 10px; font-weight: bold; font-size: 1.4em;">Votes for upgrade</div>
+                <div style="padding: 10px; font-weight: bold; font-size: 1.4em;">Panel votes for upgrade <span *ngIf="vote.closed">&nbsp;(Closed)</span></div>
                 <img style="height: 70px;" src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" />
             </div>
             <div style="clear: both;"></div>
             <ion-grid class="coachVotes">
                 <ion-row class="header-row">
-                    <ion-col size="4" style="text-align: right;">Coach</ion-col>
+                    <ion-col size="4" style="text-align: right;">Referee Coach</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteNo">Not Yet</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteAbstein">Abstein</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteYes">Yes</ion-col>
@@ -109,8 +113,13 @@
                 <ion-label>Private<br>comment</ion-label>
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
-            <div>
-                <ion-button style="float: right;" (click)="savePanelVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">Save</ion-button>
+            <div *ngIf="!vote.closed">
+                <ion-button style="float: right; margin-right: 10px;" (click)="savePanelVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">
+                    <ion-icon name="save-outline"></ion-icon>&nbsp;Save
+                </ion-button>
+                <ion-button style="float: right; margin-right: 10px;" (click)="closePanelVote(vote)" shape="round" size="normal" [disabled]="dirty || vote.dataStatus === 'NEW'">
+                    <ion-icon name="lock-closed-outline"></ion-icon>&nbsp;Close
+                </ion-button>
             </div>
         </div>
 

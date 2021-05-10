@@ -33,7 +33,7 @@ export class VotingComponent implements OnInit {
   /** The day of the competition */
   day: Date;
   /** Show or not the combox to select a competition */
-  showDaySelector = true;
+  showDaySelector = false;
 
   /** Id of the selected referee. This id can be given in parameter of the page. Can be null */
   refereeId: string;
@@ -44,7 +44,7 @@ export class VotingComponent implements OnInit {
   /** List of the referees filtered by upgrade level if the page is not dedicated to a referee. Can be null */
   filteredReferees: User[];
   /** Show or not the combox to select a referee */
-  showRefereeSelector = true;
+  showRefereeSelector = false;
 
   /** The */
   vote: CompetitionDayRefereeCoachVote;
@@ -77,24 +77,34 @@ export class VotingComponent implements OnInit {
       mergeMap(() => this.loadReferees()),
       map(() => this.computeFilteredReferees()),
       mergeMap(() => {
-        if (this.competition) {
-          // check the day field
-          if (this.day) {
-            this.day = this.competition.days.find(day => this.dateService.compareDate(day, this.day) === 0);
-          }
-          if (!this.day) {
-            this.day = this.competition.days.find(day => this.dateService.compareDate(day, new Date()) === 0);
-          }
-          if (!this.day) {
-            this.day = this.competition.days[0];
-          }
-        } else {
+        if (!this.competition) {
           this.findInitialCompetition();
         }
+        this.computeDay();
         return this.loadVote();
       }),
       map(() => this.print())
     ).subscribe();
+  }
+
+  private computeDay() {
+    if (!this.competition) {
+      this.day = null;
+    }
+    if (!this.competition.days || this.competition.days.length === 0) {
+      this.competition.days = [this.competition.date];
+    }
+    // check the day field
+    if (this.day) {
+      this.day = this.competition.days.find(day => this.dateService.compareDate(day, this.day) === 0);
+    }
+    if (!this.day) {
+      this.day = this.competition.days.find(day => this.dateService.compareDate(day, new Date()) === 0);
+    }
+    if (!this.day) {
+      this.day = this.competition.days[0];
+    }
+    this.showDaySelector = this.competition.days.length > 1;
   }
 
   private print() {
@@ -189,11 +199,10 @@ export class VotingComponent implements OnInit {
       if (this.competition) {
         return this.loadRefereesFromCompetition();
       } else {
-        console.log('loadReferees(): Load referees');
-        // load upgradable referee
-        return this.userService.searchUsers({}).pipe(
-          map((rusers: ResponseWithData<User[]>) => this.referees = this.filterReferees(rusers.data))
-        );
+        this.referees = [];
+        this.filteredReferees = [];
+        this.referee = null;
+        this.refereeId = null;
       }
     }
     return of('');
@@ -202,6 +211,7 @@ export class VotingComponent implements OnInit {
   private loadRefereesFromCompetition(): Observable<any> {
     console.log('loadReferees(): Load referees from the competition');
     this.referees = [];
+    this.referee = null;
     // load the referee list from the competitions
     return forkJoin(this.competition.referees.map(
       referee => this.userService.get(referee.refereeId).pipe(
@@ -313,7 +323,7 @@ export class VotingComponent implements OnInit {
 
   private loadVote(): Observable<any> {
     this.loading = true;
-    console.log(`Looking for Vote(competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.refereeId})`);
+    console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.refereeId})`);
     if (this.competitionId && this.refereeId && this.day) {
       return this.competitionDayRefereeCoachVoteService.getVote(
         this.competitionId, this.day, this.coach.id, this.refereeId).pipe(
@@ -367,9 +377,12 @@ export class VotingComponent implements OnInit {
     if (!this.competition || this.competitionId !== this.competition.id) {
       this.competition = this.competitions.find(c => c.id === this.competitionId);
       console.log('onCompetitionChange() => ' + this.competitionId);
+      this.showDaySelector = this.competition.days.length > 1;
       this.loadRefereesFromCompetition().pipe(
         map(() => this.computeFilteredReferees()),
         map(() => this.adjustRefereeId()),
+        map(() => this.computeDay()),
+        mergeMap(() => this.loadVote())
       ).subscribe();
     }
   }
@@ -379,14 +392,12 @@ export class VotingComponent implements OnInit {
     if (dateStr !== this.dateService.date2string(this.day)) {
       console.log('onDayChange()', dateStr);
       this.day = this.dateService.string2date(dateStr, null);
-      // TODO
       this.loadVote().subscribe();
     }
   }
 
   onUpgradeLevelChange() {
     console.log('onUpgradeLevelChange()');
-    // TODO
     this.loadVote().subscribe();
   }
 

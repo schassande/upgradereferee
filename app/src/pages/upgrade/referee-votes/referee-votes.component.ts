@@ -31,6 +31,11 @@ export class RefereeVotesComponent implements OnInit {
   refereeUpgrade: RefereeUpgrade;
   refereeUpgrades: RefereeUpgrade[];
   upgradeCriteria: UpgradeCriteria;
+  c3YesPanelVotes = 0;
+  c4YesPanelVotes = 0;
+  c5YesPanelVotes = 0;
+  nbDay = 0;
+  nbYesDay = 0;
 
   loading = false;
   computing = false;
@@ -84,6 +89,13 @@ export class RefereeVotesComponent implements OnInit {
 
   onRefereeUpgradeChange() {
     this.refereeUpgrade = this.refereeUpgrades.find(ru2 => ru2.id === this.refereeUpgradeId);
+    this.c3YesPanelVotes = this.refereeUpgrade.c3PanelVotes.filter(v => v.vote === 'Yes').length;
+    this.c4YesPanelVotes = this.refereeUpgrade.c4PanelVotes.filter(v => v.vote === 'Yes').length;
+    this.c5YesPanelVotes = this.refereeUpgrade.c5PanelVotes.filter(v => v.vote === 'Yes').length;
+    this.nbDay = this.refereeUpgrade.c3PanelVotes.length
+               + this.refereeUpgrade.c4PanelVotes.length
+               + this.refereeUpgrade.c5PanelVotes.length;
+    this.nbYesDay = this.c3YesPanelVotes + this.c4YesPanelVotes + this.c5YesPanelVotes;
     this.upgradeCriteriaService.get(this.refereeUpgrade.upgradeCriteriaId)
       .subscribe(ruc => this.upgradeCriteria = ruc.data);
   }
