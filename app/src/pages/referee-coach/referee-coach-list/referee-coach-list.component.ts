@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
-import { User } from 'src/app/model/user';
+import { DataRegion } from 'src/app/model/common';
+import { CONSTANTES, RefereeCoachLevel, User } from 'src/app/model/user';
 import { HelpService } from 'src/app/service/HelpService';
 import { ResponseWithData } from 'src/app/service/response';
-import { UserService } from 'src/app/service/UserService';
+import { UserSearchCriteria, UserService } from 'src/app/service/UserService';
 
 @Component({
   selector: 'app-referee-coach-list',
@@ -11,10 +12,16 @@ import { UserService } from 'src/app/service/UserService';
 })
 export class RefereeCoachListComponent implements OnInit {
 
+  region: DataRegion = 'Europe';
+  country: string = null;
+  refereeCoachLevel: RefereeCoachLevel = null;
+  constantes = CONSTANTES;
+
   coaches: User[];
   error: any;
   searchInput: string;
   sortBy = 'level';
+  loading = false;
 
   constructor(
     private helpService: HelpService,
@@ -28,10 +35,20 @@ export class RefereeCoachListComponent implements OnInit {
     this.searchRefereeCoaches();
   }
 
-  private searchRefereeCoaches() {
-    this.userService.searchRefereeCoaches(this.searchInput).subscribe((response: ResponseWithData<User[]>) => {
+  public searchRefereeCoaches() {
+    const criteria: UserSearchCriteria = {
+      role : 'REFEREE_COACH',
+      region: this.region,
+      country : this.country,
+      text : this.searchInput,
+      refereeCoachLevel : this.refereeCoachLevel,
+      accountStatus: 'ACTIVE'
+    };
+    this.loading = true;
+    this.userService.searchUsers(criteria).subscribe((response: ResponseWithData<User[]>) => {
       this.coaches = this.sortCoaches(response.data);
       this.error = response.error;
+      this.loading = false;
     });
   }
   private sortCoaches(coaches: User[]): User[] {

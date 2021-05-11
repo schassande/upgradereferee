@@ -20,7 +20,7 @@
 
         <div style="margin: 20px 0 0 10px; text-align: center;">
             <span style="font-size: 1.4em;">{{coach.firstName}} {{coach.lastName}}</span>
-            <br>from {{coachCountry}}
+            <br>from {{coachCountry}} / {{coach.region}}
         </div>
         <ul>
             <li>Contact: {{coach.mobilePhones}} {{coach.email}}</li>
@@ -30,7 +30,15 @@
         </ul>
         <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/coach_{{coach.refereeCoach.refereeCoachLevel}}.png" height="100" /></div>
         <div style="text-align: right;" *ngIf="canEdit()">
-            <ion-button shape="round" (click)="editCoach()" style="margin-bottom: 20px;">Edit</ion-button>
+            <ion-button shape="round" routerLink="/user/edit/{{coach.id}}" style="margin-bottom: 20px;">Edit</ion-button>
+        </div>
+        <div *ngIf="isAdmin()" style="margin: 10px;">
+            Application roles:
+            <ul>
+                <li *ngFor="let ar of coach.applications"> {{ar.name}} - {{ar.role}}</li>
+            </ul>
+            <br>Account status: {{coach.accountStatus}}
+            <br>Firebase Id: {{coach.accountId}}
         </div>
     </div>
 </ion-content>

@@ -54,7 +54,9 @@ export class RefereeCoachViewComponent implements OnInit {
   navBack() {
     this.navController.navigateRoot( ['/referee-coach/list']);
   }
-
+  isAdmin(): boolean {
+    return this.connectedUserService.isAdmin();
+  }
   private setCoachId(id: string) {
     this.userService.get(id).subscribe((response: ResponseWithData<User>) => {
       if (response.error) {
@@ -87,13 +89,6 @@ export class RefereeCoachViewComponent implements OnInit {
 
   public canEdit(): boolean {
     return this.connectedUserService.getCurrentUser().id === this.coach.id || this.connectedUserService.isAdmin();
-  }
-
-  public async editCoach() {
-    const modal = await this.modalCtrl.create(
-      { component: UserSelectorComponent, componentProps : {role: 'REFEREE_COACH'}});
-    modal.onDidDismiss().then( (data) => this.setCoachId(this.coach.id));
-    return await modal.present();
   }
 
   onSwipe(event) {

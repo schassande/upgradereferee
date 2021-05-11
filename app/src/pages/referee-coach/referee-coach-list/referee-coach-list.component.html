@@ -12,22 +12,56 @@
     </ion-toolbar>
 </ion-header>
 <ion-content (swipe)="onSwipe($event)">
-    <ion-searchbar [(ngModel)]="searchInput" [showCancelButton]="false" (ionChange)="onSearchBarInput()"></ion-searchbar>
-    <ion-item>
-        <ion-label>Sort by</ion-label>
-        <ion-select [(ngModel)]="sortBy" (ionChange)="onSearchBarInput()">
-            <ion-select-option value="shortName">Short name</ion-select-option>
-            <ion-select-option value="level">Level</ion-select-option>
-        </ion-select>
-    </ion-item>
     <ion-list>
-        <ion-item *ngFor="let coach of coaches">
-            <ion-avatar slot="start" *ngIf="!coach.photo || !coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="assets/imgs/badge/coach_{{coach.refereeCoach.refereeCoachLevel}}.png" /></ion-avatar>
-            <ion-avatar slot="start" *ngIf="coach.photo && coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="{{coach.photo.url}}"></ion-avatar>
-            <ion-label (click)="refereeCoachSelected($event, coach)" class="listItemButton">
-                {{coach.shortName}}<br> {{coach.firstName}} {{coach.lastName}}<br> {{coach.refereeCoach.refereeCoachLevel}}
-            </ion-label>
+        <ion-item>
+            <ion-label>Region</ion-label>
+            <ion-select [(ngModel)]="region" interface="action-sheet" (ionChange)="searchRefereeCoaches()">
+                <ion-select-option value="Europe">Europe</ion-select-option>
+                <ion-select-option value="Australia">Australia</ion-select-option>
+                <ion-select-option value="New Zealand">New Zealand</ion-select-option>
+                <ion-select-option value="Others">Others</ion-select-option>
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option value="Test">Test</ion-select-option>
+            </ion-select>
         </ion-item>
+        <ion-item>
+            <ion-label>Country</ion-label>
+            <ion-select [(ngModel)]="country" interface="action-sheet" (ionChange)="searchRefereeCoaches()">
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option *ngFor="let c of constantes.countries" value="{{c[0]}}">{{c[1]}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item>
+            <ion-label>Referee Coach Level</ion-label>
+            <ion-select [(ngModel)]="refereeCoachLevel" interface="action-sheet" (ionChange)="searchRefereeCoaches()">
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option *ngFor="let level of constantes.refereeCoachLevels" value="{{level}}">{{level}}</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-searchbar [(ngModel)]="searchInput" (ionChange)="searchRefereeCoaches()" animated="true" debounce="500" inputmode="text" type="text" showCancelButton="never" showClearButton="never" placeholder="Referee coach name" searchIcon="search-outline"></ion-searchbar>
+        <ion-item>
+            <ion-label>Sort by</ion-label>
+            <ion-select [(ngModel)]="sortBy" (ionChange)="onSearchBarInput()">
+                <ion-select-option value="shortName">Short name</ion-select-option>
+                <ion-select-option value="level">Level</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-item-group style="width: 100%;">
+            <ion-item-divider color="light">Search result<span *ngIf="!loading && coaches">&nbsp;({{coaches.length}})</span></ion-item-divider>
+            <div *ngIf="loading" style="margin: 20px; text-align: center;">
+                <ion-spinner></ion-spinner>
+            </div>
+            <div *ngIf="!loading && (!coaches || coaches.length === 0)" style="margin: 10px; text-align: center;">Empty result.</div>
+            <div *ngIf="!loading && coaches">
+                <ion-item *ngFor="let coach of coaches">
+                    <ion-avatar slot="start" *ngIf="!coach.photo || !coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="assets/imgs/badge/coach_{{coach.refereeCoach.refereeCoachLevel}}.png" /></ion-avatar>
+                    <ion-avatar slot="start" *ngIf="coach.photo && coach.photo.url" (click)="refereeCoachSelected($event, coach)"><img src="{{coach.photo.url}}"></ion-avatar>
+                    <ion-label (click)="refereeCoachSelected($event, coach)" class="listItemButton">
+                        {{coach.shortName}}<br> {{coach.firstName}} {{coach.lastName}}<br> {{coach.refereeCoach.refereeCoachLevel}}
+                    </ion-label>
+                </ion-item>
+            </div>
+        </ion-item-group>
     </ion-list>
     <div style="margin-bottom: 60px;"></div>
 </ion-content>
