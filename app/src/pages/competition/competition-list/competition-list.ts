@@ -7,6 +7,7 @@ import { CompetitionService } from './../../../app/service/CompetitionService';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DateService } from 'src/app/service/DateService';
 import { User } from 'src/app/model/user';
+import { DataRegion } from 'src/app/model/common';
 
 /**
  * Generated class for the CompetitionListPage page.
@@ -27,6 +28,7 @@ export class CompetitionListPage implements OnInit {
   loading = false;
   canCreate = false;
   currentUser: User;
+  region: DataRegion = 'Europe';
 
   constructor(
     private alertCtrl: AlertController,
@@ -60,7 +62,7 @@ export class CompetitionListPage implements OnInit {
   private searchCompetition(forceServer: boolean = false, event: any = null) {
     this.loading = true;
     // console.log('searchCompetition(' + this.searchInput + ')');
-    this.competitionService.searchCompetitions(this.searchInput, forceServer ? 'server' : 'default')
+    this.competitionService.searchCompetitions(this.searchInput, forceServer ? 'server' : 'default', this.region)
       .subscribe((response: ResponseWithData<Competition[]>) => {
         this.competitions = this.competitionService.sortCompetitions(response.data, true);
         this.loading = false;

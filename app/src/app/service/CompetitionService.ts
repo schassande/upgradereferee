@@ -12,6 +12,7 @@ import { map, mergeMap } from 'rxjs/operators';
 import { CompetitionDayPanelVoteService } from './CompetitionDayPanelVoteService';
 import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
 import { ToolService } from './ToolService';
+import { DataRegion } from '../model/common';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -57,10 +58,10 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     }
 
     public searchCompetitions(text: string,
-                              options: 'default' | 'server' | 'cache' = 'default'): Observable<ResponseWithData<Competition[]>> {
+                              options: 'default' | 'server' | 'cache' = 'default',
+                              region: DataRegion = null): Observable<ResponseWithData<Competition[]>> {
         let q: Query<Competition> = this.getCollectionRef();
-        if (!this.connectedUserService.isAdmin()) {
-            const region = this.connectedUserService.getCurrentUser().region;
+        if (region) {
             console.log('searchCompetitions(' + text + ',' + options + ') filter by the region of the user: \'' + region + '\'');
             q = q.where('region', '==', region);
         }

@@ -20,21 +20,29 @@
 
 
 <ion-content (swipe)="onSwipe($event)">
-    <div slot="fixed" style="width: 100%;     background: white;">
-        <ion-searchbar [(ngModel)]="searchInput" [showCancelButton]="false" (ionChange)="onSearchBarInput()"></ion-searchbar>
+    <ion-list>
+        <ion-item>
+            <ion-label>Region</ion-label>
+            <ion-select [(ngModel)]="region" interface="action-sheet" (ionChange)="onSearchBarInput()">
+                <ion-select-option value="Europe">Europe</ion-select-option>
+                <ion-select-option value="Australia">Australia</ion-select-option>
+                <ion-select-option value="New Zealand">New Zealand</ion-select-option>
+                <ion-select-option value="Others">Others</ion-select-option>
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option value="Test">Test</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <ion-searchbar [(ngModel)]="searchInput" (ionChange)="onSearchBarInput()" animated="true" debounce="500" inputmode="text" type="text" showCancelButton="never" showClearButton="never" placeholder="Competition name" searchIcon="search-outline"></ion-searchbar>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
             <ion-spinner></ion-spinner>
         </div>
-    </div>
-    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)" closeDuration="700ms">
-        <ion-refresher-content></ion-refresher-content>
-    </ion-refresher>
-    <ion-list style="margin: 60px 0 60px 0;" *ngIf="competitions && competitions.length">
-        <ion-item *ngFor="let competition of competitions">
-            <ion-label style="border: none;" class="listItemButton" (click)="competitionSelected(competition)">{{competition.name}}
-                <br>{{dateService.date2string(competition.date)}}, {{competition.country}}</ion-label>
-            <ion-icon slot="end" name="trash" (click)="deleteCompetition(competition)" *ngIf="competition.ownerId === currentUser.id"></ion-icon>
-        </ion-item>
+        <div style="margin: 20px 0;" *ngIf="competitions && competitions.length">
+            <ion-item *ngFor="let competition of competitions">
+                <ion-label style="border: none;" class="listItemButton" (click)="competitionSelected(competition)">{{competition.name}}
+                    <br>{{dateService.date2string(competition.date)}}, {{competition.country}}</ion-label>
+                <ion-icon slot="end" name="trash" (click)="deleteCompetition(competition)" *ngIf="competition.ownerId === currentUser.id"></ion-icon>
+            </ion-item>
+        </div>
     </ion-list>
     <p *ngIf="!competitions || competitions.length == 0" style="margin: 70px 10px 0 10px; text-align: center; font-style: italic;">
         <span *ngIf="canCreate">Use this section to declare competitions. For each competition, you declare the list of referees and the list of referee coaches.</span>
