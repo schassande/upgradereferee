@@ -28,12 +28,13 @@ import { VotingComponent } from 'src/pages/upgrade/voting/voting.component';
 import { RefereeCoachGuard } from './RefereeCoachGuard';
 import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
+import { NdrGuard } from './NdrGuard';
 
 const routes: Routes = [
-  { path: 'admin', component: AdminHomeComponent, canActivate: [AdminGuard] },
-  { path: 'admin/user-manager', component: UserManagerComponent, canActivate: [AdminGuard] },
-  { path: 'admin/coach-validation', component: CoachValidationComponent, canActivate: [AdminGuard] },
-  { path: 'admin/ndr-validation', component: NdrValidationComponent, canActivate: [AdminGuard] },
+  { path: 'admin', component: AdminHomeComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/user-manager', component: UserManagerComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/coach-validation', component: CoachValidationComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/ndr-validation', component: NdrValidationComponent, canActivate: [AuthGuard, AdminGuard] },
 
   { path: 'competition/list', component: CompetitionListPage, canActivate: [AuthGuard] },
   { path: 'competition/:id/home', component: CompetitionHomePage, canActivate: [AuthGuard] },
@@ -62,7 +63,7 @@ const routes: Routes = [
   { path: 'user/create', component: UserEditPage},
   { path: 'user/waiting-validation', component: UserWaitingValidationPage},
   { path: 'user/edit/:id', component: UserEditPage, canActivate: [AuthGuard] },
-  { path: 'user/referee-validation', component: RefereeValidationComponent, canActivate: [AdminGuard] },
+  { path: 'user/referee-validation', component: RefereeValidationComponent, canActivate: [AuthGuard, NdrGuard] },
 
   { path: '', redirectTo: '/home', pathMatch: 'full' },
 

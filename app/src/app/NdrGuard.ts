@@ -20,14 +20,14 @@ export class NdrGuard implements CanActivate {
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | Observable<boolean> {
     const connected: boolean = this.connectedUserService.getCurrentUser() != null;
     if (connected) {
-      return this.connectedUserService.isNDR();
+      return this.connectedUserService.isNDR() || this.connectedUserService.isAdmin();
     }
     return this.userService.autoLogin().pipe(
       map(() => {
         if (!this.connectedUserService.isConnected()) {
           this.navController.navigateRoot(['/user/login']);
         }
-        return this.connectedUserService.isNDR();
+        return this.connectedUserService.isNDR() || this.connectedUserService.isAdmin();
       })
     );
   }

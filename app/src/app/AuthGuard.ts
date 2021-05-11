@@ -50,7 +50,7 @@ export class AuthGuard implements CanActivate {
       rights += '\n\t-Application: ' + ar.name + ', role: ' + ar.role);
     this.connectedUserService.getCurrentUser().demandingApplications.forEach(ar =>
       rights += '\n\t-Application: ' + ar.name + ', demanding role: ' + ar.role);
-    console.log('the user has not access to the application. He has to ask right:'+ rights);
+    console.log('the user has not access to the application. He has to ask right:' + rights);
       // this.navController.navigateRoot(['/user/edit/' + this.connectedUserService.getCurrentUser().id ]);
   }
 }
