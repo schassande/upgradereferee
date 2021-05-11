@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NavController } from '@ionic/angular';
 import { map } from 'rxjs/operators';
 import { UpgradeCriteria } from 'src/app/model/upgrade';
 import { DateService } from 'src/app/service/DateService';
@@ -24,6 +25,7 @@ export class UpgradeCriteriaComponent implements OnInit {
 
   constructor(
     public dateService: DateService,
+    private navController: NavController,
     private upgradeCriteriaService: UpgradeCriteriaService
   ) { }
 
@@ -42,6 +44,9 @@ export class UpgradeCriteriaComponent implements OnInit {
     ).subscribe();
   }
 
-  onSwipe() {
+  onSwipe($event) {
+    if ($event.direction === 4) {
+      this.navController.navigateRoot(['/home']);
+    }
   }
 }

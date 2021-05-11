@@ -490,5 +490,8 @@ export class VotingComponent implements OnInit {
   }
 
   onSwipe($event) {
+    if ($event.direction === 4) {
+      this.navBack();
+    }
   }
 }

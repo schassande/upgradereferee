@@ -126,5 +126,9 @@ export class RefereeVotesComponent implements OnInit {
     this.navController.navigateRoot(['/home']);
   }
 
-  onSwipe($event) {}
+  onSwipe($event) {
+    if ($event.direction === 4) {
+      this.navBack();
+    }
+  }
 }
