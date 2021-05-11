@@ -516,21 +516,24 @@ export class UserService  extends RemotePersistentDataService<User> {
     }
 
     public validateRole(user: User, role: AppRole): Observable<ResponseWithData<User>> {
+        if (user.accountStatus === 'DELETED' || user.accountStatus === 'LOCKED' || user.accountStatus === 'NO_ACCOUNT') {
+            return of( { data: user, error: { error: 'Account status is not compatible', errorCode: 1 }});
+        }
+
         // validate the use of the application
         user.demandingApplications = user.demandingApplications
           .filter(ar => !(ar.name === CurrentApplicationName && ar.role === role));
         user.applications.push({name: CurrentApplicationName, role});
 
         // Active the account if required
-        const accountValidation: boolean = user.accountStatus === 'VALIDATION_REQUIRED';
-        if (accountValidation) {
+        if (user.accountStatus === 'VALIDATION_REQUIRED') {
           user.accountStatus = 'ACTIVE';
         }
 
-        // Save the user account and send emails if required
+        // Save the user account and send the email to notify of the new role
         return this.save(user).pipe(
           mergeMap((ruser) => {
-            if (accountValidation && ruser.data && ruser.data.accountStatus === 'ACTIVE') {
+            if (ruser.data && ruser.data.accountStatus === 'ACTIVE') {
               return this.sendAccountValidated(user.id).pipe(map(() => ruser));
             }
             return of(ruser);
