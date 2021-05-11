@@ -131,4 +131,7 @@ export class RefereeVotesComponent implements OnInit {
       this.navBack();
     }
   }
+  isAdmin() {
+    return this.connectedUserService.isAdmin();
+  }
 }

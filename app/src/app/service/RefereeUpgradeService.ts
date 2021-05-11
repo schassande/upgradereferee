@@ -36,6 +36,9 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
         item.c3PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
         item.c4PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
         item.c5PanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
+        if (item.allPanelVotes) {
+            item.allPanelVotes.forEach(v => v.day = this.adjustDate(v.day, this.dateService));
+        }
     }
 
     public getLastRefereeUpgrade(refereeId: string): Observable<ResponseWithData<RefereeUpgrade>> {

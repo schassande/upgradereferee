@@ -152,4 +152,26 @@
             <ion-spinner *ngIf="computing" style="margin-left: 10px;"></ion-spinner>
         </ion-button>
     </div>
+    <ion-card *ngIf="!loading && refereeUpgrade && refereeUpgrade.allPanelVotes && isAdmin()" style="margin: 40px 0;">
+        <ion-card-header>
+            <ion-title style="font-weight: bold;">All votes over the period</ion-title>
+            <ion-card-subtitle style="font-style: italic; text-align: center;">Only Administrator can see this section</ion-card-subtitle>
+        </ion-card-header>
+        <ion-list>
+            <ion-item *ngFor="let pv of refereeUpgrade.allPanelVotes">
+                <div slot="start" style="width: 85px;">{{dateService.date2string(pv.day)}}</div>
+                <ion-label>
+                    {{pv.competitionRef.competitionName}}
+                    <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
+                    <div style="font-size: 0.8em;">Yes Coach: <span *ngFor="let c of pv.yesCoaches">{{c.coachShortName}}&nbsp;</span></div>
+                    <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: {{pv.commentForReferee}}</div>
+                    <div style="font-size: 0.8em;" *ngIf="pv.commentForCoach && pv.commentForCoach.length > 2">Comment: {{pv.commentForCoach}}</div>
+                </ion-label>
+                <div slot="end">
+                    <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
+                    <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                </div>
+            </ion-item>
+        </ion-list>
+    </ion-card>
 </ion-content>
