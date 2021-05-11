@@ -297,6 +297,7 @@ export class VotingComponent implements OnInit {
       });
       console.log('Try to find a competition happening recently', this.competition, this.dateService.date2string(this.day));
     }
+    this.onCompetitionChange();
   }
 
   private filterReferees(referees: User[]): User[] {
@@ -323,6 +324,7 @@ export class VotingComponent implements OnInit {
 
   private loadVote(): Observable<any> {
     this.loading = true;
+    this.vote = null;
     console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.refereeId})`);
     if (this.competitionId && this.refereeId && this.day) {
       return this.competitionDayRefereeCoachVoteService.getVote(
@@ -405,6 +407,28 @@ export class VotingComponent implements OnInit {
     console.log('onRefereeChange()');
     this.referee = this.referees.find(r => r.id === this.refereeId);
     this.loadVote().subscribe();
+  }
+  previousDay() {
+    let idx = this.competition.days.indexOf(this.day);
+    console.log('previousDay(): ' + idx);
+    if (idx >= 0) {
+      if (idx === 0) {
+        idx = this.competition.days.length - 1;
+      } else {
+        idx = idx - 1;
+      }
+      this.day = this.competition.days[idx];
+      this.loadVote().subscribe();
+    }
+  }
+  nextDay() {
+    let idx = this.competition.days.indexOf(this.day);
+    console.log('nextDay(): ' + idx);
+    if (idx >= 0) {
+      idx = (idx + 1 ) % this.competition.days.length;
+      this.day = this.competition.days[idx];
+      this.loadVote().subscribe();
+    }
   }
   previousReferee() {
     let idx = this.referees.findIndex(r => r.id === this.refereeId);

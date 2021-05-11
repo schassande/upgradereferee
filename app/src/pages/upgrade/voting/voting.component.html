@@ -24,13 +24,16 @@
                 <ion-select-option *ngFor="let c of competitions" value="{{c.id}}">{{c.name}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="competition">
-            <ion-label>Day: </ion-label>
+        <div *ngIf="competition">
             <ion-input readonly="true" type="text" *ngIf="!showDaySelector">{{dateService.date2string(day)}}</ion-input>
-            <ion-select value="{{dateService.date2string(day)}}" style="text-align: center;" interface="action-sheet" *ngIf="showDaySelector" (ionChange)="onDayChange($event)">
-                <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+            <div *ngIf="showDaySelector" style="margin: 5px; text-align: center;">
+                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousDay()"></ion-icon>
+                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextDay()"></ion-icon>
+                <ion-select value="{{dateService.date2string(day)}}" style="width: 60%; text-align: center; margin: auto;" interface="action-sheet" (ionChange)="onDayChange($event)">
+                    <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
+                </ion-select>
+            </div>
+        </div>
         <ion-item *ngIf="upgradeLevels">
             <ion-label>Upgrade to: </ion-label>
             <ion-select [(ngModel)]="upgradeLevel" style="text-align: center;" interface="action-sheet" (ionChange)="onUpgradeLevelChange()">
@@ -38,15 +41,17 @@
                 <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="competition">
+        <div *ngIf="competition">
             <div *ngIf="referee && !referees && !showRefereeSelector">{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
-            <div *ngIf="filteredReferees && filteredReferees.length === 0 && showRefereeSelector" style="font-weight: bold;">No referee to upgrade in this competition</div>
-            <ion-icon slot="start" name="chevron-back" size="large" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (click)="previousReferee()"></ion-icon>
-            <ion-icon slot="start" name="chevron-forward" size="large" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (click)="nextReferee()"></ion-icon>
-            <ion-select [(ngModel)]="refereeId" interface="action-sheet" *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" (ionChange)="onRefereeChange()" style="width: 100%; text-align: center;">
-                <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+            <div *ngIf="filteredReferees && filteredReferees.length === 0 && showRefereeSelector" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
+            <div *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" style="margin: 5px; text-align: center;">
+                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()"></ion-icon>
+                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()"></ion-icon>
+                <ion-select [(ngModel)]="refereeId" interface="action-sheet" (ionChange)="onRefereeChange()" style="width: 60%; text-align: center; margin: auto;">
+                    <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
+                </ion-select>
+            </div>
+        </div>
         <div *ngIf="referee" style="border-bottom: 1px solid lightgrey;">
             <div style="text-align: center; width:30%; display: inline-block;">
                 <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>
