@@ -11,10 +11,9 @@ import { Observable, of, from, Subject } from 'rxjs';
 import { ConnectedUserService } from './ConnectedUserService';
 import { Injectable } from '@angular/core';
 import { User, CONSTANTES, AuthProvider, CurrentApplicationName, AppRole, RefereeLevel,
-    RefereeCoachLevel, ApplicationRole, AccountStatus } from './../model/user';
+    RefereeCoachLevel, AccountStatus } from './../model/user';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { mergeMap, map, catchError } from 'rxjs/operators';
-import * as firebase from 'firebase/app';
 import { PersistentDataFilter } from './PersistentDataFonctions';
 import { DataRegion } from '../model/common';
 import { ToolService } from './ToolService';
