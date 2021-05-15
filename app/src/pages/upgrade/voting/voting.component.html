@@ -24,13 +24,12 @@
                 <ion-select-option *ngFor="let c of competitions" value="{{c.id}}">{{c.name}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="!isCoachOfCompetition && competition" style="margin: 5px; text-align: center; font-style: italic;">You are not a referee coach of this competition, <br>therefore you cannot vote. <br>Please select another competition.</div>
-        <div *ngIf="competition && isCoachOfCompetition">
+        <div *ngIf="competition && !isCoachOfCompetition" style="margin: 5px; text-align: center; font-style: italic;">You are not a referee coach of this competition, <br>therefore you cannot vote. <br>Please select another competition.</div>
+        <div *ngIf="competition && filteredReferees && !(filteredReferees.length === 0 && referee === null)">
             <ion-item *ngIf="!showDaySelector">
                 <ion-label>Date: </ion-label>
                 <div>{{dateService.date2string(day)}}</div>
             </ion-item>
-
             <div *ngIf="showDaySelector" style="margin: 5px; text-align: center;">
                 <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousDay()" *ngIf="competition.days.length > 1"></ion-icon>
                 <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextDay()" *ngIf="competition.days.length > 1"></ion-icon>
@@ -39,19 +38,19 @@
                 </ion-select>
             </div>
         </div>
-        <ion-item *ngIf="upgradeLevels && upgradeLevels.length > 1 && isCoachOfCompetition">
+        <ion-item *ngIf="upgradeLevels && upgradeLevels.length > 1 && isCoachOfCompetition && !inputRefereeId">
             <ion-label>Upgrade to: </ion-label>
             <ion-select [(ngModel)]="upgradeLevel" style="text-align: center;" interface="action-sheet" (ionChange)="onUpgradeLevelChange()">
                 <ion-select-option value="">All</ion-select-option>
                 <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="referee && !referees && !showRefereeSelector">
+        <ion-item *ngIf="referee && filteredReferees && filteredReferees.length === 1 && !vote">
             <ion-label>Referee: </ion-label>
             <div>{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
         </ion-item>
-        <div *ngIf="competition && isCoachOfCompetition && filteredReferees">
-            <div *ngIf="filteredReferees.length === 0 && referee === null" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
+        <div *ngIf="competition && filteredReferees">
+            <div *ngIf="filteredReferees.length === 0 && referee === null" style="font-weight: bold; text-align: center; width: 100%; margin: 20px 0;">No referee you can vote at this competition.</div>
             <div *ngIf="filteredReferees.length > 1 && showRefereeSelector" style="margin: 5px; text-align: center;">
                 <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
                 <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
