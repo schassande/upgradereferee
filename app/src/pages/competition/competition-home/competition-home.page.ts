@@ -25,7 +25,8 @@ export class CompetitionHomePage implements OnInit {
   owner: string;
   canEdit = false;
   user: User;
-
+  isAdmin = false;
+  isRefereeCoachOfCompetition = false;
 
   constructor(
     private alertCtrl: AlertController,
@@ -42,6 +43,7 @@ export class CompetitionHomePage implements OnInit {
 
   ngOnInit() {
     this.user = this.connectedUserService.getCurrentUser();
+    this.isAdmin = this.connectedUserService.isAdmin();
     this.helpService.setHelp('competition-list');
     this.loadCompetition().subscribe(() => {
       this.changeDetectorRef.detectChanges();
@@ -60,6 +62,8 @@ export class CompetitionHomePage implements OnInit {
           // the competition has not been found => back to list of competition
           this.navController.navigateRoot('/competition/list');
         }
+        this.isRefereeCoachOfCompetition = this.connectedUserService.isRefereeCoach()
+          && this.competition.refereeCoaches.filter(rc => rc.coachId === this.connectedUserService.getCurrentUser().id).length > 0;
         return this.competition;
       }),
       mergeMap(() => this.loadReferees()),
@@ -154,11 +158,5 @@ export class CompetitionHomePage implements OnInit {
         }
       ]
     }).then( (alert) => alert.present() );
-  }
-  isRefereeCoach() {
-    return this.connectedUserService.isRefereeCoach();
-  }
-  isAdmin() {
-    return this.connectedUserService.isAdmin();
   }
 }

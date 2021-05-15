@@ -59,6 +59,7 @@ import { ToolService } from 'src/app/service/ToolService';
         <ion-item-divider color="light">Search result</ion-item-divider>
         <div *ngIf="loading" style="margin: 20px; text-align: center;"><ion-spinner></ion-spinner></div>
         <div *ngIf="!loading">
+          <div *ngIf="!users || users.length === 0" style="margin: 20px; text-align: center;">Empty result</div>
           <ion-item *ngFor="let user of users">
               <ion-icon slot="start" *ngIf="user.photo && !user.photo.url" name="person"></ion-icon>
               <ion-avatar slot="start" *ngIf="user.photo && user.photo.url"><img src="{{user.photo.url}}"></ion-avatar>
@@ -118,10 +119,6 @@ export class UserSelectorComponent implements OnInit {
         this.users = this.userService.sortUsers(response.data);
         this.error = response.error;
         this.loading = false;
-        if (this.users == null || this.users.length === 0) {
-            console.log('Empty referee database.');
-            this.modalCtrl.dismiss({ user: null});
-        }
       });
     }
 

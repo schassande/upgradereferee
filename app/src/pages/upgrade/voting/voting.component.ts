@@ -52,6 +52,7 @@ export class VotingComponent implements OnInit {
   loading = true;
 
   coach: User;
+  isCoachOfCompetition = false;
   upgradeLevel: RefereeLevel;
   upgradeLevels: RefereeLevel[];
 
@@ -71,17 +72,20 @@ export class VotingComponent implements OnInit {
     this.activatedRoute.queryParamMap.pipe(
       map((params: Params) => this.loadParams(params)),
       mergeMap(() => this.loadCompetitionFromId()),
-      mergeMap(() => this.loadCompetitions()),
-      map(() => this.adjustRefereeId()),
       mergeMap(() => this.loadRefereeFromId()),
-      mergeMap(() => this.loadReferees()),
-      map(() => this.computeFilteredReferees()),
+      mergeMap(() => this.loadCompetitions()),
       mergeMap(() => {
         if (!this.competition) {
           this.findInitialCompetition();
         }
-        this.computeDay();
-        return this.loadVote();
+        this.isCoachOfCompetition = this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
+        if (this.competition) {
+          this.competitionId = this.competition.id;
+          return this.onCompetitionChange();
+        } else {
+          this.computeDay();
+          return this.loadVote();
+        }
       }),
       map(() => this.print())
     ).subscribe();
@@ -109,21 +113,21 @@ export class VotingComponent implements OnInit {
   }
 
   private print() {
-    // console.log('this.showCompetitionSelector=' + this.showCompetitionSelector);
-    // console.log('this.showDaySelector=' + this.showDaySelector);
-    // console.log('this.showRefereeSelector=' + this.showRefereeSelector);
-    // console.log('this.competitionId=' + this.competitionId);
-    // console.log('this.competition=', this.competition);
-    // console.log('this.competitions=', this.competitions);
-    // console.log('this.day=', this.dateService.date2string(this.day));
-    // console.log('this.refereeId=' + this.refereeId);
-    // console.log('this.referee=', this.referee);
-    // console.log('this.referees=', this.referees);
-    // console.log('this.filteredReferees=', this.filteredReferees);
-    // console.log('this.vote=', this.vote);
-    // console.log('this.upgradeLevel=', this.upgradeLevel);
-    // console.log('this.upgradeLevels=', this.upgradeLevels);
-    // console.log('this.loading=', this.loading);
+    console.log('this.showCompetitionSelector=' + this.showCompetitionSelector
+      + '\nthis.showDaySelector=' + this.showDaySelector
+      + '\nthis.showRefereeSelector=' + this.showRefereeSelector
+      + '\nthis.competitionId=' + this.competitionId
+      + '\nthis.competition=', this.competition
+      + '\nthis.competitions=', this.competitions
+      + '\nthis.day=', this.dateService.date2string(this.day)
+      + '\nthis.refereeId=' + this.refereeId
+      + '\nthis.referee=', this.referee
+      + '\nthis.referees=', this.referees
+      + '\nthis.filteredReferees=', this.filteredReferees
+      + '\nthis.vote=', this.vote
+      + '\nthis.upgradeLevel=', this.upgradeLevel
+      + '\nthis.upgradeLevels=', this.upgradeLevels
+      + '\nthis.loading=', this.loading);
   }
 
   private loadParams(params: Params) {
@@ -168,9 +172,21 @@ export class VotingComponent implements OnInit {
       this.showCompetitionSelector = true;
       return this.competitionService.all().pipe(
         map((rcompetitions: ResponseWithData<Competition[]>) =>
-          this.competitions = this.competitionService.sortCompetitions(rcompetitions.data, true))
+          this.competitions = this.competitionService.sortCompetitions(this.filterCompetitions(rcompetitions.data), true))
       );
     }
+  }
+
+  private filterCompetitions(cs: Competition[]): Competition[] {
+    return !cs ? [] : cs.filter(c => {
+      if (this.refereeId && c.referees.filter(r => r.refereeId === this.refereeId).length === 0) {
+        return false;
+      }
+      if (!this.connectedUserService.isAdmin() && c.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length === 0) {
+        return false;
+      }
+      return true;
+    });
   }
 
   private adjustRefereeId(): any {
@@ -180,8 +196,11 @@ export class VotingComponent implements OnInit {
       // the competition exists but the referee does not belong the competition!
       // => ignore the referee id given by the url
       this.refereeId = null;
+      this.referee = null;
     }
-    return '';
+    if (this.referee && this.competition.referees.filter((referee) => referee.refereeId === this.referee.id).length === 0) {
+      this.referee = null;
+    }
   }
 
   private loadRefereeFromId(): Observable<any> {
@@ -199,7 +218,7 @@ export class VotingComponent implements OnInit {
     this.referees = [];
     if (this.referee) {
       this.showRefereeSelector = false;
-      console.log('loadReferees(): Have a referee', this.referee);
+      console.log('loadReferees(): Have a referee', this.referee, this.refereeId);
     } else {
       this.showRefereeSelector = true;
       if (this.competition) {
@@ -215,7 +234,7 @@ export class VotingComponent implements OnInit {
   }
 
   private loadRefereesFromCompetition(): Observable<any> {
-    // console.log('loadRefereesFromCompetition(): Load referees from the competition');
+    console.log('loadRefereesFromCompetition(): Load referees from the competition');
     this.referees = [];
     this.referee = null;
     const refs: User[] = [];
@@ -224,10 +243,7 @@ export class VotingComponent implements OnInit {
       referee => this.userService.get(referee.refereeId).pipe(
         map((ruser) => {
           if (this.checkReferee(ruser.data)) {
-            console.log('Referee ' + ruser.data.shortName + ' is upgradable');
             refs.push(ruser.data);
-          } else {
-            console.log('Referee ' + ruser.data.shortName + ' is NOT upgradable');
           }
         }))
     );
@@ -236,13 +252,13 @@ export class VotingComponent implements OnInit {
         this.referees = refs;
         if (!this.refereeId && !this.referee) {
           this.referee = this.referees[0];
-          this.refereeId = this.referee.id;
+          // this.refereeId = this.referee.id;
         }
       })
     );
   }
 
-  computeUpgradeLevels() {
+  private computeUpgradeLevels() {
     // console.log('BEGIN computeUpgradeLevels()');
     this.upgradeLevels = [];
     if (this.referees) {
@@ -290,9 +306,12 @@ export class VotingComponent implements OnInit {
         console.log('Use the default competition of the user', this.competition, this.dateService.date2string(this.day));
       }
     }
-    if (!this.competition) {
+    if (!this.competition && this.day) {
       // else find the competition having a day as today
       this.competition = this.competitions.find(c => {
+        if (c.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length === 0) {
+          return false;
+        }
         this.day = c.days.find(day => this.dateService.compareDate(day, this.day));
         return this.day !== null && this.day !== undefined;
       });
@@ -300,20 +319,23 @@ export class VotingComponent implements OnInit {
     }
     if (!this.competition) {
       // else take the last competition before today
-      this.competitions.filter(c => {
-        this.day = this.competition.days.find(day => this.dateService.isToday(day));
-        if (!this.day) {
-          const now = new Date().getTime();
-          const days = c.days.filter(day => day.getTime() < now);
-          if (days && days.length > 0) {
-            this.day = days[days.length - 1];
+      this.day = null;
+      this.competitions.forEach(c => {
+        if (c.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length === 0) {
+          return;
+        }
+        const now = new Date();
+        const cDays = c.days.filter(d => this.dateService.compareDate(d, now) < 0);
+        const cDay: Date = cDays.length > 0 ? cDays[cDays.length - 1] : null;
+        if (cDay) {
+          if (!this.day || this.dateService.compareDate(cDay, this.day) > 0) {
+            this.day = cDay;
+            this.competition = c;
           }
         }
-        return this.day !== null && this.day !== undefined;
       });
       console.log('Try to find a competition happening recently', this.competition, this.dateService.date2string(this.day));
     }
-    this.onCompetitionChange();
   }
 
   private checkReferee(referee: User): boolean {
@@ -322,15 +344,19 @@ export class VotingComponent implements OnInit {
     }
     if (referee.accountStatus !== 'ACTIVE') {
       // the account of the referee is not validated
+      console.log('Referee ' + referee.shortName + ' is NOT upgradable (account status)');
       return false;
     }
     if (referee.applications.findIndex((ar) => ar.role === 'REFEREE' && ar.name === CurrentApplicationName) < 0) {
       // the referee is not a registered account as Referee
+      console.log('Referee ' + referee.shortName + ' is NOT upgradable (not a referee of the application)');
       return false;
     }
     if (!this.userService.canVote(referee, this.coach) && !this.connectedUserService.isAdmin()) {
+      console.log('Referee ' + referee.shortName + ' is NOT upgradable (cannot vote)');
       return false;
     }
+    console.log('Referee ' + referee.shortName + ' is upgradable');
     return true;
   }
 
@@ -339,9 +365,9 @@ export class VotingComponent implements OnInit {
     this.loading = true;
     this.vote = null;
     console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.refereeId})`);
-    if (this.competitionId && this.refereeId && this.day) {
+    if (this.competitionId && this.referee && this.day) {
       return this.competitionDayRefereeCoachVoteService.getVote(
-        this.competitionId, this.day, this.coach.id, this.refereeId).pipe(
+        this.competitionId, this.day, this.coach.id, this.referee.id).pipe(
           map(rvote => this.vote = rvote.data),
           map(() => {
             if (this.vote) {
@@ -387,18 +413,34 @@ export class VotingComponent implements OnInit {
     };
     this.dirty = true;
   }
+  onCompetitionChangeByUser() {
+    this.onCompetitionChange(true).subscribe();
+  }
 
-  onCompetitionChange() {
-    // console.log('BEGIN onCompetitionChange()');
-    this.competition = this.competitions.find(c => c.id === this.competitionId);
-    // console.log('onCompetitionChange() => ' + this.competitionId);
-    this.showDaySelector = this.competition.days.length > 1;
-    this.loadRefereesFromCompetition().pipe(
-      map(() => this.computeFilteredReferees()),
-      map(() => this.adjustRefereeId()),
-      map(() => this.computeDay()),
-      mergeMap(() => this.loadVote())
-    ).subscribe();
+  private onCompetitionChange(fromUser = false): Observable<any> {
+    if (this.competition && this.competitionId && this.competition.id === this.competitionId && fromUser) {
+      return of('');
+    }
+    console.log('BEGIN onCompetitionChange(' + fromUser + ')');
+    if (this.competitions) {
+      this.competition = this.competitions.find(c => c.id === this.competitionId);
+    }
+    if (this.competition) {
+      // console.log('onCompetitionChange() => ' + this.competitionId);
+      this.showDaySelector = this.competition.days.length > 1;
+      this.isCoachOfCompetition = this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
+      return this.loadReferees().pipe(
+        map(() => {
+          this.computeUpgradeLevels();
+          this.computeFilteredReferees();
+          this.adjustRefereeId();
+          this.computeDay();
+        }),
+        mergeMap(() => this.loadVote())
+      );
+    } else {
+      return of('');
+    }
   }
 
   onDayChange($event: any) {

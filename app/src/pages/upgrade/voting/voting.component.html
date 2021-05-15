@@ -5,7 +5,7 @@
                 <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title>Upgrade Voting</ion-title>
+        <ion-title>Coach vote</ion-title>
         <ion-buttons slot="end">
             <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
         </ion-buttons>
@@ -20,39 +20,44 @@
         <ion-item>
             <ion-label>Competition: </ion-label>
             <div *ngIf="!showCompetitionSelector">{{competition.name}}</div>
-            <ion-select [(ngModel)]="competitionId" style="text-align: center;" interface="action-sheet" *ngIf="showCompetitionSelector" (ionChange)="onCompetitionChange()">
+            <ion-select [(ngModel)]="competitionId" style="text-align: center;" interface="action-sheet" *ngIf="showCompetitionSelector" (ionChange)="onCompetitionChangeByUser()">
                 <ion-select-option *ngFor="let c of competitions" value="{{c.id}}">{{c.name}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="competition">
-            <ion-input readonly="true" type="text" *ngIf="!showDaySelector">{{dateService.date2string(day)}}</ion-input>
+        <div *ngIf="!isCoachOfCompetition" style="margin: 5px; text-align: center; font-style: italic;">You are not a referee coach of this competition, <br>therefore you cannot vote. <br>Please select another competition.</div>
+        <div *ngIf="competition && isCoachOfCompetition">
+            <ion-item *ngIf="!showDaySelector">
+                <ion-label>Date: </ion-label>
+                <div>{{dateService.date2string(day)}}</div>
+            </ion-item>
+
             <div *ngIf="showDaySelector" style="margin: 5px; text-align: center;">
-                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousDay()"></ion-icon>
-                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextDay()"></ion-icon>
+                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousDay()" *ngIf="competition.days.length > 1"></ion-icon>
+                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextDay()" *ngIf="competition.days.length > 1"></ion-icon>
                 <ion-select value="{{dateService.date2string(day)}}" style="width: 60%; text-align: center; margin: auto;" interface="action-sheet" (ionChange)="onDayChange($event)">
                     <ion-select-option *ngFor="let d of competition.days; let idx = index" value="{{dateService.date2string(d)}}">Day {{idx+1}}: {{dateService.date2string(d)}}</ion-select-option>
                 </ion-select>
             </div>
         </div>
-        <ion-item *ngIf="upgradeLevels">
+        <ion-item *ngIf="upgradeLevels && upgradeLevels.length > 1 && isCoachOfCompetition">
             <ion-label>Upgrade to: </ion-label>
             <ion-select [(ngModel)]="upgradeLevel" style="text-align: center;" interface="action-sheet" (ionChange)="onUpgradeLevelChange()">
                 <ion-select-option value="">All</ion-select-option>
                 <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="competition">
+        <div *ngIf="competition && isCoachOfCompetition">
             <div *ngIf="referee && !referees && !showRefereeSelector">{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
-            <div *ngIf="filteredReferees && filteredReferees.length === 0 && showRefereeSelector" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
+            <div *ngIf="filteredReferees && filteredReferees.length === 0 && referee === null" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
             <div *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" style="margin: 5px; text-align: center;">
-                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()"></ion-icon>
-                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()"></ion-icon>
+                <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
+                <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
                 <ion-select [(ngModel)]="refereeId" interface="action-sheet" (ionChange)="onRefereeChange()" style="width: 60%; text-align: center; margin: auto;">
                     <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
                 </ion-select>
             </div>
         </div>
-        <div *ngIf="referee" style="border-bottom: 1px solid lightgrey;">
+        <div *ngIf="referee && isCoachOfCompetition" style="border-bottom: 1px solid lightgrey;">
             <div style="text-align: center; width:30%; display: inline-block;">
                 <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>
                 <img src="{{referee.photo.url}}" *ngIf="referee.photo && referee.photo.url" height="100">
@@ -68,10 +73,20 @@
                 <div style="margin: 0 auto;">Cat: {{referee.referee.refereeCategory}}</div>
             </div>
         </div>
-        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote && referee">
-            <ion-item-divider color="light" style="text-align: center; font-size: 1.2em; padding: 10px; font-weight: bold; width: 100%;">
-                Vote for upgrade to {{referee.referee.nextRefereeLevel}} <span *ngIf="vote.closed">&nbsp;(closed)</span>
+        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="vote && referee && isCoachOfCompetition">
+            <ion-item-divider color="light">
+                <div style="text-align: center; padding: 10px; width: 100%;">
+                    <div style="font-size: 1.3em; font-weight: bold;">
+                        Vote for upgrade to {{referee.referee.nextRefereeLevel}}
+                        <span *ngIf="vote.closed">&nbsp;(closed)</span>
+                    </div>
+                    <div *ngIf="dirty || vote.dataStatus === 'NEW'">(not saved)</div>
+                </div>
             </ion-item-divider>
+            <div *ngIf="!vote.closed">
+                <ion-button style="float: right; margin: 10px 20px 0 0;" (click)="saveVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">{{ vote.dataStatus === 'NEW' ? 'Create' : 'Save' }}</ion-button>
+            </div>
+            <div style="clear: both;"></div>
             <div style="text-align: center;">
                 <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
             </div>
@@ -107,9 +122,6 @@
                 <ion-label>Private<br>comment</ion-label>
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
-            <div *ngIf="!vote.closed">
-                <ion-button style="float: right;" (click)="saveVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">Save</ion-button>
-            </div>
         </ion-item-group>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
             <ion-spinner></ion-spinner>

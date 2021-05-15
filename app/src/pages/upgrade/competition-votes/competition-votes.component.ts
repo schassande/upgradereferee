@@ -48,7 +48,10 @@ export class CompetitionVotesComponent implements OnInit {
   referees: User[];
   /** List of the referees filtered by upgrade level if the page is not dedicated to a referee. Can be null */
   filteredReferees: User[];
-
+  isRefereeCoachOfCompetition = false;
+  isPanelDirector = false;
+  isAdmin = false;
+  canVote = false;
 
   ///////////////////////////////////////////
   // FIELD USED WHEN A REFEREE IS SELECTED //
@@ -104,6 +107,7 @@ export class CompetitionVotesComponent implements OnInit {
   ngOnInit() {
     this.loading = true;
     this.coach = this.connectedUserService.getCurrentUser();
+    this.isAdmin = this.connectedUserService.isAdmin();
     this.activatedRoute.paramMap.pipe(
       map((params: ParamMap) => {
         this.competitionId = params.get('id');
@@ -129,6 +133,9 @@ export class CompetitionVotesComponent implements OnInit {
     return this.competitionService.get(this.competitionId).pipe(
       map((rcompetition: ResponseWithData<Competition>) => {
         this.competition = rcompetition.data;
+        this.isRefereeCoachOfCompetition = this.competition
+          && this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
+        this.isPanelDirector = this.competition && this.competition.refereePanelDirectorId === this.coach.id;
         if (!this.competition) {
           return throwError('Unknown competition ' + this.competitionId);
         }
@@ -142,7 +149,7 @@ export class CompetitionVotesComponent implements OnInit {
     console.log('loadReferees(): Load referees from the competition');
     this.referees = [];
     // load the referee list from the competitions
-    return forkJoin(this.competition.referees.map(
+    const obs: Observable<any>[] = this.competition.referees.map(
       referee => this.userService.get(referee.refereeId).pipe(
         map((ruser) => {
           if (this.checkReferee(ruser.data)) {
@@ -152,8 +159,10 @@ export class CompetitionVotesComponent implements OnInit {
             console.log('Referee ' + ruser.data.shortName + ' is NOT upgradable');
           }
         }))
-      ));
+    );
+    return obs.length === 0 ? of('') : forkJoin(obs);
   }
+
   private computeUpgradeLevels() {
     this.upgradeLevels = [];
     if (this.referees) {
@@ -253,6 +262,7 @@ export class CompetitionVotesComponent implements OnInit {
             } else {
               this.createPanelVote();
             }
+            this.canVote = this.competition.refereePanelDirectorId === this.coach.id || this.isAdmin;
           }),
           map(() => { this.loading = false; this.dirty = false; })
         );

@@ -45,6 +45,7 @@ export class CompetitionListPage implements OnInit {
   ngOnInit() {
     this.helpService.setHelp('competition-list');
     this.currentUser = this.connectedUserService.getCurrentUser();
+    this.region = this.currentUser.region;
     this.canCreate = this.connectedUserService.isRefereeCoach() || this.connectedUserService.isAdmin();
     setTimeout(() => {
       this.doRefresh(null);
