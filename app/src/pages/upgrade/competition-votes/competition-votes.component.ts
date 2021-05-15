@@ -399,6 +399,42 @@ export class CompetitionVotesComponent implements OnInit {
     this.selectReferee();
     this.loadAllVotes();
   }
+  previousReferee() {
+    if (this.refereeId === '-') {
+      this.referee = this.filteredReferees[this.filteredReferees.length - 1];
+      this.refereeId = this.referee.id;
+      this.onRefereeChange();
+    } else {
+      let idx = this.filteredReferees.findIndex(r => r.id === this.refereeId);
+      if (idx >= 0) {
+        if (idx === 0) {
+          idx = this.filteredReferees.length - 1;
+        } else {
+          idx = idx - 1;
+        }
+        this.referee = this.filteredReferees[idx];
+        this.refereeId = this.referee.id;
+        this.onRefereeChange();
+      }
+    }
+  }
+  nextReferee() {
+    if (this.refereeId === '-') {
+      this.referee = this.filteredReferees[0];
+      this.refereeId = this.referee.id;
+      this.onRefereeChange();
+    } else {
+      let idx = this.filteredReferees.findIndex(r => r.id === this.refereeId);
+      // console.log('Current referee at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
+      if (idx >= 0) {
+        idx = (idx + 1 ) % this.filteredReferees.length;
+        this.referee = this.filteredReferees[idx];
+        this.refereeId = this.referee.id;
+        // console.log('New referee selected at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
+        this.onRefereeChange();
+      }
+    }
+  }
 
   onVoteChange() {
     console.log('onVoteChange(): ' +  this.dirty);

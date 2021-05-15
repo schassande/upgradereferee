@@ -31,14 +31,18 @@
                 <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item *ngIf="filteredReferees">
+        <div *ngIf="filteredReferees">
             <div *ngIf="filteredReferees.length === 0" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
-            <ion-label *ngIf="filteredReferees.length > 0" style="font-weight: bold;">Referee: </ion-label>
-            <ion-select *ngIf="filteredReferees.length > 0" [(ngModel)]="refereeId" interface="action-sheet" (ionChange)="onRefereeChange()">
-                <ion-select-option value="-">All</ion-select-option>
-                <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+            <div style="text-align: center;">
+                <ion-icon style="float: left; margin: 10px 0 5px 10px;" name="chevron-back" size="large" (click)="previousReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
+                <ion-icon style="float: right; margin: 10px 10px 5px 0;" name="chevron-forward" size="large" (click)="nextReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
+                <ion-select *ngIf="filteredReferees.length > 0" [(ngModel)]="refereeId" interface="action-sheet" (ionChange)="onRefereeChange()">
+                    <ion-select-option value="-">All</ion-select-option>
+                    <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
+                </ion-select>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
         <div *ngIf="referee" style="border-bottom: 1px solid lightgrey;">
             <div style="text-align: center; width:30%; display: inline-block;">
                 <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>
