@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavController } from '@ionic/angular';
 import { DataRegion } from 'src/app/model/common';
 import { CONSTANTES, RefereeCoachLevel, User } from 'src/app/model/user';
+import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 import { HelpService } from 'src/app/service/HelpService';
 import { ResponseWithData } from 'src/app/service/response';
 import { UserSearchCriteria, UserService } from 'src/app/service/UserService';
@@ -24,6 +25,7 @@ export class RefereeCoachListComponent implements OnInit {
   loading = false;
 
   constructor(
+    private connectedUserService: ConnectedUserService,
     private helpService: HelpService,
     private navController: NavController,
     public userService: UserService
@@ -32,6 +34,7 @@ export class RefereeCoachListComponent implements OnInit {
 
   ngOnInit() {
     this.helpService.setHelp('referee-coach-list');
+    this.region = this.connectedUserService.getCurrentUser().region;
     this.searchRefereeCoaches();
   }
 

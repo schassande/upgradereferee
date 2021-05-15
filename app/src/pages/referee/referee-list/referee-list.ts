@@ -5,6 +5,7 @@ import { ResponseWithData } from '../../../app/service/response';
 import { CONSTANTES, Referee, RefereeLevel, User } from '../../../app/model/user';
 import { UserSearchCriteria, UserService } from 'src/app/service/UserService';
 import { DataRegion } from 'src/app/model/common';
+import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 
 /**
  * Generated class for the RefereeListPage page.
@@ -31,6 +32,7 @@ export class RefereeListPage implements OnInit {
   loading = false;
 
   constructor(
+    private connectedUserService: ConnectedUserService,
     private helpService: HelpService,
     public modalController: ModalController,
     private navController: NavController,
@@ -40,6 +42,7 @@ export class RefereeListPage implements OnInit {
 
   ngOnInit() {
     this.helpService.setHelp('referee-list');
+    this.region = this.connectedUserService.getCurrentUser().region;
     this.searchReferee();
   }
 
