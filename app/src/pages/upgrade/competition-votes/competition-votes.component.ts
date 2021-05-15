@@ -212,7 +212,7 @@ export class CompetitionVotesComponent implements OnInit {
       // the referee is not a registered account as Referee
       return false;
     }
-    if (!this.userService.canVote(referee, this.coach) && !this.connectedUserService.isAdmin()) {
+    if (!this.userService.canVote(referee, this.coach) && !this.connectedUserService.isAdmin() && !this.isPanelDirector) {
       return false;
     }
     return true;
@@ -257,12 +257,12 @@ export class CompetitionVotesComponent implements OnInit {
       return this.competitionDayPanelVoteService.getVote(this.competitionId, this.day, this.refereeId).pipe(
           map(rvote => this.vote = rvote.data),
           map(() => {
+            this.canVote = this.competition.refereePanelDirectorId === this.coach.id || this.isAdmin;
             if (this.vote) {
               console.log(`Existing Vote: ${this.vote.id}`);
-            } else {
+            } else if (this.canVote) {
               this.createPanelVote();
             }
-            this.canVote = this.competition.refereePanelDirectorId === this.coach.id || this.isAdmin;
           }),
           map(() => { this.loading = false; this.dirty = false; })
         );
@@ -490,16 +490,16 @@ export class CompetitionVotesComponent implements OnInit {
         }
       }),
       map(() => this.computeHasOpen()), // in order to hide the close button
-      map(() => {
-        // Call a function to compute the referee upgrade on server side
-        this.refereeUpgradeService.computeRefereeUpgrade(pvote.referee.refereeId, pvote.day)
-          .subscribe(
-            data => console.log('computeRefereeUpgrade Ok', data),
-            err => console.log('computeRefereeUpgrade Error', err));
-      })
+      map(() => this.computeUpgrade(pvote))
     ).subscribe();
   }
-
+  computeUpgrade(pvote: CompetitionDayPanelVote) {
+    // Call a function to compute the referee upgrade on server side
+    this.refereeUpgradeService.computeRefereeUpgrade(pvote.referee.refereeId, pvote.day)
+      .subscribe(
+        data => console.log('computeRefereeUpgrade Ok', data),
+        err => console.log('computeRefereeUpgrade Error', err));
+  }
   private computeHasOpen() {
     this.hasOpenVote = this.panelVotes.filter(pv => !pv.closed).length > 0;
   }

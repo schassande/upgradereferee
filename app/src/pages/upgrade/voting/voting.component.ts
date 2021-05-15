@@ -40,9 +40,9 @@ export class VotingComponent implements OnInit {
   showDaySelector = false;
 
   /** Id of the selected referee. This id can be given in parameter of the page. Can be null */
-  selectedRefereeId: string;
+  selectedRefereeId: string = null;
   /** User object selected representing the referee. Can be null */
-  referee: User;
+  referee: User = null;
   /** List of the referees if the page is not dedicated to a referee. Can be null */
   referees: User[];
   /** List of the referees filtered by upgrade level if the page is not dedicated to a referee. Can be null */
@@ -213,7 +213,7 @@ export class VotingComponent implements OnInit {
   private loadReferees(): Observable<any> {
     // console.log('BEGIN loadReferees()');
     this.referees = [];
-    if (this.referee) {
+    if (this.inputRefereeId && this.referee) {
       this.showRefereeSelector = false;
       console.log('loadReferees(): Have a referee', this.referee, this.inputRefereeId);
     } else {
@@ -221,7 +221,6 @@ export class VotingComponent implements OnInit {
       if (this.competition) {
         console.log('loadRefereesFromCompetition(): Load referees from the competition');
         this.referees = [];
-        this.referee = null;
         const refs: User[] = [];
         // load the referee list from the competitions
         const obs: Observable<any>[] = this.competition.referees.map(
@@ -240,8 +239,6 @@ export class VotingComponent implements OnInit {
       } else {
         this.referees = [];
         this.filteredReferees = [];
-        this.referee = null;
-        this.selectedRefereeId = null;
       }
     }
     return of('');
@@ -291,7 +288,8 @@ export class VotingComponent implements OnInit {
       this.referee = null;
       this.selectedRefereeId = null;
     }
-    if (this.referee && this.filteredReferees.filter((r) => r.id === this.referee.id).length === 0) {
+    if ((this.referee && this.filteredReferees.filter((r) => r.id === this.referee.id).length === 0)
+        || this.filteredReferees.filter((r) => r.id === this.selectedRefereeId).length === 0) {
       // the current selected referee does not belong the filtered list of referees
       this.referee = null;
       this.selectedRefereeId = null;
@@ -300,6 +298,7 @@ export class VotingComponent implements OnInit {
       this.referee = this.filteredReferees[0];
       this.selectedRefereeId = this.referee.id;
     }
+    console.log('END adjustReferee() referee=', this.referee, 'this.selectedRefereeId=', this.selectedRefereeId);
   }
 
   private findInitialCompetition() {
