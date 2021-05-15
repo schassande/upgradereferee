@@ -44,6 +44,20 @@ export class UpgradeCriteriaComponent implements OnInit {
     ).subscribe();
   }
 
+  previous() {
+    const idx = this.upgradeCriterias.findIndex(uc => uc.id === this.upgradeCriteria.id);
+    if (idx === 0) {
+      this.upgradeCriteria = this.upgradeCriterias[this.upgradeCriterias.length - 1];
+    } else if (idx > 0) {
+      this.upgradeCriteria = this.upgradeCriterias[idx - 1];
+    }
+  }
+  next() {
+    const idx = this.upgradeCriterias.findIndex(uc => uc.id === this.upgradeCriteria.id);
+    if (idx >= 0) {
+      this.upgradeCriteria = this.upgradeCriterias[(idx + 1) % this.upgradeCriterias.length];
+    }
+  }
   onSwipe($event) {
     if ($event.direction === 4) {
       this.navController.navigateRoot(['/home']);

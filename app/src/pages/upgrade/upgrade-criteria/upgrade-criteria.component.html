@@ -13,9 +13,14 @@
 </ion-header>
 <ion-content>
     <div *ngIf="upgradeCriterias && upgradeCriterias.length">
-        <ion-select [(ngModel)]="upgradeCriteriaId" style="text-align: center;" interface="action-sheet">
-            <ion-select-option *ngFor="let uc of upgradeCriterias" value="{{uc.id}}">{{uc.upgradeLevel}}</ion-select-option>
-        </ion-select>
+        <div style="vertical-align: middle;">
+            <ion-icon style="float: left; margin: 15px;" name="chevron-back" size="large" (click)="previous()" *ngIf="upgradeCriterias.length > 1"></ion-icon>
+            <ion-icon style="float: right; margin: 15px;" name="chevron-forward" size="large" (click)="next()" *ngIf="upgradeCriterias.length > 1"></ion-icon>
+            <ion-select [(ngModel)]="upgradeCriteriaId" style="text-align: center;" interface="action-sheet">
+                <ion-select-option *ngFor="let uc of upgradeCriterias" value="{{uc.id}}">{{uc.upgradeLevel}}</ion-select-option>
+            </ion-select>
+        </div>
+        <div style="clear: both;"></div>
         <div *ngIf="upgradeCriteria">
             <ion-card>
                 <div style="text-align: center;">
