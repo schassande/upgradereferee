@@ -32,6 +32,10 @@
                 <ion-select-option value="Test">Test</ion-select-option>
             </ion-select>
         </ion-item>
+        <ion-item>
+            <ion-label>With me</ion-label>
+            <ion-toggle slot="end" [(ngModel)]="attendedCompetition" (ionChange)="onSearchBarInput()"></ion-toggle>
+        </ion-item>
         <ion-searchbar [(ngModel)]="searchInput" (ionChange)="onSearchBarInput()" animated="true" debounce="500" inputmode="text" type="text" showCancelButton="never" showClearButton="never" placeholder="Competition name" searchIcon="search-outline"></ion-searchbar>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
             <ion-spinner></ion-spinner>

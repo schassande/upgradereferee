@@ -6,8 +6,9 @@ import { NavController, AlertController, LoadingController } from '@ionic/angula
 import { CompetitionService } from './../../../app/service/CompetitionService';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { DateService } from 'src/app/service/DateService';
-import { User } from 'src/app/model/user';
+import { CurrentApplicationName, User } from 'src/app/model/user';
 import { DataRegion } from 'src/app/model/common';
+import { CursorError } from '@angular/compiler/src/ml_parser/lexer';
 
 /**
  * Generated class for the CompetitionListPage page.
@@ -29,6 +30,7 @@ export class CompetitionListPage implements OnInit {
   canCreate = false;
   currentUser: User;
   region: DataRegion = 'Europe';
+  attendedCompetition = false;
 
   constructor(
     private alertCtrl: AlertController,
@@ -65,7 +67,7 @@ export class CompetitionListPage implements OnInit {
     // console.log('searchCompetition(' + this.searchInput + ')');
     this.competitionService.searchCompetitions(this.searchInput, forceServer ? 'server' : 'default', this.region)
       .subscribe((response: ResponseWithData<Competition[]>) => {
-        this.competitions = this.competitionService.sortCompetitions(response.data, true);
+        this.competitions = this.competitionService.sortCompetitions(this.filterAttendedCompetitions(response.data), true);
         this.loading = false;
         if (event) {
           event.target.complete();
@@ -77,7 +79,17 @@ export class CompetitionListPage implements OnInit {
         this.changeDetectorRef.detectChanges();
       });
   }
-
+  private filterAttendedCompetitions(cs: Competition[]): Competition[] {
+    if (!cs || !this.attendedCompetition) {
+      return cs;
+    }
+    const isReferee = this.connectedUserService.isReferee();
+    const isRefereeCoach = this.connectedUserService.isRefereeCoach();
+    return  cs.filter(c =>
+      (isReferee && c.referees.filter(r => r.refereeId === this.currentUser.id).length > 0)
+      || (isRefereeCoach && c.refereeCoaches.filter(r => r.coachId === this.currentUser.id).length > 0)
+    );
+  }
   newCompetition() {
     this.navController.navigateRoot(`/competition/-1/edit`);
   }
