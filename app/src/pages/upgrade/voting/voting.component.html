@@ -5,7 +5,7 @@
                 <ion-icon name="arrow-back"></ion-icon>
             </ion-button>
         </ion-buttons>
-        <ion-title>Coach vote</ion-title>
+        <ion-title>Coach vote<span *ngIf="inputRefereeId && referee">&nbsp;on {{referee.shortName}}</span></ion-title>
         <ion-buttons slot="end">
             <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
         </ion-buttons>
@@ -17,14 +17,14 @@
             <ion-label>Coach: </ion-label>
             <div>{{coach.shortName}} - {{coach.firstName}} {{coach.lastName}}</div>
         </ion-item>
-        <ion-item>
+        <ion-item *ngIf="competition || (competitions && competitions.length > 0)">
             <ion-label>Competition: </ion-label>
             <div *ngIf="!showCompetitionSelector">{{competition.name}}</div>
             <ion-select [(ngModel)]="competitionId" style="text-align: center;" interface="action-sheet" *ngIf="showCompetitionSelector" (ionChange)="onCompetitionChangeByUser()">
                 <ion-select-option *ngFor="let c of competitions" value="{{c.id}}">{{c.name}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="!isCoachOfCompetition" style="margin: 5px; text-align: center; font-style: italic;">You are not a referee coach of this competition, <br>therefore you cannot vote. <br>Please select another competition.</div>
+        <div *ngIf="!isCoachOfCompetition && competition" style="margin: 5px; text-align: center; font-style: italic;">You are not a referee coach of this competition, <br>therefore you cannot vote. <br>Please select another competition.</div>
         <div *ngIf="competition && isCoachOfCompetition">
             <ion-item *ngIf="!showDaySelector">
                 <ion-label>Date: </ion-label>
@@ -46,17 +46,21 @@
                 <ion-select-option *ngFor="let l of upgradeLevels" value="{{l}}">{{l}}</ion-select-option>
             </ion-select>
         </ion-item>
-        <div *ngIf="competition && isCoachOfCompetition">
-            <div *ngIf="referee && !referees && !showRefereeSelector">{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
-            <div *ngIf="filteredReferees && filteredReferees.length === 0 && referee === null" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
-            <div *ngIf="filteredReferees && filteredReferees.length && showRefereeSelector" style="margin: 5px; text-align: center;">
+        <ion-item *ngIf="referee && !referees && !showRefereeSelector">
+            <ion-label>Referee: </ion-label>
+            <div>{{referee.shortName}} - {{referee.firstName}} {{referee.lastName}}</div>
+        </ion-item>
+        <div *ngIf="competition && isCoachOfCompetition && filteredReferees">
+            <div *ngIf="filteredReferees.length === 0 && referee === null" style="font-weight: bold; text-align: center; width: 100%;">No referee to upgrade in this competition</div>
+            <div *ngIf="filteredReferees.length > 1 && showRefereeSelector" style="margin: 5px; text-align: center;">
                 <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
                 <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
-                <ion-select [(ngModel)]="refereeId" interface="action-sheet" (ionChange)="onRefereeChange()" style="width: 60%; text-align: center; margin: auto;">
+                <ion-select [(ngModel)]="selectedRefereeId" interface="action-sheet" (ionChange)="onRefereeChange()" style="width: 60%; text-align: center; margin: auto;">
                     <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
                 </ion-select>
             </div>
         </div>
+        <div *ngIf="competitions && competitions.length === 0 && inputRefereeId && referee" style="margin: 5px; text-align: center; font-style: italic;">You don't have any common competition with the referee.</div>
         <div *ngIf="referee && isCoachOfCompetition" style="border-bottom: 1px solid lightgrey;">
             <div style="text-align: center; width:30%; display: inline-block;">
                 <ion-icon *ngIf="!referee.photo || !referee.photo.url" size="large" name="person" style="font-size: 4em;"></ion-icon>

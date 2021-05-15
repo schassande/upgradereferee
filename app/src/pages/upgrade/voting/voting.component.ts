@@ -20,11 +20,15 @@ import { UserService } from 'src/app/service/UserService';
 })
 export class VotingComponent implements OnInit {
 
-  dirty = false;
+  /** Id of the selected referee. This id can be given in parameter of the page. Can be null */
+  inputRefereeId: string;
   /** Id of the selected competition. This id can be given in parameter of the page. Can be null */
-  competitionId: string;
+  inputCompetitionId: string;
+
+  dirty = false;
   /** Competition object selected. Can be null */
   competition: Competition;
+  competitionId: string;
   /** List of the competitions if the page is not dedicated to a competition. Can be null */
   competitions: Competition[];
   /** Show or not the combox to select a competition */
@@ -36,7 +40,7 @@ export class VotingComponent implements OnInit {
   showDaySelector = false;
 
   /** Id of the selected referee. This id can be given in parameter of the page. Can be null */
-  refereeId: string;
+  selectedRefereeId: string;
   /** User object selected representing the referee. Can be null */
   referee: User;
   /** List of the referees if the page is not dedicated to a referee. Can be null */
@@ -78,8 +82,8 @@ export class VotingComponent implements OnInit {
         if (!this.competition) {
           this.findInitialCompetition();
         }
-        this.isCoachOfCompetition = this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
         if (this.competition) {
+          this.isCoachOfCompetition = this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
           this.competitionId = this.competition.id;
           return this.onCompetitionChange();
         } else {
@@ -95,6 +99,8 @@ export class VotingComponent implements OnInit {
     // console.log('BEGIN computeDay()');
     if (!this.competition) {
       this.day = null;
+      this.showDaySelector = false;
+      return;
     }
     if (!this.competition.days || this.competition.days.length === 0) {
       this.competition.days = [this.competition.date];
@@ -120,7 +126,7 @@ export class VotingComponent implements OnInit {
       + '\nthis.competition=', this.competition
       + '\nthis.competitions=', this.competitions
       + '\nthis.day=', this.dateService.date2string(this.day)
-      + '\nthis.refereeId=' + this.refereeId
+      + '\nthis.inputRefereeId=' + this.inputRefereeId
       + '\nthis.referee=', this.referee
       + '\nthis.referees=', this.referees
       + '\nthis.filteredReferees=', this.filteredReferees
@@ -132,9 +138,10 @@ export class VotingComponent implements OnInit {
 
   private loadParams(params: Params) {
     // console.log('BEGIN loadParams()');
-    this.competitionId = params.get('competitionId');
-    if (this.competitionId) {
-      console.log('PARAM competitionId=' + this.competitionId);
+    this.inputCompetitionId = params.get('competitionId');
+    if (this.inputCompetitionId) {
+      this.competitionId = this.inputCompetitionId;
+      console.log('PARAM competitionId=' + this.inputCompetitionId);
       const dayStr = params.get('day');
       if (dayStr) {
         try {
@@ -145,17 +152,17 @@ export class VotingComponent implements OnInit {
         }
       }
     }
-    this.refereeId = params.get('refereeId');
-    if (this.refereeId) {
-      console.log('PARAM refereeId=' + this.refereeId);
+    this.inputRefereeId = params.get('refereeId');
+    if (this.inputRefereeId) {
+      console.log('PARAM refereeId=' + this.inputRefereeId);
     }
     return '';
   }
 
   private loadCompetitionFromId(): Observable<any> {
     // console.log('BEGIN loadCompetitionFromId()');
-    if (this.competitionId) {
-      return this.competitionService.get(this.competitionId).pipe(
+    if (this.inputCompetitionId) {
+      return this.competitionService.get(this.inputCompetitionId).pipe(
         map((rcompetition: ResponseWithData<Competition>) => this.competition = rcompetition.data)
       );
     }
@@ -179,10 +186,12 @@ export class VotingComponent implements OnInit {
 
   private filterCompetitions(cs: Competition[]): Competition[] {
     return !cs ? [] : cs.filter(c => {
-      if (this.refereeId && c.referees.filter(r => r.refereeId === this.refereeId).length === 0) {
+      if (this.inputRefereeId && c.referees.filter(r => r.refereeId === this.inputRefereeId).length === 0) {
+        // console.log('filterCompetitions: does not include the referee ' + this.refereeId);
         return false;
       }
       if (!this.connectedUserService.isAdmin() && c.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length === 0) {
+        // console.log('filterCompetitions: does not include the referee coach ' + this.coach.id);
         return false;
       }
       return true;
@@ -191,22 +200,24 @@ export class VotingComponent implements OnInit {
 
   private adjustRefereeId(): any {
     // console.log('BEGIN adjustRefereeId()');
-    if (this.competition && this.refereeId
-      && this.competition.referees.findIndex((referee) => referee.refereeId === this.refereeId) < 0) {
+    if (this.competition && this.inputRefereeId
+      && this.competition.referees.findIndex((referee) => referee.refereeId === this.inputRefereeId) < 0) {
       // the competition exists but the referee does not belong the competition!
       // => ignore the referee id given by the url
-      this.refereeId = null;
+      this.inputRefereeId = null;
       this.referee = null;
+      this.selectedRefereeId = null;
     }
     if (this.referee && this.competition.referees.filter((referee) => referee.refereeId === this.referee.id).length === 0) {
       this.referee = null;
+      this.selectedRefereeId = null;
     }
   }
 
   private loadRefereeFromId(): Observable<any> {
     // console.log('BEGIN loadRefereeFromId()');
-    if (this.refereeId) { // load the referee
-      return this.userService.get(this.refereeId).pipe(
+    if (this.inputRefereeId) { // load the referee
+      return this.userService.get(this.inputRefereeId).pipe(
         map((ruser: ResponseWithData<User>) => this.referee = ruser.data),
       );
     }
@@ -218,7 +229,7 @@ export class VotingComponent implements OnInit {
     this.referees = [];
     if (this.referee) {
       this.showRefereeSelector = false;
-      console.log('loadReferees(): Have a referee', this.referee, this.refereeId);
+      console.log('loadReferees(): Have a referee', this.referee, this.inputRefereeId);
     } else {
       this.showRefereeSelector = true;
       if (this.competition) {
@@ -227,7 +238,7 @@ export class VotingComponent implements OnInit {
         this.referees = [];
         this.filteredReferees = [];
         this.referee = null;
-        this.refereeId = null;
+        this.selectedRefereeId = null;
       }
     }
     return of('');
@@ -240,7 +251,7 @@ export class VotingComponent implements OnInit {
     const refs: User[] = [];
     // load the referee list from the competitions
     const obs: Observable<any>[] = this.competition.referees.map(
-      referee => this.userService.get(referee.refereeId).pipe(
+      r => this.userService.get(r.refereeId).pipe(
         map((ruser) => {
           if (this.checkReferee(ruser.data)) {
             refs.push(ruser.data);
@@ -250,8 +261,9 @@ export class VotingComponent implements OnInit {
     return obs.length === 0 ?  of('') : forkJoin(obs).pipe(
       map(() => {
         this.referees = refs;
-        if (!this.refereeId && !this.referee) {
+        if (!this.selectedRefereeId && !this.referee && this.referees.length > 0) {
           this.referee = this.referees[0];
+          this.selectedRefereeId = this.referee.id;
           // this.refereeId = this.referee.id;
         }
       })
@@ -315,6 +327,7 @@ export class VotingComponent implements OnInit {
         this.day = c.days.find(day => this.dateService.compareDate(day, this.day));
         return this.day !== null && this.day !== undefined;
       });
+      this.competitionId = this.competition ? this.competition.id : null;
       console.log('Try to find a competition happening today', this.competition, this.dateService.date2string(this.day));
     }
     if (!this.competition) {
@@ -331,6 +344,7 @@ export class VotingComponent implements OnInit {
           if (!this.day || this.dateService.compareDate(cDay, this.day) > 0) {
             this.day = cDay;
             this.competition = c;
+            this.competitionId = this.competition.id;
           }
         }
       });
@@ -364,7 +378,7 @@ export class VotingComponent implements OnInit {
     // console.log('BEGIN loadVote()');
     this.loading = true;
     this.vote = null;
-    console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.refereeId})`);
+    console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.referee})`);
     if (this.competitionId && this.referee && this.day) {
       return this.competitionDayRefereeCoachVoteService.getVote(
         this.competitionId, this.day, this.coach.id, this.referee.id).pipe(
@@ -399,7 +413,7 @@ export class VotingComponent implements OnInit {
       day: this.dateService.to00h00(this.day),
       referee: {
         refereeShortName: this.referee.shortName,
-        refereeId: this.refereeId
+        refereeId: this.referee.id
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
       vote: 'Abstein',
@@ -460,7 +474,7 @@ export class VotingComponent implements OnInit {
 
   onRefereeChange() {
     // console.log('BEGIN onRefereeChange()');
-    this.referee = this.referees.find(r => r.id === this.refereeId);
+    // this.referee = this.referees.find(r => r.id === this.refereeId);
     // console.log('onRefereeChange(): ', this.referee);
     this.loadVote().subscribe();
   }
@@ -487,23 +501,25 @@ export class VotingComponent implements OnInit {
     }
   }
   previousReferee() {
-    let idx = this.referees.findIndex(r => r.id === this.refereeId);
+    let idx = this.referees.findIndex(r => r.id === this.referee.id);
     if (idx >= 0) {
       if (idx === 0) {
         idx = this.referees.length - 1;
       } else {
         idx = idx - 1;
       }
-      this.refereeId = this.referees[idx].id;
+      this.referee = this.referees[idx];
+      this.selectedRefereeId = this.referee.id;
       this.onRefereeChange();
     }
   }
   nextReferee() {
-    let idx = this.referees.findIndex(r => r.id === this.refereeId);
+    let idx = this.referees.findIndex(r => r.id === this.referee.id);
     // console.log('Current referee at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
     if (idx >= 0) {
       idx = (idx + 1 ) % this.referees.length;
-      this.refereeId = this.referees[idx].id;
+      this.referee = this.referees[idx];
+      this.selectedRefereeId = this.referee.id;
       // console.log('New referee selected at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
       this.onRefereeChange();
     }
@@ -522,10 +538,10 @@ export class VotingComponent implements OnInit {
   }
 
   navBack() {
-    if (this.competitionId) {
-      this.navController.navigateRoot([`/competition/${this.competitionId}/home`]);
-    } else if (this.refereeId) {
-      this.navController.navigateRoot([`/referee/view/${this.refereeId}`]);
+    if (this.inputCompetitionId) {
+      this.navController.navigateRoot([`/competition/${this.inputCompetitionId}/home`]);
+    } else if (this.inputRefereeId) {
+      this.navController.navigateRoot([`/referee/view/${this.inputRefereeId}`]);
     } else {
       this.navController.navigateRoot(['/home']);
     }
