@@ -41,7 +41,7 @@ export class CompetitionUpgradesComponent implements OnInit {
   /** Indicate the status of the upgrade */
   upgradeStatus: RefereeUpgradeStatus;
   referees: User[] = [];
-  selectedRefereeIdx = 0;
+  selectedRefereeIdx = -1;
 
   constructor(
     private competitionService: CompetitionService,
@@ -85,11 +85,10 @@ export class CompetitionUpgradesComponent implements OnInit {
         forkJoin(this.competition.days
           .map(day => this.refereeUpgradeService.findRefereeUpgradeByCompetition(this.competition.id).pipe(
           map(rrus => rrus.data.forEach(ru => {
+            // console.log('canVoteLevel(' + ru.upgradeLevel + ', ' + coach.refereeCoach.refereeCoachLevel + ')='
+            //   + this.userService.canVoteLevel(ru.upgradeLevel, coach.refereeCoach.refereeCoachLevel));
             if (isAdminOrDirector || this.userService.canVoteLevel(ru.upgradeLevel, coach.refereeCoach.refereeCoachLevel)) {
               list.push(ru);
-              if (ru.upgradeStatus === 'DECIDED') {
-                this.hasUnpublished = true;
-              }
             }
           }))
         )))
@@ -101,7 +100,6 @@ export class CompetitionUpgradesComponent implements OnInit {
         // extract the list of the referee ids
         const refIds: string[] = [];
         list.forEach(ru => this.toolService.addToSet(refIds, ru.referee.refereeId));
-
         // load the referee data
         return forkJoin(refIds.map(refereeId => this.userService.get(refereeId).pipe(
           map(ruser => {
@@ -111,6 +109,7 @@ export class CompetitionUpgradesComponent implements OnInit {
               // create an item for each RefereeUpgrade of the referee
               list.filter(ru => ru.referee.refereeId === referee.id)
                   .forEach(ru => {
+                // console.log('Add upgrade ', referee, ru);
                 this.upgrades.push({referee, upgrade: ru});
               });
             } else {
@@ -158,19 +157,28 @@ export class CompetitionUpgradesComponent implements OnInit {
   }
 
   filterUpgrades() {
+    this.hasUnpublished = false;
     this.filteredUpgrades = this.upgrades.filter(ru => {
+      if (ru.upgrade.upgradeStatus === 'DECIDED') {
+        this.hasUnpublished = true;
+      }
+
       if (this.toolService.isValidString(this.upgradeLevel) && this.upgradeLevel !== ru.upgrade.upgradeLevel) {
+        // console.log('Filter by upgradeLevel ', this.upgradeLevel);
         return false;
       }
       if (this.toolService.isValidString(this.upgradeStatus) && this.upgradeStatus !== ru.upgrade.upgradeStatus) {
+        // console.log('Filter by upgradeStatus ', this.upgradeStatus);
         return false;
       }
       if (this.toolService.isValidString(this.decision) && this.decision !== ru.upgrade.decision) {
+        // console.log('Filter by decision ', this.decision);
         return false;
       }
       if (0 <= this.selectedRefereeIdx
           && this.selectedRefereeIdx < this.referees.length
           && this.referees[this.selectedRefereeIdx].id !== ru.upgrade.referee.refereeId) {
+        console.log('Filter by referee', this.referees[this.selectedRefereeIdx].id);
         return false;
       }
       return true;
@@ -178,14 +186,15 @@ export class CompetitionUpgradesComponent implements OnInit {
   }
 
   public publishAll() {
-    forkJoin(this.upgrades.map(u => {
+    this.hasUnpublished = false;
+    forkJoin(this.filteredUpgrades.map(u => {
       if (u.upgrade.upgradeStatus === 'DECIDED') {
         u.upgrade.upgradeStatus = 'PUBLISHED';
         return this.refereeUpgradeService.save(u.upgrade);
       } else {
-        return of();
+        return of('');
       }
-    })).subscribe();
+    })).subscribe(() => this.filterUpgrades());
   }
   private compareUpgradeDate(u1: RefUp, u2: RefUp): number {
     return this.dateService.compareDate(u1.upgrade.decisionDate, u2.upgrade.decisionDate);

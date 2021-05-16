@@ -58,7 +58,7 @@
         </ion-select>
     </ion-item>
 
-    <div *ngIf="!loading && filteredUpgrades && filteredUpgrades.length === 0" style="margin: 20px; text-align: center;"> No upgrade during the competition</div>
+    <div *ngIf="!loading && filteredUpgrades && filteredUpgrades.length === 0" style="margin: 20px; text-align: center;">Empty upgrades list.</div>
     <ion-grid *ngIf="!loading && filteredUpgrades && filteredUpgrades.length > 0">
         <ion-row>
             <ion-col size="2" style="text-align: center;">Date</ion-col>
@@ -87,6 +87,6 @@
         </ion-row>
     </ion-grid>
     <div style="width: 100%; text-align: center;">
-        <ion-button *ngIf="hasUnpublished" shape="round" size="large" style="width: 80%; padding: 10px;">Publish All</ion-button>
+        <ion-button *ngIf="hasUnpublished" shape="round" size="large" style="width: 80%; padding: 10px;" (click)="publishAll()">Publish selected</ion-button>
     </div>
 </ion-content>
