@@ -8,7 +8,7 @@ import { ResponseWithData, Response } from './response';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
-import { map, mergeMap } from 'rxjs/operators';
+import { mergeMap } from 'rxjs/operators';
 import { CompetitionDayPanelVoteService } from './CompetitionDayPanelVoteService';
 import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
 import { ToolService } from './ToolService';

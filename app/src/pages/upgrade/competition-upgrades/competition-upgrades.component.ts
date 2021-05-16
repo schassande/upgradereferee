@@ -3,13 +3,15 @@ import { ActivatedRoute } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
+import { Upgradable } from 'src/app/model/coaching';
 import { Competition } from 'src/app/model/competition';
-import { RefereeUpgrade } from 'src/app/model/upgrade';
-import { User } from 'src/app/model/user';
+import { RefereeUpgrade, RefereeUpgradeStatus } from 'src/app/model/upgrade';
+import { RefereeLevel, User } from 'src/app/model/user';
 import { CompetitionService } from 'src/app/service/CompetitionService';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 import { DateService } from 'src/app/service/DateService';
 import { RefereeUpgradeService } from 'src/app/service/RefereeUpgradeService';
+import { ToolService } from 'src/app/service/ToolService';
 import { UserService } from 'src/app/service/UserService';
 
 export type UpgradeSort = 'Level-Date' | 'Date-Level';
@@ -30,6 +32,17 @@ export class CompetitionUpgradesComponent implements OnInit {
   sort: UpgradeSort = 'Level-Date';
   hasUnpublished = false;
 
+  // FILTERS //
+  filteredUpgrades: RefUp[] = [];
+  /** The level to upgrade */
+  upgradeLevel: RefereeLevel;
+  /** The decision of the upgrade. Only 2 possible values: 'Yes' or 'No' */
+  decision: Upgradable;
+  /** Indicate the status of the upgrade */
+  upgradeStatus: RefereeUpgradeStatus;
+  referees: User[] = [];
+  selectedRefereeIdx = 0;
+
   constructor(
     private competitionService: CompetitionService,
     private connectedUserService: ConnectedUserService,
@@ -37,6 +50,7 @@ export class CompetitionUpgradesComponent implements OnInit {
     private navController: NavController,
     private refereeUpgradeService: RefereeUpgradeService,
     private route: ActivatedRoute,
+    private toolService: ToolService,
     public userService: UserService
   ) { }
 
@@ -46,7 +60,10 @@ export class CompetitionUpgradesComponent implements OnInit {
 
   private loadCompetition(): Observable<Competition> {
     this.loading = true;
+    const coach: User = this.connectedUserService.getCurrentUser();
+    let isAdminOrDirector = this.connectedUserService.isAdmin();
     const list: RefereeUpgrade[] = [];
+    const id2Ref: Map<string, User> = new Map();
     // load id from url path
     return this.route.paramMap.pipe(
       // load competition from the id
@@ -60,32 +77,44 @@ export class CompetitionUpgradesComponent implements OnInit {
           // the coach is not allowed to access to this competition
           this.navController.navigateRoot('/competition/list');
         }
+        isAdminOrDirector = isAdminOrDirector || this.competition.refereePanelDirectorId === coach.id;
         return this.competition;
       }),
       // load Referee Upgrade
       mergeMap(() =>
         forkJoin(this.competition.days
-          .map(day => this.refereeUpgradeService.findRefereeUpgradeByCompetition(this.competition.id, 'Yes').pipe(
+          .map(day => this.refereeUpgradeService.findRefereeUpgradeByCompetition(this.competition.id).pipe(
           map(rrus => rrus.data.forEach(ru => {
-            list.push(ru);
-            if (ru.upgradeStatus === 'DECIDED') {
-              this.hasUnpublished = true;
+            if (isAdminOrDirector || this.userService.canVoteLevel(ru.upgradeLevel, coach.refereeCoach.refereeCoachLevel)) {
+              list.push(ru);
+              if (ru.upgradeStatus === 'DECIDED') {
+                this.hasUnpublished = true;
+              }
             }
           }))
         )))
       ),
       mergeMap(() => {
-        this.hasUnpublished = false;
         if (list.length === 0) {
           return of('');
         }
+        // extract the list of the referee ids
+        const refIds: string[] = [];
+        list.forEach(ru => this.toolService.addToSet(refIds, ru.referee.refereeId));
+
         // load the referee data
-        return forkJoin(list.map(ru => this.userService.get(ru.referee.refereeId).pipe(
+        return forkJoin(refIds.map(refereeId => this.userService.get(refereeId).pipe(
           map(ruser => {
-            if (ruser.data) {
-              this.upgrades.push({ referee: ruser.data, upgrade: ru});
+            const referee: User = ruser.data;
+            if (referee) {
+              this.referees.push(referee);
+              // create an item for each RefereeUpgrade of the referee
+              list.filter(ru => ru.referee.refereeId === referee.id)
+                  .forEach(ru => {
+                this.upgrades.push({referee, upgrade: ru});
+              });
             } else {
-              console.error('Referee ' + ru.referee.refereeId + ' does not exist.');
+              console.error('Referee ' + refereeId + ' has not been found: ' + ruser.error);
             }
           })
         )));
@@ -96,6 +125,7 @@ export class CompetitionUpgradesComponent implements OnInit {
         return of(this.competition);
       }),
       map (() => {
+        this.filterUpgrades();
         this.loading = false;
         return this.competition;
       })
@@ -124,6 +154,26 @@ export class CompetitionUpgradesComponent implements OnInit {
         res = u1.referee.lastName.localeCompare(u2.referee.lastName);
       }
       return res;
+    });
+  }
+
+  filterUpgrades() {
+    this.filteredUpgrades = this.upgrades.filter(ru => {
+      if (this.toolService.isValidString(this.upgradeLevel) && this.upgradeLevel !== ru.upgrade.upgradeLevel) {
+        return false;
+      }
+      if (this.toolService.isValidString(this.upgradeStatus) && this.upgradeStatus !== ru.upgrade.upgradeStatus) {
+        return false;
+      }
+      if (this.toolService.isValidString(this.decision) && this.decision !== ru.upgrade.decision) {
+        return false;
+      }
+      if (0 <= this.selectedRefereeIdx
+          && this.selectedRefereeIdx < this.referees.length
+          && this.referees[this.selectedRefereeIdx].id !== ru.upgrade.referee.refereeId) {
+        return false;
+      }
+      return true;
     });
   }
 

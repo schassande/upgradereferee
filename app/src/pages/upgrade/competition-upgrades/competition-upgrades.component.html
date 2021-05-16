@@ -26,21 +26,67 @@
             <div>Category: {{competition.category}}</div>
         </ion-card-content>
     </ion-card>
-    <div *ngIf="!loading && upgrades && upgrades.length === 0" style="margin: 20px; text-align: center;"> No upgrade during the competition</div>
-    <ion-list *ngIf="!loading && upgrades && upgrades.length > 0">
-        <ion-item>
-            <ion-select (ionChange)="onSortChange()" [(ngModel)]="sort" interface="action-sheet">
-                <ion-select-option value="Level-Date">Sort By level then by date</ion-select-option>
-                <ion-select-option value="Date-Level">Sort By date then by level</ion-select-option>
-            </ion-select>
-        </ion-item>
-        <ion-item *ngFor="let ru of upgrades">
-            <div slot="start">{{this.dateService.date2string(ru.upgrade.decisionDate)}}</div>
-            <div><span style="font-size: 1.2em; font-weight: bold;">{{ru.referee.shortName}} - {{ru.referee.firstName}} {{ru.referee.lastName}}</span>
+    <ion-item>
+        <ion-label>Upgrade Level</ion-label>
+        <ion-select [(ngModel)]="upgradeLevel" interface="action-sheet" (ionChange)="filterUpgrades()">
+            <ion-select-option value="">All</ion-select-option>
+            <ion-select-option value="EURO_3">European Level 3</ion-select-option>
+            <ion-select-option value="EURO_4">European Level 4</ion-select-option>
+            <ion-select-option value="EURO_5">European Level 5</ion-select-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Decision</ion-label>
+        <ion-select [(ngModel)]="decision" interface="action-sheet" (ionChange)="filterUpgrades()">
+            <ion-select-option value="">All</ion-select-option>
+            <ion-select-option value="Yes">Yes</ion-select-option>
+            <ion-select-option value="No">Not yet</ion-select-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-label>Upgrade status</ion-label>
+        <ion-select [(ngModel)]="upgradeStatus" interface="action-sheet" (ionChange)="filterUpgrades()">
+            <ion-select-option value="">All</ion-select-option>
+            <ion-select-option value="DECIDED">Decided</ion-select-option>
+            <ion-select-option value="PUBLISHED">Published</ion-select-option>
+        </ion-select>
+    </ion-item>
+    <ion-item>
+        <ion-select (ionChange)="onSortChange()" [(ngModel)]="sort" interface="action-sheet">
+            <ion-select-option value="Level-Date">Sort By level then by date</ion-select-option>
+            <ion-select-option value="Date-Level">Sort By date then by level</ion-select-option>
+        </ion-select>
+    </ion-item>
+
+    <div *ngIf="!loading && filteredUpgrades && filteredUpgrades.length === 0" style="margin: 20px; text-align: center;"> No upgrade during the competition</div>
+    <ion-grid *ngIf="!loading && filteredUpgrades && filteredUpgrades.length > 0">
+        <ion-row>
+            <ion-col size="2" style="text-align: center;">Date</ion-col>
+            <ion-col size="2" style="text-align: center;">Lvl</ion-col>
+            <ion-col size="6" style="text-align: center;">Referee</ion-col>
+            <ion-col size="1" style="text-align: center;">Vo</ion-col>
+            <ion-col size="1" style="text-align: center;">Pu</ion-col>
+        </ion-row>
+        <ion-row *ngFor="let ru of filteredUpgrades">
+            <ion-col style="font-size: 0.8em; text-align: center;" size="2">
+                {{this.dateService.date2string(ru.upgrade.decisionDate)}}
+            </ion-col>
+            <ion-col style="text-align: center;" size="2"><img src="assets/imgs/badge/{{ru.upgrade.upgradeLevel}}.png" height="30" /></ion-col>
+            <ion-col size="6">
+                <span style="font-size: 1.1em; font-weight: bold;">{{ru.referee.shortName}} - {{ru.referee.firstName}} {{ru.referee.lastName}}</span>
                 <br>{{ru.referee.country}} / {{ru.referee.region}}
-            </div>
-            <div style="text-align: center; margin: 10px;"><img src="assets/imgs/badge/{{ru.upgrade.upgradeLevel}}.png" height="100" /></div>
-        </ion-item>
-    </ion-list>
-    <ion-button *ngIf="hasUnpublished" shape="round" style="width: 100%; margin: 20px 10px; padding: 5px;">Publish All</ion-button>
+            </ion-col>
+            <ion-col style="text-align: center;" size="1">
+                <span *ngIf="ru.upgrade.decision === 'Yes'"><ion-icon name="checkmark-outline" size="small" color="success"></ion-icon></span>
+                <span *ngIf="ru.upgrade.decision === 'No'"><ion-icon name="close-outline" size="small" color="danger"></ion-icon></span>
+            </ion-col>
+            <ion-col style="text-align: center;" size="1">
+                <span *ngIf="ru.upgrade.upgradeStatus === 'PUBLISHED'"><ion-icon name="checkmark-outline" size="small" color="success"></ion-icon></span>
+                <span *ngIf="ru.upgrade.upgradeStatus === 'DECIDED'"><ion-icon name="close-outline" size="small" color="danger"></ion-icon></span>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <div style="width: 100%; text-align: center;">
+        <ion-button *ngIf="hasUnpublished" shape="round" size="large" style="width: 80%; padding: 10px;">Publish All</ion-button>
+    </div>
 </ion-content>

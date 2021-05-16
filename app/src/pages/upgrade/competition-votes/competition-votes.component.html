@@ -61,7 +61,13 @@
         </div>
         <div *ngIf="referee">
             <div style="text-align: center;">
-                <div style="padding: 10px; font-weight: bold; font-size: 1.4em;">Panel votes for upgrade <span *ngIf="vote && vote.closed">&nbsp;(Closed)</span></div>
+                <div style="text-align: center; padding: 10px; width: 100%;">
+                    <div style="font-size: 1.4em; font-weight: bold;">
+                        Panel vote for upgrade
+                        <span *ngIf="vote.closed">&nbsp;(closed)</span>
+                    </div>
+                    <div *ngIf="dirty || vote.dataStatus === 'NEW'">(not saved)</div>
+                </div>
                 <img style="height: 70px;" src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" />
             </div>
             <div style="clear: both;"></div>

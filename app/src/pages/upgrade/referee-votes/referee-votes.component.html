@@ -110,7 +110,7 @@
                 </ion-item>
             </ion-list>
             <div *ngIf="refereeUpgrade.c4PanelVotes.length < upgradeCriteria.c4DaysRequired" style="color: red;">{{upgradeCriteria.c4DaysRequired - refereeUpgrade.c4PanelVotes.length}} C4 competition day(s) are missing.</div>
-            <div *ngIf="refereeUpgrade.c4PanelVotes.length >= upgradeCriteria.c4DaysRequired">{{upgradeCriteria.c4DaysRequired}} C4 competition day(s) are required (OK).</div>
+            <div *ngIf="refereeUpgrade.c4PanelVotes.length >= upgradeCriteria.c4DaysRequired">{{upgradeCriteria.c4DaysRequired}} C4+ competition day(s) are required (OK).</div>
 
             <div *ngIf="upgradeCriteria.c4YesRequired > 0 && c4YesPanelVotes < upgradeCriteria.c4YesRequired" style="color: red;">{{upgradeCriteria.c4YesRequired - c4YesPanelVotes}} Yes vote(s) are missing.</div>
             <div *ngIf="upgradeCriteria.c4YesRequired > 0 && c4YesPanelVotes >= upgradeCriteria.c4YesRequired">{{upgradeCriteria.c4YesRequired}} Yes vote(s) are required (OK).</div>
@@ -137,7 +137,7 @@
                 </ion-item>
             </ion-list>
             <div *ngIf="refereeUpgrade.c3PanelVotes.length < upgradeCriteria.c3DaysRequired" style="color: red;">{{upgradeCriteria.c3DaysRequired - refereeUpgrade.c3PanelVotes.length}} C3 competition day(s) are missing.</div>
-            <div *ngIf="refereeUpgrade.c3PanelVotes.length >= upgradeCriteria.c3DaysRequired">{{upgradeCriteria.c3DaysRequired}} C3 competition day(s) are required (OK).</div>
+            <div *ngIf="refereeUpgrade.c3PanelVotes.length >= upgradeCriteria.c3DaysRequired">{{upgradeCriteria.c3DaysRequired}} C3+ competition day(s) are required (OK).</div>
 
             <div *ngIf="upgradeCriteria.c3YesRequired > 0 && c3YesPanelVotes < upgradeCriteria.c3YesRequired" style="color: red;">{{upgradeCriteria.c3YesRequired - c3YesPanelVotes}} Yes vote(s) are missing.</div>
             <div *ngIf="upgradeCriteria.c3YesRequired > 0 && c3YesPanelVotes >= upgradeCriteria.c3YesRequired">{{upgradeCriteria.c3YesRequired}} Yes vote(s) are required (OK).</div>

@@ -21,6 +21,13 @@ export class ToolService {
         }
     }
 
+    addToSet(arrays: any[], itemToAdd: any) {
+        const idx = arrays.indexOf(itemToAdd);
+        if (idx < 0) {
+            arrays.push(itemToAdd);
+        }
+    }
+
     deleteFromArrayById(arrays: any[], id: string, idFieldName: string = 'id') {
         const idx = arrays.findIndex( (item) => id === item[idFieldName]);
         if (idx >= 0) {
