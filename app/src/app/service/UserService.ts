@@ -591,7 +591,12 @@ export class UserService  extends RemotePersistentDataService<User> {
         if (!refereeLevel || !refereeCoachLevel) {
             return false;
         }
-        if (refereeLevel === 'EURO_3') {
+        if (refereeLevel === 'EURO_2') {
+            return refereeCoachLevel === 'EURO_2'
+            ||  refereeCoachLevel === 'EURO_3'
+            ||  refereeCoachLevel === 'EURO_4'
+            ||  refereeCoachLevel === 'EURO_5';
+        } else if (refereeLevel === 'EURO_3') {
             return refereeCoachLevel === 'EURO_3'
                 ||  refereeCoachLevel === 'EURO_4'
                 ||  refereeCoachLevel === 'EURO_5';

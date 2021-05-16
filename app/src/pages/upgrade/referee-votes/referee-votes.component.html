@@ -34,6 +34,7 @@
                     <span style="font-weight: bold; color: green;" *ngIf="refereeUpgrade.decision === 'Yes'">Yes</span>
                 </div>
             </ion-title>
+            <div *ngIf="refereeUpgrade.upgradeStatus !== 'PUBLISHED'" style="text-align: center;">(Not published yet)</div>
         </ion-card-content>
     </ion-card>
     <ion-card *ngIf="!loading && refereeUpgrade">

@@ -3,7 +3,7 @@ import { AngularFirestore, Query } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
-import { CompetitionDayPanelVote, RefereeUpgrade } from '../model/upgrade';
+import { CompetitionDayPanelVote, RefereeUpgrade, RefereeUpgradeStatus } from '../model/upgrade';
 import { DateService } from './DateService';
 import { ResponseWithData } from './response';
 import { Observable, of } from 'rxjs';
@@ -48,12 +48,16 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
             .limit(1)
             , 'default');
     }
-    public find10LastRefereeUpgrades(refereeId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
-        return this.query(this.getCollectionRef()
+    public find10LastRefereeUpgrades(refereeId: string,
+                                     upgradeStatus: RefereeUpgradeStatus = null): Observable<ResponseWithData<RefereeUpgrade[]>> {
+        let query: Query<RefereeUpgrade> = this.getCollectionRef()
             .where('referee.refereeId', '==', refereeId)
             .orderBy('decisionDate', 'desc')
-            .limit(10)
-            , 'default');
+            .limit(10);
+        if (upgradeStatus) {
+            query = query.where('upgradeStatus', '==', upgradeStatus);
+        }
+        return this.query(query, 'default');
     }
     public computeRefereeUpgrade(refereeId: string, day: Date): Observable<RefereeUpgrade> {
         return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({

@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { throwError, forkJoin, of, Observable } from 'rxjs';
-import { map, mergeMap } from 'rxjs/operators';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import { Competition } from 'src/app/model/competition';
-import { CompetitionDayPanelVote, RefereeUpgrade, UpgradeCriteria } from 'src/app/model/upgrade';
+import { CompetitionDayPanelVote, RefereeUpgrade, RefereeUpgradeStatus, UpgradeCriteria } from 'src/app/model/upgrade';
 import { CurrentApplicationName, User } from 'src/app/model/user';
 import { CompetitionDayPanelVoteService } from 'src/app/service/CompetitionDayPanelVoteService';
 import { CompetitionService } from 'src/app/service/CompetitionService';
@@ -52,6 +52,7 @@ export class RefereeVotesComponent implements OnInit {
 
   ngOnInit() {
     this.loading = true;
+    const user = this.connectedUserService.getCurrentUser();
     this.activatedRoute.paramMap.pipe(
       map((params: ParamMap) => {
         this.refereeId = params.get('id');
@@ -70,10 +71,18 @@ export class RefereeVotesComponent implements OnInit {
           throwError('User (' + this.refereeId + ') is not active.');
         }
         if (this.referee.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === 'REFEREE_COACH').length === 0) {
-          throwError('User (' + this.refereeId + ') has not role of REFEREE.');
+          throwError('User (' + this.refereeId + ') has not role of REFEREE_COACH.');
         }
       }),
-      mergeMap(() => this.refereeUpgradeService.find10LastRefereeUpgrades(this.refereeId)),
+      mergeMap(() => {
+        let upgradeStatus: RefereeUpgradeStatus = 'PUBLISHED';
+        if (this.connectedUserService.isAdmin()
+          || (this.connectedUserService.isRefereeCoach()
+              && this.userService.canVoteLevel(this.referee.referee.refereeLevel, user.refereeCoach.refereeCoachLevel))) {
+          upgradeStatus = null;
+        }
+        return this.refereeUpgradeService.find10LastRefereeUpgrades(this.refereeId, upgradeStatus);
+      }),
       map(rru => {
         this.refereeUpgrades = rru.data;
         console.log('this.refereeUpgrades', this.refereeUpgrades);
@@ -83,6 +92,10 @@ export class RefereeVotesComponent implements OnInit {
           this.refereeUpgradeId = this.refereeUpgrades[0].id;
           this.onRefereeUpgradeChange();
         }
+      }),
+      catchError(err => {
+        this.navBack();
+        return of('');
       })
     ).subscribe();
   }
