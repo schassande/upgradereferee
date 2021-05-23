@@ -1,9 +1,9 @@
 {
-    "name": "coachreferee",
+    "name": "upgradereferee",
     "version": "0.3.3",
-    "description": "Ref Coach project",
+    "description": "Referee upgrade web application",
     "author": "Sebastien Chassande-Barrioz",
-    "homepage": "https://refcoach",
+    "homepage": "https://upgrade.coachreferee.com",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",

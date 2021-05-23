@@ -69,7 +69,7 @@
         </ion-row>
         <ion-row *ngFor="let ru of filteredUpgrades">
             <ion-col style="font-size: 0.8em; text-align: center;" size="2">
-                {{this.dateService.date2string(ru.upgrade.decisionDate)}}
+                <span innerHtml="{{date2html(ru.upgrade.decisionDate)}}"></span>
             </ion-col>
             <ion-col style="text-align: center;" size="2"><img src="assets/imgs/badge/{{ru.upgrade.upgradeLevel}}.png" height="30" /></ion-col>
             <ion-col size="6">

@@ -82,21 +82,21 @@ export class CompetitionUpgradesComponent implements OnInit {
       }),
       // load Referee Upgrade
       mergeMap(() =>
-        forkJoin(this.competition.days
-          .map(day => this.refereeUpgradeService.findRefereeUpgradeByCompetition(this.competition.id).pipe(
+        this.refereeUpgradeService.findRefereeUpgradeByCompetition(this.competition.id).pipe(
           map(rrus => rrus.data.forEach(ru => {
             // console.log('canVoteLevel(' + ru.upgradeLevel + ', ' + coach.refereeCoach.refereeCoachLevel + ')='
             //   + this.userService.canVoteLevel(ru.upgradeLevel, coach.refereeCoach.refereeCoachLevel));
             if (isAdminOrDirector || this.userService.canVoteLevel(ru.upgradeLevel, coach.refereeCoach.refereeCoachLevel)) {
               list.push(ru);
             }
-          }))
+          }
         )))
       ),
       mergeMap(() => {
         if (list.length === 0) {
           return of('');
         }
+        console.log('list of RU:', list);
         // extract the list of the referee ids
         const refIds: string[] = [];
         list.forEach(ru => this.toolService.addToSet(refIds, ru.referee.refereeId));
@@ -205,5 +205,11 @@ export class CompetitionUpgradesComponent implements OnInit {
 
   back() {
     this.navController.navigateRoot(`/competition/${this.competition.id}/home`);
+  }
+
+  date2html(date: Date): string {
+    return date.getFullYear()
+      + '<br>' + this.dateService.to2Digit(date.getMonth() + 1)
+      + '-' + this.dateService.to2Digit(date.getDate());
   }
 }
