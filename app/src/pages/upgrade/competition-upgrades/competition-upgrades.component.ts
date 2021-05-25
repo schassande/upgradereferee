@@ -125,6 +125,7 @@ export class CompetitionUpgradesComponent implements OnInit {
       }),
       map (() => {
         this.filterUpgrades();
+        this.onSortChange();
         this.loading = false;
         return this.competition;
       })
@@ -133,24 +134,21 @@ export class CompetitionUpgradesComponent implements OnInit {
 
   onSortChange() {
     console.log('onSortChange() ' + this.sort);
-    return this.upgrades.sort((u1: RefUp, u2: RefUp) => {
+    const fcts: any[] = [];
+    if (this.sort === 'Date-Level') {
+      fcts.push(this.compareUpgradeDate.bind(this));
+      fcts.push(this.compareUpgradeLevel.bind(this));
+    } else if (this.sort === 'Level-Date') {
+      fcts.push(this.compareUpgradeLevel.bind(this));
+      fcts.push(this.compareUpgradeDate.bind(this));
+    }
+    fcts.push(this.compareUpgradeStatus.bind(this));
+    fcts.push(this.compareUpgradeFirstName.bind(this));
+    fcts.push(this.compareUpgradeLastName.bind(this));
+    this.filteredUpgrades = this.filteredUpgrades.sort((u1: RefUp, u2: RefUp) => {
       let res = 0;
-      if (this.sort === 'Date-Level') {
-        res = this.compareUpgradeDate(u1, u2);
-        if (res === 0) {
-          res = this.compareUpgradeStatus(u1, u2);
-        }
-      } else if (this.sort === 'Level-Date') {
-        res = this.compareUpgradeStatus(u1, u2);
-        if (res === 0) {
-          res = this.compareUpgradeDate(u1, u2);
-        }
-      }
-      if (res === 0) {
-        res = u1.referee.firstName.localeCompare(u2.referee.firstName);
-      }
-      if (res === 0) {
-        res = u1.referee.lastName.localeCompare(u2.referee.lastName);
+      for (let i = 0; i < fcts.length && res === 0; i++) {
+        res = fcts[i](u1, u2);
       }
       return res;
     });
@@ -197,10 +195,29 @@ export class CompetitionUpgradesComponent implements OnInit {
     })).subscribe(() => this.filterUpgrades());
   }
   private compareUpgradeDate(u1: RefUp, u2: RefUp): number {
-    return this.dateService.compareDate(u1.upgrade.decisionDate, u2.upgrade.decisionDate);
+    const res = this.dateService.compareDate(u1.upgrade.decisionDate, u2.upgrade.decisionDate);
+    // console.log('Compare RefUp by date (' + u1.referee.shortName + ', ' + u2.referee.shortName + ') = ' + res);
+    return res;
   }
   private compareUpgradeStatus(u1: RefUp, u2: RefUp): number {
-    return u1.upgrade.upgradeStatus.localeCompare(u2.upgrade.upgradeStatus);
+    const res = u1.upgrade.upgradeStatus.localeCompare(u2.upgrade.upgradeStatus);
+    // console.log('Compare RefUp by status (' + u1.referee.shortName + ', ' + u2.referee.shortName + ') = ' + res);
+    return res;
+  }
+  private compareUpgradeLevel(u1: RefUp, u2: RefUp): number {
+    const res = u1.upgrade.upgradeLevel.localeCompare(u2.upgrade.upgradeLevel);
+    // console.log('Compare RefUp by level (' + u1.referee.shortName + ', ' + u2.referee.shortName + ') = ' + res);
+    return res;
+  }
+  private compareUpgradeFirstName(u1: RefUp, u2: RefUp): number {
+    const res = u1.referee.firstName.localeCompare(u2.referee.firstName);
+    // console.log('Compare RefUp by first name (' + u1.referee.shortName + ', ' + u2.referee.shortName + ') = ' + res);
+    return res;
+  }
+  private compareUpgradeLastName(u1: RefUp, u2: RefUp): number {
+    const res = u1.referee.lastName.localeCompare(u2.referee.lastName);
+    // console.log('Compare RefUp by last name (' + u1.referee.shortName + ', ' + u2.referee.shortName + ') = ' + res);
+    return res;
   }
 
   back() {

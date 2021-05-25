@@ -51,7 +51,7 @@
             <ion-select-option value="PUBLISHED">Published</ion-select-option>
         </ion-select>
     </ion-item>
-    <ion-item>
+    <ion-item *ngIf="competition && competition.days.length > 1">
         <ion-select (ionChange)="onSortChange()" [(ngModel)]="sort" interface="action-sheet">
             <ion-select-option value="Level-Date">Sort By level then by date</ion-select-option>
             <ion-select-option value="Date-Level">Sort By date then by level</ion-select-option>
@@ -62,7 +62,7 @@
     <ion-grid *ngIf="!loading && filteredUpgrades && filteredUpgrades.length > 0">
         <ion-row>
             <ion-col size="2" style="text-align: center;">Date</ion-col>
-            <ion-col size="2" style="text-align: center;">Lvl</ion-col>
+            <ion-col size="2" style="text-align: center;">Up Lvl</ion-col>
             <ion-col size="6" style="text-align: center;">Referee</ion-col>
             <ion-col size="1" style="text-align: center;">Vo</ion-col>
             <ion-col size="1" style="text-align: center;">Pu</ion-col>
