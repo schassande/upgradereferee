@@ -102,10 +102,10 @@
                         <ion-radio slot="start" value="Yes" color="success" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
-                        <ion-label style="color: blue; font-weight: bold;">Abstein</ion-label>
-                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Abstein'" style="width: 30px;"></div>
-                        <ion-icon slot="start" name="radio-button-on-outline" size="large" color="primary" *ngIf="vote.closed && vote.vote === 'Abstein'"></ion-icon>
-                        <ion-radio slot="start" value="Abstein" color="primary" *ngIf="!vote.closed"></ion-radio>
+                        <ion-label style="color: blue; font-weight: bold;">Abstain</ion-label>
+                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Abstein' && vote.vote !== 'Abstain'" style="width: 30px;"></div>
+                        <ion-icon slot="start" name="radio-button-on-outline" size="large" color="primary" *ngIf="vote.closed && (vote.vote === 'Abstein' || vote.vote === 'Abstain')"></ion-icon>
+                        <ion-radio slot="start" value="Abstain" color="primary" *ngIf="!vote.closed"></ion-radio>
                     </ion-item>
                     <ion-item>
                         <ion-label style="color: red; font-weight: bold;">Not yet competent</ion-label>

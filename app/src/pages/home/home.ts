@@ -32,7 +32,7 @@ export class HomePage implements OnInit {
   public isRefereeCoach() {
     return this.connectedUserService.isRefereeCoach();
   }
-  public isLevelAdmin() {
+  public isAdmin() {
     return this.connectedUserService.isAdmin();
   }
   public isNdr() {

@@ -63,8 +63,8 @@ export class CompetitionVotesComponent implements OnInit {
   coachVotes: CompetitionDayRefereeCoachVote[] = [];
   /** The number of decision 'No' for the selected referee */
   totalNo = 0;
-  /** The number of decision 'Abstein' for the selected referee */
-  totalAbstein = 0;
+  /** The number of decision 'Abstain' for the selected referee */
+  totalAbstain = 0;
   /** The number of decision 'Yes' for the selected referee */
   totalYes = 0;
 
@@ -208,6 +208,13 @@ export class CompetitionVotesComponent implements OnInit {
       // the account of the referee is not validated
       return false;
     }
+    if (referee.referee.nextRefereeLevel !== 'EURO_3'
+      && referee.referee.nextRefereeLevel !== 'EURO_4'
+      && referee.referee.nextRefereeLevel !== 'EURO_5'
+      ) {
+      // the referee is not upgradable
+      return false;
+    }
     if (referee.applications.findIndex((ar) => ar.role === 'REFEREE' && ar.name === CurrentApplicationName) < 0) {
       // the referee is not a registered account as Referee
       return false;
@@ -231,12 +238,13 @@ export class CompetitionVotesComponent implements OnInit {
       this.loadCoachVotes().pipe(
         map(() => {
           this.totalYes = 0;
-          this.totalAbstein = 0;
+          this.totalAbstain = 0;
           this.totalNo = 0;
           this.coachVotes.forEach(v => {
             switch (v.vote){
               case 'Yes': this.totalYes++; break;
-              case 'Abstein': this.totalAbstein++; break;
+              case 'Abstein': this.totalAbstain++; break;
+              case 'Abstain': this.totalAbstain++; break;
               case 'No': this.totalNo++; break;
             }
           });
@@ -290,7 +298,7 @@ export class CompetitionVotesComponent implements OnInit {
         refereeId: this.refereeId
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
-      vote: 'Abstein',
+      vote: 'Abstain',
       commentForCoach: '-',
       commentForReferee: '-',
       closed: false,
@@ -304,7 +312,7 @@ export class CompetitionVotesComponent implements OnInit {
     } else if ((this.totalYes - this.totalNo) < 0) {
       this.vote.vote = 'No';
     } else {
-      this.vote.vote = 'Abstein';
+      this.vote.vote = 'Abstain';
     }
   }
 

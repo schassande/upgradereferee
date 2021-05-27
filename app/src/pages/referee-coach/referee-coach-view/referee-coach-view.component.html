@@ -23,7 +23,7 @@
             <br>from {{coachCountry}} / {{coach.region}}
         </div>
         <ul>
-            <li>Contact: {{coach.mobilePhones}} {{coach.email}}</li>
+            <li *ngIf="canEdit()">Contact: {{coach.mobilePhones}} {{coach.email}}</li>
             <li>Speaking languages : {{coachLanguage ? coachLanguage.join(", ") : ''}}</li>
             <li>Gender: {{coach.gender == 'M' ? 'Male' : (coach.gender == 'F' ? 'Female' : '-')}}</li>
             <li>Referee coach Level: {{coach.refereeCoach.refereeCoachLevel}}</li>

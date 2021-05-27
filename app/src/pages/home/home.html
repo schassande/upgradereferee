@@ -12,7 +12,7 @@
         <ion-item detail routerLink="/competition/list">
             <ion-label class="menu-entry">Competitions</ion-label>
         </ion-item>
-        <ion-item detail routerLink="/referee/list">
+        <ion-item detail routerLink="/referee/list" *ngIf="isRefereeCoach() || isAdmin()">
             <ion-label class="menu-entry">Referees</ion-label>
         </ion-item>
         <ion-item detail routerLink="/referee-coach/list">
@@ -31,10 +31,10 @@
         <ion-item detail routerLink="/settings">
             <ion-label class="menu-entry">Settings</ion-label>
         </ion-item>
-        <ion-item detail routerLink="/admin" *ngIf="isLevelAdmin()">
+        <ion-item detail routerLink="/admin" *ngIf="isAdmin()">
             <ion-label class="menu-entry">Admin</ion-label>
         </ion-item>
-        <ion-item detail routerLink="/user/referee-validation" *ngIf="isNdr() || isLevelAdmin()">
+        <ion-item detail routerLink="/user/referee-validation" *ngIf="isNdr() || isAdmin()">
             <ion-label class="menu-entry">Referee Validation</ion-label>
         </ion-item>
         <ion-item (click)="addToHome()" *ngIf="showInstallBtn">

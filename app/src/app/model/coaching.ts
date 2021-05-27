@@ -1,7 +1,7 @@
 import { GameCategory, GameLevel } from './game';
 import { PersistentData, SharedElement } from './common';
 
-export type Upgradable = 'DNS' | 'DNSE'  | 'No' | 'Possible' | 'Yes' | 'Abstein' ;
+export type Upgradable = 'DNS' | 'DNSE'  | 'No' | 'Possible' | 'Yes' | 'Abstein' | 'Abstain';
 
 export interface PRO {
     problemShortDesc: string;

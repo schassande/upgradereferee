@@ -23,7 +23,7 @@
             <br>from {{refereeCountry}} / {{referee.region}}
         </div>
         <ul>
-            <li>Contact: {{referee.mobilePhones}} {{referee.email}}</li>
+            <li *ngIf="canEdit()">Contact: {{referee.mobilePhones}} {{referee.email}}</li>
             <li>Speaking languages : {{refereeLanguage ? refereeLanguage.join(", ") : ''}}</li>
             <li>Gender: {{referee.gender == 'M' ? 'Male' : (referee.gender == 'F' ? 'Female' : '-')}}</li>
             <li>Referee Level: {{referee.referee.refereeLevel}}</li>

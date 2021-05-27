@@ -6,7 +6,7 @@ import { catchError, map, mergeMap } from 'rxjs/operators';
 import { Upgradable } from 'src/app/model/coaching';
 import { Competition } from 'src/app/model/competition';
 import { RefereeUpgrade, RefereeUpgradeStatus } from 'src/app/model/upgrade';
-import { RefereeLevel, User } from 'src/app/model/user';
+import { getNextRefereeLevel, RefereeLevel, User } from 'src/app/model/user';
 import { CompetitionService } from 'src/app/service/CompetitionService';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 import { DateService } from 'src/app/service/DateService';
@@ -183,12 +183,21 @@ export class CompetitionUpgradesComponent implements OnInit {
     });
   }
 
+  /** Publish the decision not already published of the list of filtered referees */
   public publishAll() {
     this.hasUnpublished = false;
     forkJoin(this.filteredUpgrades.map(u => {
       if (u.upgrade.upgradeStatus === 'DECIDED') {
+        // set the status of the upgrade
         u.upgrade.upgradeStatus = 'PUBLISHED';
-        return this.refereeUpgradeService.save(u.upgrade);
+        // set the new level of the referee
+        u.referee.referee.refereeLevel = u.referee.referee.nextRefereeLevel;
+        // Compute the next referee level
+        u.referee.referee.nextRefereeLevel = getNextRefereeLevel(u.referee.referee.refereeLevel);
+        return this.refereeUpgradeService.save(u.upgrade).pipe( // save the upgrade
+          mergeMap(() => this.userService.save(u.referee)), // save the referee
+          mergeMap(() => this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade)) // send an email to the referee
+        );
       } else {
         return of('');
       }

@@ -362,6 +362,14 @@ export class VotingComponent implements OnInit {
       console.log('Referee ' + referee.shortName + ' is NOT upgradable (account status)');
       return false;
     }
+    if (referee.referee.nextRefereeLevel !== 'EURO_3'
+      && referee.referee.nextRefereeLevel !== 'EURO_4'
+      && referee.referee.nextRefereeLevel !== 'EURO_5'
+      ) {
+      console.log('Referee ' + referee.shortName + ' is NOT upgradable (wrong nextRefereeLevel: ' + referee.referee.nextRefereeLevel + ')');
+        // the referee is not upgradable
+      return false;
+    }
     if (referee.applications.findIndex((ar) => ar.role === 'REFEREE' && ar.name === CurrentApplicationName) < 0) {
       // the referee is not a registered account as Referee
       console.log('Referee ' + referee.shortName + ' is NOT upgradable (not a referee of the application)');
@@ -417,7 +425,7 @@ export class VotingComponent implements OnInit {
         refereeId: this.referee.id
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
-      vote: 'Abstein',
+      vote: 'Abstain',
       commentForCoach: '-',
       commentForReferee: '-',
       closed: false,

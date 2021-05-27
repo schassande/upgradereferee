@@ -75,7 +75,7 @@
                 <ion-row class="header-row">
                     <ion-col size="4" style="text-align: right;">Referee Coach</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteNo">Not Yet</ion-col>
-                    <ion-col size="2" style="text-align: center;" class="voteAbstein">Abstein</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteAbstain">Abstain</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteYes">Yes</ion-col>
                 </ion-row>
                 <ion-row class="coachVotes-row" *ngFor="let rcvote of coachVotes">
@@ -84,7 +84,7 @@
                         <ion-icon name="close-outline" size="large" color="danger" *ngIf="rcvote.vote === 'No'"></ion-icon>
                     </ion-col>
                     <ion-col size="2" style="text-align: center;">
-                        <ion-icon name="radio-button-on-outline" size="large" color="primary" *ngIf="rcvote.vote === 'Abstein'"></ion-icon>
+                        <ion-icon name="radio-button-on-outline" size="large" color="primary" *ngIf="rcvote.vote === 'Abstein' || rcvote.vote === 'Abstain'"></ion-icon>
                     </ion-col>
                     <ion-col size="2" style="text-align: center;">
                         <ion-icon name="checkmark-outline" size="large" color="success" *ngIf="rcvote.vote === 'Yes'"></ion-icon>
@@ -93,7 +93,7 @@
                 <ion-row class="coachVotes-row">
                     <ion-col size="4" style="text-align: right; font-weight: bold;">Total</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteNo">{{totalNo}}</ion-col>
-                    <ion-col size="2" style="text-align: center;" class="voteAbstein">{{totalAbstein}}</ion-col>
+                    <ion-col size="2" style="text-align: center;" class="voteAbstain">{{totalAbstain}}</ion-col>
                     <ion-col size="2" style="text-align: center;" class="voteYes">{{totalYes}}</ion-col>
                 </ion-row>
                 <ion-radio-group *ngIf="vote" [(ngModel)]="vote.vote" name="votePanel" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
@@ -104,8 +104,8 @@
                             <ion-radio value="No" *ngIf="canVote && !vote.closed && coachVotes.length > 0" color="danger" style="display: inline-block;"></ion-radio>
                         </ion-col>
                         <ion-col size="2" style="text-align: center;">
-                            <ion-icon name="radio-button-on-outline" size="large" color="primary" *ngIf="(!canVote || vote.closed) && vote.vote === 'Abstein'"></ion-icon>
-                            <ion-radio value="Abstein" *ngIf="canVote && !vote.closed" color="primary" style="display: inline-block;"></ion-radio>
+                            <ion-icon name="radio-button-on-outline" size="large" color="primary" *ngIf="(!canVote || vote.closed) && (vote.vote === 'Abstein' || vote.vote === 'Abstain')"></ion-icon>
+                            <ion-radio value="Abstain" *ngIf="canVote && !vote.closed" color="primary" style="display: inline-block;"></ion-radio>
                         </ion-col>
                         <ion-col size="2" style="text-align: center;">
                             <ion-icon name="checkmark-outline" size="large" color="success" *ngIf="(!canVote || vote.closed) && vote.vote === 'Yes'"></ion-icon>
