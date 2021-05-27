@@ -28,7 +28,7 @@
     <ion-card *ngIf="!loading && refereeUpgrade">
         <ion-card-content>
             <ion-title>
-                <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
+                <img src="assets/imgs/badge/{{refereeUpgrade.upgradeLevel}}.png" alt="{{refereeUpgrade.upgradeLevel}}" height="70" />
                 <div>Upgrade decision:
                     <span style="font-weight: bold; color: red;" *ngIf="refereeUpgrade.decision !== 'Yes'">Not Yet</span>
                     <span style="font-weight: bold; color: green;" *ngIf="refereeUpgrade.decision === 'Yes'">Yes</span>

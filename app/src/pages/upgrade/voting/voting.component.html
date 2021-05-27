@@ -80,7 +80,7 @@
             <ion-item-divider color="light">
                 <div style="text-align: center; padding: 10px; width: 100%;">
                     <div style="font-size: 1.3em; font-weight: bold;">
-                        Vote for upgrade to {{referee.referee.nextRefereeLevel}}
+                        Vote for upgrade to {{vote.upgradeLevel}}
                         <span *ngIf="vote.closed">&nbsp;(closed)</span>
                     </div>
                     <div *ngIf="dirty || vote.dataStatus === 'NEW'">(not saved)</div>
@@ -91,7 +91,7 @@
             </div>
             <div style="clear: both;"></div>
             <div style="text-align: center;">
-                <img src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" height="70" />
+                <img src="assets/imgs/badge/{{vote.upgradeLevel}}.png" alt="{{vote.upgradeLevel}}" height="70" />
             </div>
             <ion-item>
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">

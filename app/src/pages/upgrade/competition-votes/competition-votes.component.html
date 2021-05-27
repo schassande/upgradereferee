@@ -64,11 +64,12 @@
                 <div style="text-align: center; padding: 10px; width: 100%;">
                     <div style="font-size: 1.4em; font-weight: bold;">
                         Panel vote for upgrade
-                        <span *ngIf="vote.closed">&nbsp;(closed)</span>
+                        <span *ngIf="vote && vote.closed">&nbsp;(closed)</span>
                     </div>
-                    <div *ngIf="dirty || vote.dataStatus === 'NEW'">(not saved)</div>
+                    <div *ngIf="dirty || (vote && vote.dataStatus === 'NEW')">(not saved)</div>
                 </div>
-                <img style="height: 70px;" src="assets/imgs/badge/{{referee.referee.nextRefereeLevel}}.png" alt="{{referee.referee.nextRefereeLevel}}" />
+
+                <img *ngIf="vote" style="height: 70px;" src="assets/imgs/badge/{{vote.upgradeLevel}}.png" alt="{{vote.upgradeLevel}}" />
             </div>
             <div style="clear: both;"></div>
             <ion-grid class="coachVotes">
