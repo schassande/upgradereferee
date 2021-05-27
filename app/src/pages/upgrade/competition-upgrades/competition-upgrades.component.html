@@ -63,8 +63,8 @@
         <ion-row>
             <ion-col size="2" style="text-align: center;">Date</ion-col>
             <ion-col size="2" style="text-align: center;">Up Lvl</ion-col>
-            <ion-col size="6" style="text-align: center;">Referee</ion-col>
             <ion-col size="1" style="text-align: center;">Vo</ion-col>
+            <ion-col size="6" style="text-align: center;">Referee</ion-col>
             <ion-col size="1" style="text-align: center;">Pu</ion-col>
         </ion-row>
         <ion-row *ngFor="let ru of filteredUpgrades">
@@ -72,21 +72,23 @@
                 <span innerHtml="{{date2html(ru.upgrade.decisionDate)}}"></span>
             </ion-col>
             <ion-col style="text-align: center;" size="2"><img src="assets/imgs/badge/{{ru.upgrade.upgradeLevel}}.png" height="30" /></ion-col>
-            <ion-col size="6">
-                <span style="font-size: 1.1em; font-weight: bold;">{{ru.referee.shortName}} - {{ru.referee.firstName}} {{ru.referee.lastName}}</span>
-                <br>{{ru.referee.country}} / {{ru.referee.region}}
-            </ion-col>
             <ion-col style="text-align: center;" size="1">
                 <span *ngIf="ru.upgrade.decision === 'Yes'"><ion-icon name="checkmark-outline" size="small" color="success"></ion-icon></span>
                 <span *ngIf="ru.upgrade.decision === 'No'"><ion-icon name="close-outline" size="small" color="danger"></ion-icon></span>
             </ion-col>
-            <ion-col style="text-align: center;" size="1">
+            <ion-col size="6">
+                <span style="font-size: 1.1em; font-weight: bold;">{{ru.referee.shortName}} - {{ru.referee.firstName}} {{ru.referee.lastName}}</span>
+                <br>{{ru.referee.country}} / {{ru.referee.region}}
+            </ion-col>
+            <ion-col style="text-align: center;" class="action" size="1" (click)="publishOne(ru)">
                 <span *ngIf="ru.upgrade.upgradeStatus === 'PUBLISHED'"><ion-icon name="checkmark-outline" size="small" color="success"></ion-icon></span>
                 <span *ngIf="ru.upgrade.upgradeStatus === 'DECIDED'"><ion-icon name="close-outline" size="small" color="danger"></ion-icon></span>
             </ion-col>
         </ion-row>
     </ion-grid>
     <div style="width: 100%; text-align: center;">
-        <ion-button *ngIf="hasUnpublished" shape="round" size="large" style="width: 80%; padding: 10px;" (click)="publishAll()">Publish selected</ion-button>
+        <ion-button *ngIf="hasUnpublished" shape="round" size="large" style="width: 80%; padding: 10px;" (click)="publishAll()" [disabled]="publishing">
+            <span *ngIf="publishing"><ion-spinner></ion-spinner>&nbsp;</span>Publish selected
+        </ion-button>
     </div>
 </ion-content>

@@ -147,7 +147,7 @@
     <div style="text-align: center; margin-top: 20px;" *ngIf="!loading && refereeUpgrades.length === 0">
         No upgrade information available.
     </div>
-    <div style="text-align: center;" *ngIf="refereeUpgrade">
+    <div style="text-align: center;" *ngIf="refereeUpgrade && isAdmin()">
         <ion-button [disabled]="computing" (click)="onRecomputeUpgrade()" shape="round">
             <ion-icon name="refresh-sharp"></ion-icon>&nbsp;Re Compute
             <ion-spinner *ngIf="computing" style="margin-left: 10px;"></ion-spinner>

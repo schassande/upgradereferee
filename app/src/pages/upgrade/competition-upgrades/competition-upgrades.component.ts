@@ -28,6 +28,7 @@ export class CompetitionUpgradesComponent implements OnInit {
 
   competition: Competition;
   loading = false;
+  publishing = false;
   upgrades: RefUp[] = [];
   sort: UpgradeSort = 'Level-Date';
   hasUnpublished = false;
@@ -186,22 +187,41 @@ export class CompetitionUpgradesComponent implements OnInit {
   /** Publish the decision not already published of the list of filtered referees */
   public publishAll() {
     this.hasUnpublished = false;
-    forkJoin(this.filteredUpgrades.map(u => {
-      if (u.upgrade.upgradeStatus === 'DECIDED') {
-        // set the status of the upgrade
-        u.upgrade.upgradeStatus = 'PUBLISHED';
-        // set the new level of the referee
-        u.referee.referee.refereeLevel = u.referee.referee.nextRefereeLevel;
-        // Compute the next referee level
-        u.referee.referee.nextRefereeLevel = getNextRefereeLevel(u.referee.referee.refereeLevel);
-        return this.refereeUpgradeService.save(u.upgrade).pipe( // save the upgrade
-          mergeMap(() => this.userService.save(u.referee)), // save the referee
-          mergeMap(() => this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade)) // send an email to the referee
-        );
-      } else {
-        return of('');
-      }
-    })).subscribe(() => this.filterUpgrades());
+    this.publishing = true;
+    forkJoin(this.filteredUpgrades.map(u => this.publish(u))).subscribe(() => {
+      this.filterUpgrades();
+      this.publishing = false;
+    });
+  }
+
+  public publishOne(u: RefUp) {
+    this.hasUnpublished = false;
+    this.publishing = true;
+    this.publish(u).subscribe(() => {
+      this.filterUpgrades();
+      this.publishing = false;
+    });
+  }
+
+  private publish(u: RefUp): Observable<any> {
+    if (u.upgrade.upgradeStatus === 'DECIDED' || u.upgrade.upgradeLevel === u.referee.referee.nextRefereeLevel) {
+      console.log('publishing ' + u.referee.shortName + ' ' + u.upgrade.upgradeLevel + ' ' + u.upgrade.decision);
+      // set the status of the upgrade
+      u.upgrade.upgradeStatus = 'PUBLISHED';
+      // set the new level of the referee
+      u.referee.referee.refereeLevel = u.referee.referee.nextRefereeLevel;
+      // Compute the next referee level
+      u.referee.referee.nextRefereeLevel = getNextRefereeLevel(u.referee.referee.refereeLevel);
+      return this.refereeUpgradeService.save(u.upgrade).pipe( // save the upgrade
+        mergeMap(() => this.userService.save(u.referee)), // save the referee
+        mergeMap(() => this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade)) // send an email to the referee
+      );
+    } else if (u.upgrade.decision === 'Yes') {
+      console.log('Send certificate only');
+      return this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade);
+    } else {
+      return of('');
+    }
   }
   private compareUpgradeDate(u1: RefUp, u2: RefUp): number {
     const res = this.dateService.compareDate(u1.upgrade.decisionDate, u2.upgrade.decisionDate);
