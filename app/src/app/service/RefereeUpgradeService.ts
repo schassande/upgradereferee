@@ -85,4 +85,9 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
         }
         return this.query(q, 'default');
     }
+    public sendRefereeUpgrade(upgrade: RefereeUpgrade): Observable<any> {
+        if (upgrade.decision === 'Yes' && upgrade.upgradeStatus === 'DECIDED') {
+            return this.angularFireFunctions.httpsCallable('sendRefereeUpgrade')({upgradeId: upgrade.id});
+        }
+    }
 }
