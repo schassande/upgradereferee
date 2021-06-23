@@ -12,6 +12,7 @@ import { RefereeService } from 'src/app/service/RefereeService';
 import { ResponseWithData } from 'src/app/service/response';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { UpgradeCriteriaService } from 'src/app/service/UpgradeCriteriaService';
+import { ToolService } from 'src/app/service/ToolService';
 
 
 /**
@@ -42,7 +43,8 @@ export class SettingsPage implements OnInit {
     private navController: NavController,
     private refereeService: RefereeService,
     private upgradeCriteriaService: UpgradeCriteriaService,
-    private userService: UserService
+    private userService: UserService,
+    private toolService: ToolService,
   ) {
   }
 
@@ -182,6 +184,31 @@ export class SettingsPage implements OnInit {
 
   initUpgradeCriteria() {
     this.upgradeCriteriaService.initData().subscribe();
+  }
+
+  cleanNoAccount() {
+    console.log('cleanNoAccount: begin');
+    this.userService.all().pipe(
+      mergeMap((rus) => {
+        if (rus.error) {
+          throwError(rus.error);
+        }
+        if (rus.data.length === 0) {
+          return of('');
+        }
+        return forkJoin(rus.data.map(user => {
+          if (user.accountStatus === 'NO_ACCOUNT'
+            && this.toolService.isValidString(user.email)
+            && !user.email.startsWith('_')) {
+            user.email = '_' + user.email;
+            user.shortName = '_' + user.shortName;
+            console.log('cleanNoAccount: adjust user ', user.email, user.accountId);
+            return this.userService.save(user);
+          }
+          return of('');
+        }));
+      })
+    ).subscribe(() => console.log('cleanNoAccount: end'));
   }
 
   toggleDebugInfo() {

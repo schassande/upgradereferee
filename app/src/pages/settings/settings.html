@@ -33,6 +33,9 @@
         <ion-item (click)="initUpgradeCriteria()" *ngIf="!env.production">
             <ion-label class="menu-entry">init upgrade criteria</ion-label>
         </ion-item>
+        <ion-item (click)="cleanNoAccount()" *ngIf="!env.production">
+            <ion-label class="menu-entry">clean no account</ion-label>
+        </ion-item>
     </ion-list>
 
     <p *ngFor="let m of msg" class="message">{{m}}</p>
