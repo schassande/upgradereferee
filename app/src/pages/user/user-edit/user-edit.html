@@ -112,7 +112,7 @@
             <div *ngIf="refereeRole">
                 <ion-item>
                     <ion-label>Current referee Level</ion-label>
-                    <ion-select [(ngModel)]="user.referee.refereeLevel" interface="action-sheet">
+                    <ion-select [(ngModel)]="user.referee.refereeLevel" interface="action-sheet" [disabled]="disallowRefereeLevelChange()">
                         <ion-select-option value="EURO_2">European Level 2</ion-select-option>
                         <ion-select-option value="EURO_3">European Level 3</ion-select-option>
                         <ion-select-option value="EURO_4">European Level 4</ion-select-option>
@@ -120,7 +120,7 @@
                 </ion-item>
                 <ion-item>
                     <ion-label>Referee category</ion-label>
-                    <ion-select [(ngModel)]="user.referee.refereeCategory" interface="action-sheet">
+                    <ion-select [(ngModel)]="user.referee.refereeCategory" interface="action-sheet" [disabled]="disallowRefereeLevelChange()">
                         <ion-select-option value="JUNIOR">Junior</ion-select-option>
                         <ion-select-option value="OPEN">Open</ion-select-option>
                         <ion-select-option value="SENIOR">Senior</ion-select-option>
@@ -140,7 +140,7 @@
             <div *ngIf="refereeCoachRole">
                 <ion-item>
                     <ion-label>Referee coach Level</ion-label>
-                    <ion-select [(ngModel)]="user.refereeCoach.refereeCoachLevel" interface="action-sheet">
+                    <ion-select [(ngModel)]="user.refereeCoach.refereeCoachLevel" interface="action-sheet" [disabled]="disallowRefereeCoachLevelChange()">
                         <ion-select-option value="EURO_3">European Level 3</ion-select-option>
                         <ion-select-option value="EURO_4">European Level 4</ion-select-option>
                         <ion-select-option value="EURO_5">European Level 5</ion-select-option>

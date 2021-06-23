@@ -86,6 +86,16 @@ export class UserEditPage implements OnInit {
   onNDRRoleChange() {
     this.onXXXRoleChange(this.ndrRole, this.ndrRoleInit, 'NDR');
   }
+  disallowRefereeLevelChange(): boolean {
+    return this.user.accountStatus === 'ACTIVE' && this.hasRole('REFEREE') && !this.connectedUserService.isAdmin();
+  }
+  disallowRefereeCoachLevelChange(): boolean {
+    return this.user.accountStatus === 'ACTIVE' && this.hasRole('REFEREE_COACH') && !this.connectedUserService.isAdmin();
+  }
+
+  private hasRole(role: AppRole): boolean {
+    return this.user.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === role).length > 0;
+  }
 
   private onXXXRoleChange(hasRole: boolean, hadRole: boolean, role: AppRole) {
     const ar: ApplicationRole = { name: CurrentApplicationName, role};
