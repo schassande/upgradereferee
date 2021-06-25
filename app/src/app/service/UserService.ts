@@ -435,6 +435,9 @@ export class UserService  extends RemotePersistentDataService<User> {
     public sendAccountNotValidated(userId: string): Observable<any> {
         return this.angularFireFunctions.httpsCallable('sendAccountNotValidated')({userId});
     }
+    public sendValidationRequired(userId: string, rolesToValidate: AppRole[], toEmails: string[], ccEmails: string[]) {
+        return this.angularFireFunctions.httpsCallable('sendValidationRequired')({userId, rolesToValidate, toEmails, ccEmails});
+    }
 
     public sortUsers(users: User[]): User[] {
         if (users) {

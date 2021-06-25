@@ -9,6 +9,7 @@ import { UserService } from '../../../app/service/UserService';
 import { User, CONSTANTES, CurrentApplicationName, ApplicationRole, AppRole, getNextRefereeLevel } from '../../../app/model/user';
 
 import { PhotoEvent } from '../../widget/camera-icon-component';
+import { Observable, of } from 'rxjs';
 
 /**
  * Generated class for the UserNewPage page.
@@ -95,6 +96,9 @@ export class UserEditPage implements OnInit {
 
   private hasRole(role: AppRole): boolean {
     return this.user.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === role).length > 0;
+  }
+  private demandRole(role: AppRole): boolean {
+    return this.user.demandingApplications.filter(ar => ar.name === CurrentApplicationName && ar.role === role).length > 0;
   }
 
   private onXXXRoleChange(hasRole: boolean, hadRole: boolean, role: AppRole) {
@@ -290,7 +294,7 @@ export class UserEditPage implements OnInit {
             this.user = response.data;
             console.log('Saved user: ', this.user);
             if (this.user.accountStatus === 'VALIDATION_REQUIRED') {
-              this.navController.navigateRoot('/user/waiting-validation');
+              this.notifyValidationRequired().subscribe(() => this.navController.navigateRoot('/user/waiting-validation'));
             }
             this.saving = false;
           }
@@ -298,6 +302,50 @@ export class UserEditPage implements OnInit {
       ).subscribe();
     }
   }
+  private notifyValidationRequired(): Observable<any> {
+    const askNdr: boolean = this.demandRole('NDR');
+    const askCoach: boolean = this.demandRole('REFEREE_COACH');
+    const askReferee: boolean = this.demandRole('REFEREE');
+    if (askNdr || askCoach) {
+      // Send notification to the Admins
+      let adminEmails: string[] = [];
+      const rolesToValidate: AppRole[] = [];
+      if (askNdr) {
+        rolesToValidate.push('NDR');
+      }
+      if (askCoach) {
+        rolesToValidate.push('REFEREE_COACH');
+      }
+      return this.userService.searchUsers({ role: 'ADMIN'}).pipe(
+        map(rusers => {
+          adminEmails = rusers.error || rusers.data.length === 0
+            ? []
+            : rusers.data.map(u => u.email);
+        }),
+        mergeMap(() => this.userService.sendValidationRequired(this.user.id, rolesToValidate, adminEmails, []))
+      );
+    }
+    if (askReferee) {
+      // Send notification to the NDR and the admin
+      let ndrEmails: string[] = [];
+      let adminEmails: string[] = [];
+      return this.userService.searchUsers({ role: 'NDR', country: this.user.country}).pipe(
+        map(rusers => {
+          ndrEmails = rusers.error || rusers.data.length === 0
+            ? []
+            : rusers.data.map(u => u.email);
+        }),
+        mergeMap(() => this.userService.searchUsers({ role: 'ADMIN'})),
+        map(rusers => {
+          adminEmails = rusers.error || rusers.data.length === 0
+            ? []
+            : rusers.data.map(u => u.email);
+        }),
+        mergeMap(() => this.userService.sendValidationRequired(this.user.id, ['REFEREE'], ndrEmails, adminEmails))
+      );
+    }
+  }
+
   checkEmail() {
     if (this.user.dataStatus === 'NEW') {
       const email = this.user.email;
