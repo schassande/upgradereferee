@@ -107,6 +107,7 @@ export class UserSelectorComponent implements OnInit {
 
     ngOnInit() {
       this.showFilterRefereeLevel = this.role === 'REFEREE';
+      this.lookingforUpugrade = this.showFilterRefereeLevel;
       this.showFilterRefereeCoachLevel = this.role === 'REFEREE_COACH';
       this.loadUser();
     }
@@ -119,14 +120,21 @@ export class UserSelectorComponent implements OnInit {
         text : this.searchInput,
         refereeLevel : this.refereeLevel,
         refereeCoachLevel : this.refereeCoachLevel,
-        accountStatus: this.lookingforUpugrade ? 'ACTIVE' : null
+        accountStatus: this.role === 'REFEREE' && this.lookingforUpugrade ? 'ACTIVE' : null
       };
       this.loading = true;
       this.userService.searchUsers(criteria).subscribe((response: ResponseWithData<User[]>) => {
-        this.users = this.userService.sortUsers(response.data);
+        this.users = this.userService.sortUsers(this.filterUpgradableReferees(response.data));
         this.error = response.error;
         this.loading = false;
       });
+    }
+    private filterUpgradableReferees(users: User[]): User[] {
+      if (users && this.role === 'REFEREE' && this.lookingforUpugrade) {
+        return users.filter(r => this.toolService.isValidString(r.referee.nextRefereeLevel));
+      } else {
+        return users;
+      }
     }
 
     public userSelected(user: User): void {

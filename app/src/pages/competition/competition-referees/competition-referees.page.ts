@@ -241,6 +241,7 @@ export class CompetitionRefereesPage implements OnInit {
   }
   isUpgradableReferee(referee: User) {
     return  referee.accountStatus === 'ACTIVE'
+      && referee.referee.nextRefereeLevel
       && referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
   }
   back() {
