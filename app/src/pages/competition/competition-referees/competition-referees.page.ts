@@ -240,7 +240,8 @@ export class CompetitionRefereesPage implements OnInit {
     }).then( (alert) => alert.present() );
   }
   isUpgradableReferee(referee: User) {
-    return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
+    return  referee.accountStatus === 'ACTIVE'
+      && referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0;
   }
   back() {
     if (this.competition.id) {

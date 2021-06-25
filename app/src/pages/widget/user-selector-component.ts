@@ -47,6 +47,11 @@ import { ToolService } from 'src/app/service/ToolService';
             <ion-select-option *ngFor="let level of constantes.refereeLevels" value="{{level}}">{{level}}</ion-select-option>
           </ion-select>
         </ion-item>
+        <ion-item *ngIf="showFilterRefereeLevel">
+          <ion-label>Upgradable</ion-label>
+          <ion-toggle [(ngModel)]="lookingforUpugrade" (ionChange)="loadUser()">
+          </ion-toggle>
+        </ion-item>
         <ion-item *ngIf="showFilterRefereeCoachLevel">
           <ion-label>Referee coach Level</ion-label>
           <ion-select [(ngModel)]="refereeCoachLevel" interface="action-sheet" (ionChange)="loadUser()">
@@ -92,6 +97,7 @@ export class UserSelectorComponent implements OnInit {
     showFilterRefereeCoachLevel = false;
     constantes = CONSTANTES;
     loading = false;
+    lookingforUpugrade = true;
 
     constructor(
       public userService: UserService,
@@ -112,7 +118,8 @@ export class UserSelectorComponent implements OnInit {
         country : this.country,
         text : this.searchInput,
         refereeLevel : this.refereeLevel,
-        refereeCoachLevel : this.refereeCoachLevel
+        refereeCoachLevel : this.refereeCoachLevel,
+        accountStatus: this.lookingforUpugrade ? 'ACTIVE' : null
       };
       this.loading = true;
       this.userService.searchUsers(criteria).subscribe((response: ResponseWithData<User[]>) => {
