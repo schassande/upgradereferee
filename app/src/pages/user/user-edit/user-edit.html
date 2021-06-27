@@ -34,7 +34,7 @@
             </ion-item>
             <ion-item>
                 <ion-label fixed>Email</ion-label>
-                <ion-input type="text" [(ngModel)]="user.email" id="email" name="email" min="3" max="30" #email="ngModel" required tabindex="4" (ionChange)="checkEmail()"></ion-input>
+                <ion-input type="text" [(ngModel)]="user.email" [disabled]="user.dataStatus !== 'NEW'" id="email" name="email" min="3" max="30" #email="ngModel" required tabindex="4" (ionChange)="checkEmail()"></ion-input>
             </ion-item>
             <ion-item>
                 <ion-label fixed>Password</ion-label>

@@ -10,6 +10,7 @@ import { User, CONSTANTES, CurrentApplicationName, ApplicationRole, AppRole, get
 
 import { PhotoEvent } from '../../widget/camera-icon-component';
 import { Observable, of } from 'rxjs';
+import { ToolService } from 'src/app/service/ToolService';
 
 /**
  * Generated class for the UserNewPage page.
@@ -25,6 +26,7 @@ import { Observable, of } from 'rxjs';
 })
 export class UserEditPage implements OnInit {
   user: User;
+  existUser: User = null;
   error: string[] = [];
   constantes = CONSTANTES;
   saving = false;
@@ -46,6 +48,7 @@ export class UserEditPage implements OnInit {
     public connectedUserService: ConnectedUserService,
     private invitationService: InvitationService,
     private toastController: ToastController,
+    private toolService: ToolService,
     public loadingCtrl: LoadingController) {
   }
 
@@ -267,41 +270,57 @@ export class UserEditPage implements OnInit {
 
   public newUser(event) {
     this.adjustRefereeNextLevel();
-    if (this.isValid()) {
-      this.saving = true;
-      this.invitationService.getByEmail(this.user.email).pipe(
-        mergeMap((rinv) => {
-          if (rinv.data && rinv.data.expirationDate.getTime() > new Date().getTime()) {
-            console.log('The user has been invited.');
-            this.user.accountStatus = 'ACTIVE';
-          }
-          return this.userService.save(this.user);
-        }),
-        map((response: ResponseWithData<User>) => {
-          if (response.error) {
-            this.saving = false;
-            this.error = response.error.error;
-            if (response.error.code === 'auth/email-already-in-use') {
-              console.log('The email addresse is already used.');
-              this.toastController.create({ message: 'The email addresse is already used: ' + this.user.email, duration: 10000})
-                .then((toast) => toast.present());
-            } else {
-              console.log('Error', response.error);
-              this.toastController.create({ message: 'Error when saving the user info: ' + response.error, duration: 10000})
-                .then((toast) => toast.present());
-            }
-          } else {
-            this.user = response.data;
-            console.log('Saved user: ', this.user);
-            if (this.user.accountStatus === 'VALIDATION_REQUIRED') {
-              this.notifyValidationRequired().subscribe(() => this.navController.navigateRoot('/user/waiting-validation'));
-            }
-            this.saving = false;
-          }
-        })
-      ).subscribe();
+    if (!this.isValid()) {
+      return;
     }
+    this.saving = true;
+    this.invitationService.getByEmail(this.user.email).pipe(
+      mergeMap((rinv) => {
+        if (rinv.data && rinv.data.expirationDate.getTime() > new Date().getTime()) {
+          console.log('The user has been invited.');
+          this.user.accountStatus = 'ACTIVE';
+        }
+        if (this.existUser
+            && this.existUser.accountStatus === 'NO_ACCOUNT'
+            && this.existUser.email === this.user.email
+            && !this.toolService.isValidString(this.existUser.accountId)) {
+          this.user.id = this.existUser.id;
+          this.user.dataStatus = 'DIRTY';
+          this.existUser.applications.forEach(ar => {
+            const idx = this.user.applications.findIndex(ar2 => ar2.name === ar.name && ar2.role === ar.role);
+            if (idx < 0) {
+              this.user.applications.push(ar);
+            }
+          });
+          console.log('The user ' + this.existUser.id + ' was a referee inside the coaching app.');
+        }
+        return this.userService.save(this.user);
+      }),
+      map((response: ResponseWithData<User>) => {
+        if (response.error) {
+          this.saving = false;
+          this.error = response.error.error;
+          if (response.error.code === 'auth/email-already-in-use') {
+            console.log('The email addresse is already used.');
+            this.toastController.create({ message: 'The email addresse is already used: ' + this.user.email, duration: 10000})
+              .then((toast) => toast.present());
+          } else {
+            console.log('Error', response.error);
+            this.toastController.create({ message: 'Error when saving the user info: ' + response.error, duration: 10000})
+              .then((toast) => toast.present());
+          }
+        } else {
+          this.user = response.data;
+          console.log('Saved user: ', this.user);
+          if (this.user.accountStatus === 'VALIDATION_REQUIRED') {
+            this.notifyValidationRequired().subscribe(() => this.navController.navigateRoot('/user/waiting-validation'));
+          }
+          this.saving = false;
+        }
+      })
+    ).subscribe();
   }
+
   private notifyValidationRequired(): Observable<any> {
     const askNdr: boolean = this.demandRole('NDR');
     const askCoach: boolean = this.demandRole('REFEREE_COACH');
@@ -350,13 +369,15 @@ export class UserEditPage implements OnInit {
     if (this.user.dataStatus === 'NEW') {
       const email = this.user.email;
       this.userService.getByEmail(email).subscribe( (ruser) => {
-        if (ruser.data && email === this.user.email) {
-          this.toastController.create({ message: 'The email addresse is already used: ' + email, duration: 10000})
+        this.existUser = ruser.data;
+        if (this.existUser && email === this.user.email && this.existUser.accountStatus !== 'NO_ACCOUNT') {
+            this.toastController.create({ message: 'The email addresse is already used: ' + email, duration: 10000})
             .then((toast) => toast.present());
         }
       });
     }
   }
+
   onImage(event: PhotoEvent) {
     if (event && event.url) {
       this.user.photo.url = event.url;
