@@ -29,10 +29,12 @@ import { RefereeCoachGuard } from './RefereeCoachGuard';
 import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
 import { NdrGuard } from './NdrGuard';
+import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
 
 const routes: Routes = [
   { path: 'admin', component: AdminHomeComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'admin/user-manager', component: UserManagerComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin/user-merger', component: UserMergerComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'admin/coach-validation', component: CoachValidationComponent, canActivate: [AuthGuard, AdminGuard] },
   { path: 'admin/ndr-validation', component: NdrValidationComponent, canActivate: [AuthGuard, AdminGuard] },
 

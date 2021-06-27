@@ -17,6 +17,7 @@ import { mergeMap, map, catchError } from 'rxjs/operators';
 import { PersistentDataFilter } from './PersistentDataFonctions';
 import { DataRegion } from '../model/common';
 import { ToolService } from './ToolService';
+import { DateService } from './DateService';
 
 @Injectable()
 export class UserService  extends RemotePersistentDataService<User> {
@@ -29,6 +30,7 @@ export class UserService  extends RemotePersistentDataService<User> {
         private connectedUserService: ConnectedUserService,
         appSettingsService: AppSettingsService,
         private alertCtrl: AlertController,
+        private dateService: DateService,
         private loadingController: LoadingController,
         private angularFireFunctions: AngularFireFunctions,
         private angularFireAuth: AngularFireAuth,
@@ -55,6 +57,8 @@ export class UserService  extends RemotePersistentDataService<User> {
         if (!item.accountStatus) {
             item.accountStatus = 'ACTIVE';
         }
+        item.creationDate = this.adjustDate(item.creationDate, this.dateService);
+        item.lastUpdate = this.adjustDate(item.lastUpdate, this.dateService);
     }
 
     public save(user: User, cred: UserCredential = null): Observable<ResponseWithData<User>> {
@@ -104,7 +108,7 @@ export class UserService  extends RemotePersistentDataService<User> {
 
     public delete(id: string): Observable<Response> {
         // check the user to delete is the current user.
-        if (this.connectedUserService.getCurrentUser().id !== id) {
+        if (this.connectedUserService.getCurrentUser().id !== id && !this.connectedUserService.isAdmin()) {
             return of({error: {error: 'Not current user', errorCode: 1}});
         }
         // First delete user from database
@@ -113,7 +117,7 @@ export class UserService  extends RemotePersistentDataService<User> {
                 if (res.error != null) {
                     console.log('Error on delete', res.error);
                     return of (res);
-                } else {
+                } else if (this.connectedUserService.getCurrentUser().id === id) {
                     // then delete the user from firestore user auth database
                     return from(this.angularFireAuth.currentUser).pipe(
                         mergeMap((user) => from(user.delete())),
@@ -125,6 +129,8 @@ export class UserService  extends RemotePersistentDataService<User> {
                             return of({error: err});
                         })
                     );
+                } else {
+                    return of({ error: null});
                 }
             })
         );

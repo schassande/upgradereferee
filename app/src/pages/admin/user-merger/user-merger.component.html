@@ -1,0 +1,228 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/admin" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">User Merger</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content (swipe)="onSwipe($event)">
+    <ion-list>
+        <ion-item>
+            <ion-label>Region</ion-label>
+            <ion-select slot="end" (ionChange)="onRegionChange()" [(ngModel)]="region" interface="action-sheet">
+                <ion-select-option value="">All</ion-select-option>
+                <ion-select-option value="Europe">Europe</ion-select-option>
+                <ion-select-option value="Australia">Australia</ion-select-option>
+                <ion-select-option value="New Zealand">New Zealand</ion-select-option>
+                <ion-select-option value="Others">Others</ion-select-option>
+            </ion-select>
+        </ion-item>
+        <div style="margin: 20px; text-align: right;" *ngIf="filteredUsers">{{nbNotYetAnalysed}} not yet analysed ({{nbAnalysed}} analysed).</div>
+        <div style="margin: 10px; text-align: right;">
+            <ion-button shape="round" (click)="loadData()">Reset</ion-button>
+            <ion-button shape="round" (click)="findUserToMerge()" *ngIf="nbNotYetAnalysed > 0">Next</ion-button>
+        </div>
+        <ion-item *ngIf="user">
+            <div>
+                <div style="font-weight: bold; font-size: 1.2em;">{{user.firstName}} {{user.lastName}} ({{user.shortName}})</div>
+                <div *ngIf="user.photo && user.photo.url">{{user.photo.url}}</div>
+                <div>Email: {{user.email}}</div>
+                <div>{{user.country}} / {{user.region}}</div>
+                <div>id: {{user.id}}</div>
+                <div>Status: {{user.accountStatus}}</div>
+                <div>Creation date: {{user.creationDate}}</div>
+                <div *ngIf="user.applications.length > 0">Roles:
+                    <ul>
+                        <li *ngFor="let ar of sortRoles(user.applications)">{{ar.name}}-{{ar.role}}</li>
+                    </ul>
+                </div>
+                <div *ngIf="user.demandingApplications.length > 0">Demanding roles:
+                    <ul>
+                        <li *ngFor="let ar of sortRoles(user.demandingApplications)">{{ar.name}}-{{ar.role}}</li>
+                    </ul>
+                </div>
+            </div>
+        </ion-item>
+        <ion-item *ngFor="let simUser of similarUsers">
+            <div *ngIf="!userFrom || !userTo || userFrom === simUser || userTo === simUser">
+                <div style="font-weight: bold; font-size: 1.2em;">{{simUser.firstName}} {{simUser.lastName}} ({{simUser.shortName}})</div>
+                <div *ngIf="simUser.photo && simUser.photo.url">{{simUser.photo.url}}</div>
+                <div>Email: {{simUser.email}}</div>
+                <div>{{simUser.country}} / {{simUser.region}}</div>
+                <div>id: {{simUser.id}}</div>
+                <div>Status: {{simUser.accountStatus}}</div>
+                <div>Creation date: {{simUser.creationDate}}</div>
+                <div *ngIf="simUser.applications.length > 0">Roles:
+                    <ul>
+                        <li *ngFor="let ar of sortRoles(simUser.applications)">{{ar.name}}-{{ar.role}}</li>
+                    </ul>
+                </div>
+                <div *ngIf="simUser.demandingApplications.length > 0">Demanding roles:
+                    <ul>
+                        <li *ngFor="let ar of sortRoles(simUser.demandingApplications)">{{ar.name}}-{{ar.role}}</li>
+                    </ul>
+                </div>
+                <div style="margin: 5px 0; text-align: center;">
+                    <div>
+                        <ion-button shape="round" color="{{user.creationDate > simUser.creationDate ?  'success' : 'warning'}}" (click)="startMerging(user, simUser)">Start merging into this one</ion-button>
+                    </div>
+                    <div>
+                        <ion-button shape="round" color="{{user.creationDate < simUser.creationDate ?  'success' : 'warning'}}" (click)="startMerging(simUser, user)">Start merging into the first</ion-button>
+                    </div>
+                </div>
+            </div>
+        </ion-item>
+    </ion-list>
+    <div *ngIf="userFrom && userTo && userFinal">
+        <ion-grid style="width: 100%;" class="mergingTable">
+            <ion-row class="mergingTable-header">
+                <ion-col>Field</ion-col>
+                <ion-col>From</ion-col>
+                <ion-col>To</ion-col>
+                <ion-col>Final</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">id</ion-col>
+                <ion-col>{{userFrom.id}}</ion-col>
+                <ion-col>{{userTo.id}}</ion-col>
+                <ion-col>{{userFinal.id}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Account status</ion-col>
+                <ion-col (click)="userFinal.accountStatus = userFrom.accountStatus">{{userFrom.accountStatus}}</ion-col>
+                <ion-col (click)="userFinal.accountStatus = userTo.accountStatus">{{userTo.accountStatus}}</ion-col>
+                <ion-col>{{userFinal.accountStatus}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Account id</ion-col>
+                <ion-col (click)="userFinal.accountId = userFrom.accountId">{{userFrom.accountId}}</ion-col>
+                <ion-col (click)="userFinal.accountId = userTo.accountId">{{userTo.accountId}}</ion-col>
+                <ion-col>{{userFinal.accountId}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Photo</ion-col>
+                <ion-col (click)="userFinal.photo = userFrom.photo"><span *ngIf="userFrom.photo && userFrom.photo.url">{{userFrom.photo.url}}</span></ion-col>
+                <ion-col (click)="userFinal.photo = userTo.photo"><span *ngIf="userTo.photo && userTo.photo.url">{{userTo.photo.url}}</span></ion-col>
+                <ion-col><span *ngIf="userFinal.photo && userFinal.photo.url">{{userFinal.photo.url}}</span></ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">First name</ion-col>
+                <ion-col (click)="userFinal.firstName = userFrom.firstName">{{userFrom.firstName}}</ion-col>
+                <ion-col (click)="userFinal.firstName = userTo.firstName">{{userTo.firstName}}</ion-col>
+                <ion-col>{{userFinal.firstName}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Last name</ion-col>
+                <ion-col (click)="userFinal.lastName = userFrom.lastName">{{userFrom.lastName}}</ion-col>
+                <ion-col (click)="userFinal.lastName = userTo.lastName">{{userTo.lastName}}</ion-col>
+                <ion-col>{{userFinal.lastName}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Short name</ion-col>
+                <ion-col (click)="userFinal.shortName = userFrom.shortName">{{userFrom.shortName}}</ion-col>
+                <ion-col (click)="userFinal.shortName = userTo.shortName">{{userTo.shortName}}</ion-col>
+                <ion-col>{{userFinal.shortName}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Email</ion-col>
+                <ion-col (click)="userFinal.email = userFrom.email">{{userFrom.email}}</ion-col>
+                <ion-col (click)="userFinal.email = userTo.email">{{userTo.email}}</ion-col>
+                <ion-col>{{userFinal.email}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Region</ion-col>
+                <ion-col (click)="userFinal.region = userFrom.region">{{userFrom.region}}</ion-col>
+                <ion-col (click)="userFinal.region = userTo.region">{{userTo.region}}</ion-col>
+                <ion-col>{{userFinal.region}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Country</ion-col>
+                <ion-col (click)="userFinal.country = userFrom.country">{{userFrom.country}}</ion-col>
+                <ion-col (click)="userFinal.country = userTo.country">{{userTo.country}}</ion-col>
+                <ion-col>{{userFinal.country}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Gender</ion-col>
+                <ion-col (click)="userFinal.gender = userFrom.gender">{{userFrom.gender}}</ion-col>
+                <ion-col (click)="userFinal.gender = userTo.gender">{{userTo.gender}}</ion-col>
+                <ion-col>{{userFinal.gender}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Mobile phones</ion-col>
+                <ion-col (click)="userFinal.mobilePhones = userFrom.mobilePhones">{{userFrom.mobilePhones}}</ion-col>
+                <ion-col (click)="userFinal.mobilePhones = userTo.mobilePhones">{{userTo.mobilePhones}}</ion-col>
+                <ion-col>{{userFinal.mobilePhones}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Languages</ion-col>
+                <ion-col (click)="userFinal.speakingLanguages = userFrom.speakingLanguages">{{userFrom.speakingLanguages}}</ion-col>
+                <ion-col (click)="userFinal.speakingLanguages = userTo.speakingLanguages">{{userTo.speakingLanguages}}</ion-col>
+                <ion-col>{{userFinal.speakingLanguages}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Referee Level</ion-col>
+                <ion-col (click)="userFinal.referee.refereeLevel = userFrom.referee.refereeLevel">{{userFrom.referee.refereeLevel}}</ion-col>
+                <ion-col (click)="userFinal.referee.refereeLevel = userTo.referee.refereeLevel">{{userTo.referee.refereeLevel}}</ion-col>
+                <ion-col>{{userFinal.referee.refereeLevel}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Referee Category</ion-col>
+                <ion-col (click)="userFinal.referee.refereeCategory = userFrom.referee.refereeCategory">{{userFrom.referee.refereeCategory}}</ion-col>
+                <ion-col (click)="userFinal.referee.refereeCategory = userTo.referee.refereeCategory">{{userTo.referee.refereeCategory}}</ion-col>
+                <ion-col>{{userFinal.referee.refereeCategory}}</ion-col>
+            </ion-row>
+            <ion-row>
+                <ion-col class="mergingTable-field">Coach Level</ion-col>
+                <ion-col (click)="userFinal.refereeCoach.refereeCoachLevel = userFrom.refereeCoach.refereeCoachLevel">{{userFrom.refereeCoach.refereeCoachLevel}}</ion-col>
+                <ion-col (click)="userFinal.refereeCoach.refereeCoachLevel = userTo.refereeCoach.refereeCoachLevel">{{userTo.refereeCoach.refereeCoachLevel}}</ion-col>
+                <ion-col>{{userFinal.refereeCoach.refereeCoachLevel}}</ion-col>
+            </ion-row>
+        </ion-grid>
+        <div *ngIf="userFinal.applications.length > 0" style="margin-left: 5px;">Roles:
+            <ul>
+                <li *ngFor="let ar of sortRoles(userFinal.applications)">{{ar.name}}-{{ar.role}}</li>
+            </ul>
+        </div>
+        <div *ngIf="userFinal.demandingApplications.length > 0" style="margin-left: 5px;">Demanding roles:
+            <ul>
+                <li *ngFor="let ar of sortRoles(userFinal.demandingApplications)">{{ar.name}}-{{ar.role}}</li>
+            </ul>
+        </div>
+        <div style="margin-left: 5px;">
+            The user {{userFrom.id}} is referenced in the following items:
+            <div>
+                * Competitions:<span *ngIf="toMigrate.competitions.length === 0">&nbsp;None</span>
+                <ul *ngIf="toMigrate.competitions.length > 0">
+                    <li *ngFor="let c of toMigrate.competitions">{{c.name}}</li>
+                </ul>
+            </div>
+            <div>
+                * Referee coach votes:<span *ngIf="toMigrate.competitionDayRefereeCoachVotes.length === 0">&nbsp;None</span>
+                <ul *ngIf="toMigrate.competitionDayRefereeCoachVotes.length > 0">
+                    <li *ngFor="let v of toMigrate.competitionDayRefereeCoachVotes">{{v.id}}</li>
+                </ul>
+            </div>
+            <div>
+                * Panel votes:<span *ngIf="toMigrate.competitionDayPanelVotes.length === 0">&nbsp;None</span>
+                <ul *ngIf="toMigrate.competitionDayPanelVotes.length > 0">
+                    <li *ngFor="let v of toMigrate.competitionDayPanelVotes">{{v.id}}</li>
+                </ul>
+            </div>
+            <div>
+                * Referee Upgrades:<span *ngIf="toMigrate.refereeUpgrades.length === 0">&nbsp;None</span>
+                <ul *ngIf="toMigrate.refereeUpgrades.length > 0">
+                    <li *ngFor="let ru of toMigrate.refereeUpgrades">{{ru.id}} {{ru.referee.refereeShortName}}</li>
+                </ul>
+            </div>
+        </div>
+        <div style="margin: 5px; text-align: center;">
+            <ion-button shape="round" (click)="merge()">Merge</ion-button>
+        </div>
+    </div>
+</ion-content>

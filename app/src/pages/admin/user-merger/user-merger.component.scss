@@ -1,0 +1,18 @@
+.mergingTable {
+    width: 100%;
+    text-align: center;
+}
+
+.mergingTable ion-row {
+    border-top: 1px solid grey;
+}
+
+.mergingTable ion-col {
+    width: 24%;
+    vertical-align: middle;
+}
+
+.mergingTable-header,
+.mergingTable-field {
+    background-color: lightgrey;
+}

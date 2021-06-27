@@ -79,11 +79,12 @@ import { RefereeUpgradeService } from './service/RefereeUpgradeService';
 import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
 import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
+import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
 
 
 @NgModule({
   declarations: [AppComponent,
-    AdminHomeComponent, UserManagerComponent,
+    AdminHomeComponent, UserManagerComponent, UserMergerComponent,
     CoachValidationComponent,
     CompetitionSelectorComponent,
     CompetitionListPage, CompetitionEditComponent, CompetitionHomePage, CompetitionCoachesPage, CompetitionRefereesPage,
