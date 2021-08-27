@@ -592,8 +592,8 @@ export class UserService  extends RemotePersistentDataService<User> {
             coach.refereeCoach.refereeCoachLevel);
     }
 
-    public isNdrOf(referee: User, user: User) {
-        return user.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === 'NDR')
+    public isNdrOf(user: User, referee: User) {
+        return user.applications.filter(ar => ar.name === CurrentApplicationName && ar.role === 'NDR').length > 0
             && referee.country === user.country;
     }
     public canVoteLevel(refereeLevel: RefereeLevel, refereeCoachLevel: RefereeCoachLevel) {

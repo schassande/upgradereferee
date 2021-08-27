@@ -115,7 +115,8 @@ export class CompetitionEditComponent implements OnInit {
       referees: [],
       refereeCoaches: [],
       allocations: [],
-      category: 'C1'
+      category: 'C1',
+      categorySenior: 'C1'
     };
     if (this.connectedUserService.isRefereeCoach) {
       this.competition.refereeCoaches.push({ coachId: currentUser.id, coachShortName: currentUser.shortName});

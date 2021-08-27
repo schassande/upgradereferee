@@ -49,8 +49,14 @@
                 </ion-select>
             </ion-item>
             <ion-item>
-                <ion-label position="fixed">Category:</ion-label>
+                <ion-label position="fixed">Category Open:</ion-label>
                 <ion-select *ngIf="!readonly" [(ngModel)]="competition.category" style="text-align: center;" interface="action-sheet">
+                    <ion-select-option *ngFor="let category of categories" value="{{category}}">{{category}}</ion-select-option>
+                </ion-select>
+            </ion-item>
+            <ion-item>
+                <ion-label position="fixed">Category Senior:</ion-label>
+                <ion-select *ngIf="!readonly" [(ngModel)]="competition.categorySenior" style="text-align: center;" interface="action-sheet">
                     <ion-select-option *ngFor="let category of categories" value="{{category}}">{{category}}</ion-select-option>
                 </ion-select>
             </ion-item>

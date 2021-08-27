@@ -67,7 +67,7 @@ export class RefereeViewPage implements OnInit {
     return this.referee.accountStatus === 'ACTIVE'
       && (this.connectedUserService.getCurrentUser().id === this.referee.id
         || this.canVote()
-        || this.userService.isNdrOf(this.referee, this.connectedUserService.getCurrentUser()));
+        || this.userService.isNdrOf(this.connectedUserService.getCurrentUser(), this.referee));
   }
 
   private setRefereeId(id: string) {

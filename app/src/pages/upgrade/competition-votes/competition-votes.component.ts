@@ -3,9 +3,9 @@ import { ActivatedRoute, ParamMap, Params } from '@angular/router';
 import { AlertController, NavController } from '@ionic/angular';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
-import { Competition } from 'src/app/model/competition';
+import { Competition, CompetitionCategory } from 'src/app/model/competition';
 import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote } from 'src/app/model/upgrade';
-import { CurrentApplicationName, RefereeLevel, User } from 'src/app/model/user';
+import { CurrentApplicationName, Referee, RefereeLevel, User } from 'src/app/model/user';
 import { CompetitionDayPanelVoteService } from 'src/app/service/CompetitionDayPanelVoteService';
 import { CompetitionDayRefereeCoachVoteService } from 'src/app/service/CompetitionDayRefereeCoachVoteService';
 import { CompetitionService } from 'src/app/service/CompetitionService';
@@ -281,7 +281,6 @@ export class CompetitionVotesComponent implements OnInit {
       return of('');
     }
   }
-
   private createPanelVote() {
     console.log('createVote()');
     this.vote = {
@@ -291,7 +290,7 @@ export class CompetitionVotesComponent implements OnInit {
       lastUpdate: new Date(),
       version: 0,
       competitionRef: { competitionId: this.competitionId, competitionName: this.competition.name },
-      competitionCategory: this.competition.category,
+      competitionCategory: this.competitionService.getCompetitionCategory(this.competition, this.referee),
       day: this.dateService.to00h00(this.day),
       referee: {
         refereeShortName: this.referee.shortName,

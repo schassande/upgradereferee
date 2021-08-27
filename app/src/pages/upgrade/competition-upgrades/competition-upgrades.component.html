@@ -23,7 +23,7 @@
             <div style="text-align: center;">
                 <div *ngFor="let day of competition.days">{{dateService.date2string(day)}}</div>
             </div>
-            <div>Category: {{competition.category}}</div>
+            <div>Category: Open:{{competition.category}}, Senior:{{competition.categorySenior}}</div>
         </ion-card-content>
     </ion-card>
     <ion-item>
