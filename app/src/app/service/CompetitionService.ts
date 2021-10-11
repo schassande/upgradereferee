@@ -142,11 +142,9 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         const compCat: CompetitionCategory = this.getCompetitionCategory(competition, referee);
         switch (referee?.referee?.nextRefereeLevel) {
             case 'EURO_3':
-                return compCat === 'C3' || compCat === 'C4' || compCat === 'C5';
             case 'EURO_4':
-                return compCat === 'C4' || compCat === 'C5';
             case 'EURO_5':
-                return compCat === 'C5';
+                return compCat === 'C3' || compCat === 'C4' || compCat === 'C5';
         }
         return false;
     }
