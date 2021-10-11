@@ -2,11 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, map, mergeMap } from 'rxjs/operators';
+import { catchError, map, merge, mergeMap } from 'rxjs/operators';
 import { Upgradable } from 'src/app/model/coaching';
 import { Competition } from 'src/app/model/competition';
 import { RefereeUpgrade, RefereeUpgradeStatus } from 'src/app/model/upgrade';
-import { getNextRefereeLevel, RefereeLevel, User } from 'src/app/model/user';
+import { getNextRefereeLevel, Referee, RefereeLevel, REFEREE_LEVELS, User } from 'src/app/model/user';
 import { CompetitionService } from 'src/app/service/CompetitionService';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
 import { DateService } from 'src/app/service/DateService';
@@ -204,17 +204,27 @@ export class CompetitionUpgradesComponent implements OnInit {
   }
 
   private publish(u: RefUp): Observable<any> {
-    if (u.upgrade.upgradeStatus === 'DECIDED' || u.upgrade.upgradeLevel === u.referee.referee.nextRefereeLevel) {
+    if (u.upgrade.upgradeStatus === 'DECIDED') {
       console.log('publishing ' + u.referee.shortName + ' ' + u.upgrade.upgradeLevel + ' ' + u.upgrade.decision);
       // set the status of the upgrade
       u.upgrade.upgradeStatus = 'PUBLISHED';
-      // set the new level of the referee
-      u.referee.referee.refereeLevel = u.referee.referee.nextRefereeLevel;
-      // Compute the next referee level
-      u.referee.referee.nextRefereeLevel = getNextRefereeLevel(u.referee.referee.refereeLevel);
       return this.refereeUpgradeService.save(u.upgrade).pipe( // save the upgrade
-        mergeMap(() => this.userService.save(u.referee)), // save the referee
-        mergeMap(() => this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade)) // send an email to the referee
+        mergeMap(() => {
+          if (u.upgrade.decision === 'Yes' && this.notAlreadyUpgraded(u)) {
+            console.log('Upgrading ' + u.referee.shortName + ' to ' + u.upgrade.upgradeLevel);
+            // set the new level of the referee
+            u.referee.referee.refereeLevel = u.upgrade.upgradeLevel;
+            // Compute the next referee level
+            u.referee.referee.nextRefereeLevel = getNextRefereeLevel(u.referee.referee.refereeLevel);
+            // save the referee
+            return this.userService.save(u.referee).pipe(
+              // send the certificate
+              mergeMap(() => this.refereeUpgradeService.sendRefereeUpgrade(u.upgrade))
+            );
+          } else {
+            return of('');
+          }
+        }),
       );
     } else if (u.upgrade.decision === 'Yes') {
       console.log('Send certificate only');
@@ -222,6 +232,11 @@ export class CompetitionUpgradesComponent implements OnInit {
     } else {
       return of('');
     }
+  }
+  private notAlreadyUpgraded(u: RefUp): boolean {
+    const refIdx = REFEREE_LEVELS.indexOf(u.referee.referee.refereeLevel);
+    const upIdx = REFEREE_LEVELS.indexOf(u.upgrade.upgradeLevel);
+    return refIdx < upIdx;
   }
   private compareUpgradeDate(u1: RefUp, u2: RefUp): number {
     const res = this.dateService.compareDate(u1.upgrade.decisionDate, u2.upgrade.decisionDate);
