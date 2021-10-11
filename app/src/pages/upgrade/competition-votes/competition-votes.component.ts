@@ -222,6 +222,9 @@ export class CompetitionVotesComponent implements OnInit {
     if (!this.userService.canVote(referee, this.coach) && !this.connectedUserService.isAdmin() && !this.isPanelDirector) {
       return false;
     }
+    if (!this.competitionService.canBeAssessed(this.competition, referee)) {
+      return false;
+    }
     return true;
   }
 

@@ -379,6 +379,10 @@ export class VotingComponent implements OnInit {
       console.log('Referee ' + referee.shortName + ' is NOT upgradable (cannot vote)');
       return false;
     }
+    if (!this.competitionService.canBeAssessed(this.competition, referee)) {
+      console.log('Referee ' + referee.shortName + ' cannot be assessed at the competition');
+      return false;
+    }
     console.log('Referee ' + referee.shortName + ' is upgradable');
     return true;
   }
