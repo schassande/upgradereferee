@@ -30,6 +30,7 @@ import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upg
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
 import { NdrGuard } from './NdrGuard';
 import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
+import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
 
 const routes: Routes = [
   { path: 'admin', component: AdminHomeComponent, canActivate: [AuthGuard, AdminGuard] },
@@ -50,6 +51,8 @@ const routes: Routes = [
   { path: 'upgrade/criteria', component: UpgradeCriteriaComponent, canActivate: [AuthGuard] },
 
   { path: 'home', component: HomePage, canActivate: [AuthGuard]},
+
+  { path: 'ndr/list', component: NdrListComponent, canActivate: [AuthGuard] },
 
   { path: 'referee/list', component: RefereeListPage, canActivate: [AuthGuard] },
   { path: 'referee/view/:id', component: RefereeViewPage, canActivate: [AuthGuard] },

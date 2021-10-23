@@ -80,6 +80,7 @@ import { UpgradeCriteriaService } from './service/UpgradeCriteriaService';
 import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upgrade-criteria.component';
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
 import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
+import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
 
 
 @NgModule({
@@ -90,7 +91,7 @@ import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.com
     CompetitionListPage, CompetitionEditComponent, CompetitionHomePage, CompetitionCoachesPage, CompetitionRefereesPage,
     CompetitionVotesComponent, CompetitionUpgradesComponent,
     HomePage, HelpWidgetComponent,
-    NdrValidationComponent,
+    NdrValidationComponent, NdrListComponent,
     RefereeCoachListComponent, RefereeCoachViewComponent,
     RefereeListPage, RefereeSelectPage, RefereeValidationComponent, RefereeViewPage, RefereeVotesComponent,
     SettingsPage,

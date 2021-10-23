@@ -1,0 +1,30 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button routerLink="/home" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">List of NDRs</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-list>
+        <div *ngIf="!loading && (!ndrs || ndrs.length === 0)" style="margin: 10px; text-align: center;">Empty result.</div>
+        <div *ngIf="!loading && ndrs">
+            <ion-item *ngFor="let ndr of ndrs">
+                <ion-avatar slot="start" *ngIf="!ndr.photo || !ndr.photo.url"></ion-avatar>
+                <ion-avatar slot="start" *ngIf="ndr.photo && ndr.photo.url">
+                    <img src="{{ndr.photo.url}}">
+                </ion-avatar>
+                <ion-label class="listItemButton">
+                    {{ndr.country}} - {{ndr.firstName}} {{ndr.lastName}} ({{ndr.shortName}})
+                </ion-label>
+            </ion-item>
+        </div>
+    </ion-list>
+    <div style="margin-bottom: 60px;"></div>
+</ion-content>
