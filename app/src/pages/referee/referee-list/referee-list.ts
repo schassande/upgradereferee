@@ -30,6 +30,8 @@ export class RefereeListPage implements OnInit {
   sortBy: string;
   applicationUser = true;
   loading = false;
+  showFilterRegion = true;
+  showFilterCountry = true;
 
   constructor(
     private connectedUserService: ConnectedUserService,
@@ -42,7 +44,15 @@ export class RefereeListPage implements OnInit {
 
   ngOnInit() {
     this.helpService.setHelp('referee-list');
-    this.region = this.connectedUserService.getCurrentUser().region;
+    const curUser: User = this.connectedUserService.getCurrentUser();
+    const isAdmin = this.connectedUserService.isAdmin();
+    const isNDR = this.connectedUserService.isNDR();
+    this.region = curUser.region;
+    this.showFilterRegion = isAdmin || !isNDR;
+    this.showFilterCountry = isAdmin || !isNDR;
+    if (isNDR && !isAdmin) {
+      this.country = curUser.country;
+    }
     this.searchReferee();
   }
 

@@ -19,7 +19,7 @@
 </ion-header>
 <ion-content (swipe)="onSwipe($event)">
     <ion-list>
-        <ion-item>
+        <ion-item *ngIf="showFilterRegion">
             <ion-label>Region</ion-label>
             <ion-select [(ngModel)]="region" interface="action-sheet" (ionChange)="searchReferee()">
                 <ion-select-option value="Europe">Europe</ion-select-option>
@@ -30,7 +30,7 @@
                 <ion-select-option value="Test">Test</ion-select-option>
             </ion-select>
         </ion-item>
-        <ion-item>
+        <ion-item *ngIf="showFilterCountry">
             <ion-label>Country</ion-label>
             <ion-select [(ngModel)]="country" interface="action-sheet" (ionChange)="searchReferee()">
                 <ion-select-option value="">All</ion-select-option>
