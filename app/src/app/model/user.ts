@@ -27,6 +27,7 @@ export const COUNTRIES: string[][] = [
     ['Australia	', 'Australia'],
     ['Austria',	'Austria'],
     ['Belgium', 'Belgium'],
+    ['Bulgaria', 'Bulgaria'],
     ['Canada', 'Canada'],
     ['Chile', 'Chile'],
     ['China', 'China'],
@@ -70,6 +71,7 @@ export const COUNTRIES: string[][] = [
 export const EUROPEAN_COUNTRIES: string[][] = [
     ['Austria',	'Austria'],
     ['Belgium', 'Belgium'],
+    ['Bulgaria', 'Bulgaria'],
     ['Czech Republic' ,	'Czech Republic'],
     ['England', 'England'],
     ['France' , 'France'],
