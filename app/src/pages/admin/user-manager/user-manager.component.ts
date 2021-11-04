@@ -35,6 +35,7 @@ export class UserManagerComponent implements OnInit {
   status: AccountStatus;
   role: AppRole;
   region: DataRegion;
+  searchInput: string;
 
   constructor(
     private alertCtrl: AlertController,
@@ -65,10 +66,15 @@ export class UserManagerComponent implements OnInit {
   onRegionChange() {
     this.filterUsers();
   }
+
+  onSearchBarInput() {
+    this.filterUsers();
+  }
   filterUsers() {
     if (this.users && (this.toolService.isValidString(this.status)
                       || this.toolService.isValidString(this.role)
                       || this.toolService.isValidString(this.region)
+                      || this.toolService.isValidString(this.searchInput)
                       )) {
       this.filteredUsers = this.users.filter(u => {
         let keep = true;
@@ -80,6 +86,11 @@ export class UserManagerComponent implements OnInit {
         }
         if (keep && this.toolService.isValidString(this.region)) {
           keep = u.region === this.region;
+        }
+        if (keep && this.toolService.isValidString(this.searchInput)) {
+          keep = this.toolService.stringContains(this.searchInput, u.firstName)
+            || this.toolService.stringContains(this.searchInput, u.lastName)
+            || this.toolService.stringContains(this.searchInput, u.shortName);
         }
         return keep;
       });
