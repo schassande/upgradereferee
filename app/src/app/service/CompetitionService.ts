@@ -85,7 +85,8 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     public authorized(competition: Competition, coachId: string): boolean {
         return competition.refereePanelDirectorId === coachId
                 || competition.ownerId === coachId
-                || competition.refereeCoaches.filter((coach) => coach.coachId === coachId).length > 0;
+                || competition.refereeCoaches.filter((coach) => coach.coachId === coachId).length > 0
+                || this.connectedUserService.isAdmin();
     }
 
     public sortCompetitions(competitions: Competition[], reverse: boolean = false): Competition[] {
