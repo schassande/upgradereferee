@@ -14,6 +14,7 @@ import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCo
 import { ToolService } from './ToolService';
 import { DataRegion } from '../model/common';
 import { Referee } from '../model/user';
+import { AngularFireFunctions } from '@angular/fire/functions';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -21,6 +22,7 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     constructor(
         appSettingsService: AppSettingsService,
         db: AngularFirestore,
+        private angularFireFunctions: AngularFireFunctions,
         private competitionDayPanelVoteService: CompetitionDayPanelVoteService,
         private competitionDayRefereeCoachVoteService: CompetitionDayRefereeCoachVoteService,
         private connectedUserService: ConnectedUserService,
@@ -148,5 +150,11 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
                 return compCat === 'C3' || compCat === 'C4' || compCat === 'C5';
         }
         return false;
+    }
+    public getRefereeUpgradeStatus(competition: Competition, day: Date): Observable<any> {
+        return this.angularFireFunctions.httpsCallable('sendRefereeUpgradeStatus')({
+            refereeIds: competition.referees.map(ref => ref.refereeId),
+            day: this.dateService.date2string(day)
+        });
     }
 }

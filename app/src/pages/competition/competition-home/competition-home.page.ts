@@ -11,6 +11,8 @@ import { Competition } from './../../../app/model/competition';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CurrentApplicationName, User } from 'src/app/model/user';
 import { ResponseWithData } from 'src/app/service/response';
+import { environment } from 'src/environments/environment';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-competition-home',
@@ -27,6 +29,8 @@ export class CompetitionHomePage implements OnInit {
   user: User;
   isAdmin = false;
   isRefereeCoachOfCompetition = false;
+  env = environment;
+  downloading = false;
 
   constructor(
     private alertCtrl: AlertController,
@@ -89,7 +93,7 @@ export class CompetitionHomePage implements OnInit {
         return of(this.competition);
       }),
       map (() => {
-        this.canEdit = this.competition.ownerId === this.connectedUserService.getCurrentUser().id;
+        this.canEdit = this.isAdmin || this.competition.ownerId === this.connectedUserService.getCurrentUser().id;
         this.loading = false;
         return this.competition;
       })
@@ -158,5 +162,49 @@ export class CompetitionHomePage implements OnInit {
         }
       ]
     }).then( (alert) => alert.present() );
+  }
+
+  exportRefereeUpgradeStatus() {
+    const dayBefore = moment(this.competition.days[0]).add(-1, 'day').toDate();
+    const inputs: any[] = [
+      { name: 'radio-1', type: 'radio', label: 'End of ' + this.dateService.date2string(dayBefore), value: dayBefore },
+      ...this.competition.days.map((day, idx) => {
+        return { name: 'radio' + idx, type: 'radio', label: 'End of ' + this.dateService.date2string(day), value: day };
+      })
+    ];
+    this.alertCtrl.create({
+      message: 'Which end of day do you want the status analysis?',
+      inputs,
+      buttons: [
+        { text: 'Cancel', role: 'cancel'},
+        {
+          text: 'Analysis',
+          handler: (day) => {
+            this.exportRefereeUpgradeStatusAtDay(day ? day : this.competition.days[0]);
+          }
+        }
+      ]
+    }).then( (alert) => alert.present() );
+  }
+  exportRefereeUpgradeStatusAtDay(day: Date) {
+    this.downloading = true;
+    this.competitionService.getRefereeUpgradeStatus(this.competition, day).subscribe(
+      (content) => {
+        // console.log(content);
+        const oMyBlob = new Blob([content], {type : 'text/csv'});
+        const url = URL.createObjectURL(oMyBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Referees_Upgrade_status_${this.dateService.date2string(day)}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        this.downloading = false;
+      },
+      (err) => {
+        console.error(err);
+        this.downloading = false;
+      }
+    );
   }
 }
