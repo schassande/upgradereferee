@@ -92,4 +92,7 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
             return of('');
         }
     }
+    findByCompetition(competitionId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
+        return this.query(this.getCollectionRef().where('competitionId', '==', competitionId), 'default');
+    }
 }

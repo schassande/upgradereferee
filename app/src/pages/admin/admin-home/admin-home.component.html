@@ -26,4 +26,7 @@
             <ion-label class="menu-entry">Merge users</ion-label>
         </ion-item>
     </ion-list>
+    <div style="margin: 5px;">
+        <ion-button size="large" expand="block" [disabled]="downloading" (click)="exportRefereeCoachList()">Download Ref coach List</ion-button>
+    </div>
 </ion-content>

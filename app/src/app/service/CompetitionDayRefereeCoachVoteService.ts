@@ -51,4 +51,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
                 }
             }));
     }
+    findByCompetition(competitionId: string): Observable<ResponseWithData<CompetitionDayRefereeCoachVote[]>> {
+        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default');
+    }
 }

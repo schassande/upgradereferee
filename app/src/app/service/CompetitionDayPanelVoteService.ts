@@ -55,4 +55,7 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
                 }
             }));
     }
+    findByCompetition(competitionId: string): Observable<ResponseWithData<CompetitionDayPanelVote[]>> {
+        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default');
+    }
 }

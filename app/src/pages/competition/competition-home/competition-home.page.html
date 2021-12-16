@@ -27,49 +27,73 @@
             <div *ngIf="owner"><br>Own by {{owner}}</div>
         </ion-card-content>
     </ion-card>
-    <div style="margin: 5px;">
-        <ion-row>
-            <ion-col *ngIf="isRefereeCoachOfCompetition">
-                <ion-button routerLink="/upgrade/voting" [queryParams]="{competitionId : competition.id }" expand="block" size="large">
-                    <ion-icon name="ribbon-outline"></ion-icon>&nbsp;1.Coach vote
+    <ion-grid style="margin: 5px;">
+        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin)">
+            <ion-col size="4">
+                <div style="width: 100; text-align: center;" *ngIf="voteAnalysis">
+                    <div>
+                        <div style="margin-bottom: 5px;">All: {{voteAnalysis.coachVote.ratio | percent}}</div>
+                        <ion-progress-bar color="success" [value]="voteAnalysis.coachVote.ratio"></ion-progress-bar>
+                    </div>
+                    <div *ngIf="isRefereeCoachOfCompetition" style="margin-top: 5px;">
+                        <div style="margin-bottom: 5px;">You: {{voteAnalysis.coachVote[user.id].ratio | percent}}</div>
+                        <ion-progress-bar color="success" [value]="voteAnalysis.coachVote[user.id].ratio"></ion-progress-bar>
+                    </div>
+                </div>
+            </ion-col>
+            <ion-col size="8">
+                <ion-button routerLink="/upgrade/voting" [queryParams]="{competitionId : competition.id }" expand="block" size="large" *ngIf="isRefereeCoachOfCompetition">
+                    1.Coach vote
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row>
-            <ion-col *ngIf="isRefereeCoachOfCompetition || isAdmin">
+        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin)">
+            <ion-col size="4">
+                <div style="width: 100; text-align: center; margin-top: 20px;" *ngIf="voteAnalysis">
+                    <div style="margin-bottom: 5px;">Panel: {{voteAnalysis.panelVote.ratio | percent}}</div>
+                    <ion-progress-bar color="success" [value]="voteAnalysis.panelVote.ratio"></ion-progress-bar>
+                </div>
+            </ion-col>
+            <ion-col size="8">
                 <ion-button routerLink="/competition/{{competition.id}}/votes" expand="block" size="large">
-                    <ion-icon name="ribbon-outline"></ion-icon>&nbsp;2.Panel vote
+                    2.Panel vote
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row *ngIf="isRefereeCoachOfCompetition || isAdmin">
-            <ion-col>
+        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin)">
+            <ion-col size="4">
+                <div style="width: 100; text-align: center; margin-top: 20px;" *ngIf="voteAnalysis">
+                    <div style="margin-bottom: 5px;">Panel: {{voteAnalysis.publishedUpgrade.ratio | percent}}</div>
+                    <ion-progress-bar color="success" [value]="voteAnalysis.publishedUpgrade.ratio"></ion-progress-bar>
+                </div>
+            </ion-col>
+            <ion-col size="8">
                 <ion-button routerLink="/competition/{{competition.id}}/upgrades" expand="block" size="large">
-                    <ion-icon name="school"></ion-icon>&nbsp;3.Publish upgrades
+                    3.Publish upgrades
                 </ion-button>
             </ion-col>
         </ion-row>
         <ion-row *ngIf="canEdit || isAdmin">
             <ion-col>
-                <ion-button (click)="onDelete()" expand="block" size="large" color="danger">
+                <ion-button (click)="onDelete()" expand="block" color="danger">
                     <ion-icon name="trash"></ion-icon>&nbsp;Delete
                 </ion-button>
             </ion-col>
             <ion-col>
-                <ion-button routerLink="/competition/{{competition.id}}/edit" expand="block" size="large" color="warning" style="margin-bottom: 10px;">
+                <ion-button routerLink="/competition/{{competition.id}}/edit" expand="block" color="warning" style="margin-bottom: 10px;">
                     <ion-icon name="create-outline"></ion-icon>&nbsp;Edit
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row *ngIf="canEdit || isAdmin">
+        <ion-row *ngIf="upgradable && (canEdit || isAdmin)">
             <ion-col>
                 <!-- href="{{env.firebase.functionUrl}}/sendRefereeUpgradeStatus" -->
-                <ion-button expand="block" (click)="exportRefereeUpgradeStatus()" size="large" [disabled]="downloading">
+                <ion-button expand="block" (click)="exportRefereeUpgradeStatus()" [disabled]="downloading">
                     <ion-icon name="trash"></ion-icon>&nbsp;Download Upgrade Status
                 </ion-button>
             </ion-col>
         </ion-row>
-    </div>
+    </ion-grid>
     <ion-card>
         <ion-card-header>
             <ion-card-title style="text-align: center;">

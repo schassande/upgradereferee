@@ -13,8 +13,10 @@ import { CompetitionDayPanelVoteService } from './CompetitionDayPanelVoteService
 import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
 import { ToolService } from './ToolService';
 import { DataRegion } from '../model/common';
-import { Referee } from '../model/user';
+import { CurrentApplicationName, Referee, RefereeCoachLevel, User } from '../model/user';
 import { AngularFireFunctions } from '@angular/fire/functions';
+import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote, RefereeUpgrade } from '../model/upgrade';
+import { PrefixNot } from '@angular/compiler';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -157,4 +159,159 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
             day: this.dateService.date2string(day)
         });
     }
+
+    public computeVoteAnalysis(competition: Competition,
+                               referees: User[],
+                               refereeCoaches: User[],
+                               coachVotes: CompetitionDayRefereeCoachVote[],
+                               panelVotes: CompetitionDayPanelVote[],
+                               upgrades: RefereeUpgrade[]
+                               ): VoteAnalysis {
+        // filter referees to get only upgradable
+        const upgradableReferees = referees.filter(r => this.isUpgradableReferee(r));
+        const nbDays = competition.days.length;
+        const expected =
+          upgradableReferees.filter(r => r.referee.nextRefereeLevel === 'EURO_3').length
+          * refereeCoaches.filter(c => this.valueIn(c.refereeCoach.refereeCoachLevel, 'EURO_3', 'EURO_4', 'EURO_5')).length
+          + upgradableReferees.filter(r => r.referee.nextRefereeLevel === 'EURO_4').length
+          * refereeCoaches.filter(c => this.valueIn(c.refereeCoach.refereeCoachLevel, 'EURO_4', 'EURO_5')).length
+          + upgradableReferees.filter(r => r.referee.nextRefereeLevel === 'EURO_5').length
+          * refereeCoaches.filter(c => this.valueIn(c.refereeCoach.refereeCoachLevel, 'EURO_5')).length
+          ;
+        // console.log('computeVoteAnalysis: expected=' + expected);
+        // console.log('computeVoteAnalysis: coachVotes.length=' + coachVotes.length);
+        // console.log('computeVoteAnalysis: panelVotes.length=' + panelVotes.length);
+        // console.log('computeVoteAnalysis: upgrades.length=' + upgrades.length);
+        const globalAnalysis: VoteAnalysis = competition.days.map(d => {
+            const day = this.dateService.to00h00(d);
+            // console.log('computeVoteAnalysis: day=' + this.dateService.date2string(day));
+            const analysis: VoteAnalysis = {
+                day,
+                coachVote: { existing: 0, ratio: 0, expected, byCoach: [] },
+                panelVote: { existing: 0, ratio: 0, expected: upgradableReferees.length, refereeIds: [] },
+                publishedUpgrade: { existing: 0, ratio: 0, expected: upgradableReferees.length, refereeIds: [] }
+            };
+            coachVotes.forEach(cv => {
+                if (cv.day.getTime() === day.getTime()) {
+                    const cvs = analysis.coachVote.byCoach.filter(elem => elem.coachId === cv.coach.coachId);
+                    // console.log('computeVoteAnalysis: looking for coach (' + cv.coach.coachShortName + '): cvs=' + JSON.stringify(cvs));
+                    let cva: CoachVoteAnalysis;
+                    if (cvs.length > 0) {
+                        cva = cvs[0];
+                    } else {
+                        cva = {
+                            coachId: cv.coach.coachId,
+                            coachLevel: refereeCoaches.filter(rc => rc.id === cv.coach.coachId)[0].refereeCoach.refereeCoachLevel,
+                            existing: 0,
+                            expected: 0,
+                            ratio: 0,
+                            refereeIds: []
+                        };
+                        analysis.coachVote.byCoach.push(cva);
+                    }
+                    if (cva.refereeIds.filter(refereeId => refereeId === cv.referee.refereeId).length === 0) {
+                        cva.refereeIds.push(cv.referee.refereeId);
+                        cva.existing++;
+                        analysis.coachVote.existing++;
+                    }
+                }
+            });
+            panelVotes.forEach(pv => {
+                if (pv.day.getTime() === day.getTime()) {
+                    if (analysis.panelVote.refereeIds.filter(refereeId => refereeId === pv.referee.refereeId).length === 0) {
+                        analysis.panelVote.refereeIds.push(pv.referee.refereeId);
+                        analysis.panelVote.existing++;
+                    }
+                }
+            });
+            upgrades.forEach(u => {
+                if (u.decisionDate.getTime() === day.getTime()) {
+                    if (analysis.publishedUpgrade.refereeIds.filter(refereeId => refereeId === u.referee.refereeId).length === 0) {
+                        analysis.publishedUpgrade.refereeIds.push(u.referee.refereeId);
+                        analysis.publishedUpgrade.existing++;
+                    }
+                }
+            });
+            analysis.coachVote.byCoach.forEach(cv => {
+                cv.expected = upgradableReferees.filter(r => {
+                    if (cv.coachLevel === 'EURO_3') {
+                        return this.valueIn(r.referee.nextRefereeLevel, 'EURO_3');
+                    } else if (cv.coachLevel === 'EURO_4') {
+                        return this.valueIn(r.referee.nextRefereeLevel, 'EURO_3', 'EURO_4');
+                    } else if (cv.coachLevel === 'EURO_5') {
+                        return this.valueIn(r.referee.nextRefereeLevel, 'EURO_3', 'EURO_4', 'EURO_5');
+                    } else {
+                        return false;
+                    }
+                }).length;
+            });
+            return analysis;
+        }).reduce((prev, cur) => {
+            prev.day = undefined;
+            prev.coachVote.byCoach.forEach(cv => cv.refereeIds = undefined);
+            prev.panelVote.refereeIds = undefined;
+            prev.publishedUpgrade.refereeIds = undefined;
+            // console.log('Merging ', JSON.stringify(prev, null, 2), JSON.stringify(cur, null, 2));
+            prev.coachVote.existing += cur.coachVote.existing;
+            prev.coachVote.expected += cur.coachVote.expected;
+            prev.panelVote.existing += cur.panelVote.existing;
+            prev.panelVote.expected += cur.panelVote.expected;
+            prev.publishedUpgrade.existing += cur.publishedUpgrade.existing;
+            prev.publishedUpgrade.expected += cur.publishedUpgrade.expected;
+
+            cur.coachVote.byCoach.forEach(cv => {
+                prev.coachVote.byCoach.filter(prevCv => prevCv.coachId === cv.coachId).forEach(prevCv => {
+                    prevCv.existing += cv.existing;
+                    prevCv.expected += cv.expected;
+                });
+            });
+            return prev;
+        });
+        globalAnalysis.coachVote.ratio = globalAnalysis.coachVote.existing / globalAnalysis.coachVote.expected;
+        globalAnalysis.panelVote.ratio = globalAnalysis.panelVote.existing / globalAnalysis.panelVote.expected;
+        globalAnalysis.publishedUpgrade.ratio = globalAnalysis.publishedUpgrade.existing / globalAnalysis.publishedUpgrade.expected;
+        globalAnalysis.coachVote.byCoach.forEach(cv => {
+            cv.ratio = cv.existing / cv.expected;
+            globalAnalysis.coachVote[cv.coachId] = cv;
+        });
+        return globalAnalysis;
+    }
+
+    public isUpgradableReferee(referee: User) {
+        return referee.applications.filter(ar => ar.role === 'REFEREE' && ar.name === CurrentApplicationName).length > 0
+          && referee.accountStatus === 'ACTIVE'
+          && this.valueIn(referee.referee.nextRefereeLevel, 'EURO_3', 'EURO_4', 'EURO_5');
+      }
+    public valueIn(str: string, ...values: string[]): boolean {
+        return values.filter(v => str === v).length > 0;
+    }
+}
+export interface VoteAnalysis {
+    day?: Date;
+    coachVote: {
+        existing: number;
+        expected: number;
+        ratio: number;
+        byCoach: CoachVoteAnalysis[];
+    };
+    panelVote: {
+        existing: number;
+        expected: number;
+        ratio: number;
+        refereeIds?: string[];
+    };
+    publishedUpgrade: {
+        existing: number;
+        expected: number;
+        ratio: number;
+        refereeIds?: string[];
+    };
+}
+export interface CoachVoteAnalysis {
+    coachId: string;
+    coachLevel: RefereeCoachLevel;
+    existing: number;
+    expected: number;
+    ratio: number;
+    refereeIds?: string[];
 }
