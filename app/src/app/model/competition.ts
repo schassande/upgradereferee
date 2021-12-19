@@ -10,6 +10,7 @@ export interface Competition extends PersistentData {
     date: Date;
     year: number;
     days: Date[];
+    completed: boolean;
     region: DataRegion;
     country: string;
     category: CompetitionCategory;

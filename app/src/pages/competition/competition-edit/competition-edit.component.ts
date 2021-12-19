@@ -105,6 +105,7 @@ export class CompetitionEditComponent implements OnInit {
       creationDate : new Date(),
       lastUpdate : new Date(),
       dataStatus: 'NEW',
+      completed: false,
       name: '',
       date: new Date(),
       days: [],

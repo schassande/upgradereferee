@@ -41,8 +41,8 @@
                     </div>
                 </div>
             </ion-col>
-            <ion-col size="8">
-                <ion-button routerLink="/upgrade/voting" [queryParams]="{competitionId : competition.id }" expand="block" size="large" *ngIf="isRefereeCoachOfCompetition">
+            <ion-col size="8" *ngIf="isRefereeCoachOfCompetition">
+                <ion-button routerLink="/upgrade/voting" [queryParams]="{competitionId : competition.id }" expand="block" size="large">
                     1.Coach vote
                 </ion-button>
             </ion-col>
@@ -87,9 +87,15 @@
         </ion-row>
         <ion-row *ngIf="upgradable && (canEdit || isAdmin)">
             <ion-col>
-                <!-- href="{{env.firebase.functionUrl}}/sendRefereeUpgradeStatus" -->
                 <ion-button expand="block" (click)="exportRefereeUpgradeStatus()" [disabled]="downloading">
-                    <ion-icon name="trash"></ion-icon>&nbsp;Download Upgrade Status
+                    <ion-icon name="cloud-download-outline"></ion-icon>&nbsp;Download Upgrade Status
+                </ion-button>
+            </ion-col>
+        </ion-row>
+        <ion-row *ngIf="upgradable && isAdmin">
+            <ion-col>
+                <ion-button expand="block" (click)="switchCompleted()" color="warning" [disabled]="downloading">
+                    <ion-icon name="checkmark-outline"></ion-icon>&nbsp;<span *ngIf="competition.completed">Un</span>Mark as completed
                 </ion-button>
             </ion-col>
         </ion-row>

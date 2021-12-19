@@ -271,4 +271,8 @@ export class CompetitionHomePage implements OnInit {
       }
     );
   }
+  switchCompleted() {
+    this.competition.completed = !this.competition.completed;
+    this.competitionService.save(this.competition).subscribe();
+  }
 }
