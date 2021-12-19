@@ -27,6 +27,12 @@
         </ion-item>
     </ion-list>
     <div style="margin: 5px;">
-        <ion-button size="large" expand="block" [disabled]="downloading" (click)="exportRefereeCoachList()">Download Ref coach List</ion-button>
+        <ion-button expand="block" [disabled]="downloading" (click)="exportRefereeCoachList()">Download Ref coach List</ion-button>
+    </div>
+    <div style="margin: 5px;">
+        <ion-button expand="block" [disabled]="downloading" (click)="exportRefereeList()">Download Referee List</ion-button>
+    </div>
+    <div style="margin: 5px;">
+        <ion-button expand="block" [disabled]="downloading" (click)="exportNDRList()">Download NDR List</ion-button>
     </div>
 </ion-content>
