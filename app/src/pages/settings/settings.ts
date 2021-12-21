@@ -36,6 +36,7 @@ export class SettingsPage implements OnInit {
   deferredPrompt;
   showInstallBtn = false;
   currentUser: User;
+  isAdmin = false;
 
   constructor(
     private appSettingsService: AppSettingsService,
@@ -52,6 +53,7 @@ export class SettingsPage implements OnInit {
     this.installAsApp();
     this.computeLaunchMode();
     this.currentUser = this.connectedUserService.getCurrentUser();
+    this.isAdmin = this.connectedUserService.isAdmin();
     this.appSettingsService.get().subscribe((appSettings: LocalAppSettings) => {
       if (appSettings.forceOffline === undefined) {
         appSettings.forceOffline = false;
