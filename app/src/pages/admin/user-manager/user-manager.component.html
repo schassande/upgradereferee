@@ -102,6 +102,7 @@
                         <ion-button *ngIf="user.accountStatus === 'LOCKED'" color="warning" name="unlock" shape="round" (click)="unlock(user)">UnlocK</ion-button>
                         <ion-button *ngIf="user.accountStatus === 'VALIDATION_REQUIRED'" color="success" name="checkmark" shape="round" (click)="validate(user)">validate</ion-button>
                         <ion-button *ngIf="user.accountStatus === 'VALIDATION_REQUIRED'" color="danger" name="close" shape="round" (click)="unvalidate(user)">Reject</ion-button>
+                        <ion-button *ngIf="user.accountStatus === 'ACTIVE'" name="sudo" shape="round" color="danger" (click)="sudo(user)">Sudo</ion-button>
                         <ion-button *ngIf="user.accountStatus !== 'NO_ACCOUNT'" name="trash" color="danger" shape="round" (click)="delete(user)">Delete</ion-button>
                         <ion-button *ngIf="user.accountStatus !== 'NO_ACCOUNT'" name="resetPassword" shape="round" (click)="resetPassword(user)">Reset Pwd</ion-button>
                         <ion-button name="edit" shape="round" routerLink="/user/edit/{{user.id}}">Edit</ion-button>

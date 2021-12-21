@@ -8,6 +8,7 @@ import { ToolService } from './../../../app/service/ToolService';
 import { mergeMap, map } from 'rxjs/operators';
 import { DataRegion } from 'src/app/model/common';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-user-manager',
@@ -36,6 +37,7 @@ export class UserManagerComponent implements OnInit {
   role: AppRole;
   region: DataRegion;
   searchInput: string;
+  env = environment;
 
   constructor(
     private alertCtrl: AlertController,
@@ -254,5 +256,9 @@ export class UserManagerComponent implements OnInit {
   }
   filterApplicationRoles(roles: ApplicationRole[]) {
     return roles.filter(ar => ar.name === CurrentApplicationName);
+  }
+
+  sudo(user) {
+    this.connectedUserService.userConnected(user, null);
   }
 }
