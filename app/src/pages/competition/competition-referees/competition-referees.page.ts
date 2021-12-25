@@ -14,6 +14,7 @@ import { Component, OnInit } from '@angular/core';
 import { SharedWith } from 'src/app/model/common';
 import { UserSelectorComponent } from 'src/pages/widget/user-selector-component';
 import { UserService } from 'src/app/service/UserService';
+import { NotificationService } from 'src/app/service/NotificationService';
 
 @Component({
   selector: 'app-competition-referees',
@@ -35,6 +36,7 @@ export class CompetitionRefereesPage implements OnInit {
     public dateService: DateService,
     private helpService: HelpService,
     private navController: NavController,
+    private notificationService: NotificationService,
     private userService: UserService,
     private route: ActivatedRoute,
     private toolService: ToolService
@@ -129,7 +131,9 @@ export class CompetitionRefereesPage implements OnInit {
         }
         this.referees.push(referee);
         this.competition.referees.push({ refereeShortName: referee.shortName, refereeId: referee.id});
-        this.competitionService.save(this.competition).subscribe();
+        this.competitionService.save(this.competition)
+          .pipe(map(() => this.notificationService.refereeAddedToCompetition(referee, this.competition)))
+          .subscribe();
       }
     });
     return await modal.present();
@@ -143,9 +147,11 @@ export class CompetitionRefereesPage implements OnInit {
         {
           text: 'Delete All',
           handler: () => {
+            const obs = [this.competitionService.save(this.competition)];
+            this.referees.forEach(ref => obs.push(this.notificationService.refereeRemovedFromCompetition(ref, this.competition)));
             this.referees = [];
             this.competition.referees = [];
-            this.competitionService.save(this.competition).subscribe();
+            forkJoin(obs).subscribe();
           }
         }
       ]
@@ -173,6 +179,7 @@ export class CompetitionRefereesPage implements OnInit {
     let addedRefereeNumber = 0;
     const unknownShortNames: string[] = [];
     let alreadyAddNames = 0;
+    const notifObs = [of('')];
     refShortNames.forEach((refShortName) => {
       console.log('Searching referee ', refShortName);
       obs.push(
@@ -185,6 +192,7 @@ export class CompetitionRefereesPage implements OnInit {
                   addedRefereeNumber ++;
                   this.referees.push(referee);
                   this.competition.referees.push({ refereeShortName: referee.shortName, refereeId: referee.id});
+                  notifObs.push(this.notificationService.refereeAddedToCompetition(referee, this.competition));
                   console.log('Referee ', refShortName, ' added.');
                 } else {
                   alreadyAddNames ++;
@@ -203,6 +211,7 @@ export class CompetitionRefereesPage implements OnInit {
     if (obs.length) {
       forkJoin(obs).pipe(
         mergeMap(() => this.competitionService.save(this.competition)),
+        mergeMap(() => forkJoin(notifObs)),
         map(() => {
           this.refereesImported(refShortNames.length, addedRefereeNumber, unknownShortNames, alreadyAddNames);
         })
@@ -233,7 +242,9 @@ export class CompetitionRefereesPage implements OnInit {
             this.toolService.deleteFromArrayById(this.competition.referees, referee.id, 'refereeId');
             // remove the referee from the local list
             this.toolService.deleteFromArrayById(this.referees, referee.id);
-            this.competitionService.save(this.competition).subscribe();
+            this.competitionService.save(this.competition)
+              .pipe(map(() => this.notificationService.refereeRemovedFromCompetition(referee, this.competition)))
+              .subscribe();
           }
         }
       ]
