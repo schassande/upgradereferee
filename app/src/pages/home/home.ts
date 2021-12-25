@@ -7,6 +7,9 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { ConnectedUserService } from './../../app/service/ConnectedUserService';
 
 import { User } from './../../app/model/user';
+import { NotificationService } from 'src/app/service/NotificationService';
+import { Notification } from 'src/app/model/notification';
+import { DateService } from 'src/app/service/DateService';
 
 
 @Component({
@@ -18,12 +21,15 @@ export class HomePage implements OnInit {
   currentUser: User = null;
   showInstallBtn = false;
   deferredPrompt;
+  notifications: Notification[] = [];
 
   constructor(
       private alertCtrl: AlertController,
       private connectedUserService: ConnectedUserService,
+      public dateService: DateService,
       private helpService: HelpService,
       private invitationService: InvitationService,
+      private notificationService: NotificationService,
       private changeDetectorRef: ChangeDetectorRef) {
   }
   public getShortName(): string {
@@ -55,6 +61,9 @@ export class HomePage implements OnInit {
       this.showInstallBtn = true;
     });
     window.addEventListener('appinstalled', (event) => console.log('App installed'));
+    this.notificationService.findMyNotitifications().subscribe((rn) => {
+      this.notifications = rn.data;
+    });
   }
 
   addToHome() {
@@ -85,5 +94,12 @@ export class HomePage implements OnInit {
           }},
         ]
       }).then( (alert) => alert.present() );
+  }
+  closeAllNotifications() {
+    this.notifications.forEach(not => this.notificationService.closeNotification(not).subscribe());
+    this.notifications = [];
+  }
+  closeNotification(notificationIdx: number) {
+    this.notificationService.closeNotification(this.notifications.splice(notificationIdx)[0]).subscribe();
   }
 }

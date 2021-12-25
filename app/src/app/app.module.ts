@@ -81,6 +81,7 @@ import { UpgradeCriteriaComponent } from 'src/pages/upgrade/upgrade-criteria/upg
 import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgrades/competition-upgrades.component';
 import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
 import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
+import { NotificationService } from './service/NotificationService';
 
 
 @NgModule({
@@ -130,6 +131,7 @@ import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
     HelpService,
     InvitationService,
     LocalDatabaseService,
+    NotificationService,
     OfflinesService,
     RefereeService,
     RefereeUpgradeService,
