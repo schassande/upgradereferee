@@ -286,6 +286,24 @@ export class CompetitionVotesComponent implements OnInit {
   }
   private createPanelVote() {
     console.log('createVote()');
+    let commentFC = '';
+    let commentFR = '';
+    this.coachVotes.forEach(cv => {
+      if (cv.commentForReferee.length > 1) {
+        if (commentFR.length > 0) {
+          commentFC = commentFC + '<br>-' + cv.commentForReferee;
+        } else {
+          commentFC = '-' + cv.commentForReferee;
+        }
+      }
+      if (cv.commentForCoach.length > 1) {
+        if (commentFR.length > 0) {
+          commentFR = commentFR + '<br>-' + cv.coach.coachShortName + ':' + cv.commentForReferee;
+        } else {
+          commentFR = '-' + cv.coach.coachShortName + ':' + cv.commentForReferee;
+        }
+      }
+    });
     this.vote = {
       id: '',
       dataStatus: 'NEW',
@@ -301,8 +319,8 @@ export class CompetitionVotesComponent implements OnInit {
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
       vote: 'Abstain',
-      commentForCoach: '-',
-      commentForReferee: '-',
+      commentForCoach: commentFC.length > 0 ? commentFC : '-',
+      commentForReferee: commentFR.length > 0 ? commentFR : '-',
       closed: false,
       coaches: this.competition.refereeCoaches,
       yesCoaches: this.coachVotes.filter(cv => cv.vote === 'Yes').map(cv => cv.coach),
