@@ -7,16 +7,18 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
-import { IonicStorageModule } from '@ionic/Storage-angular';
+import { IonicStorageModule } from '@ionic/storage-angular';
 // Firebase dependencies
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireStorageModule } from '@angular/fire/storage';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFireFunctionsModule } from '@angular/fire/functions';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getFirestore, provideFirestore } from '@angular/fire/firestore';
+import { getAuth, provideAuth } from '@angular/fire/auth';
+import { getStorage, provideStorage } from '@angular/fire/storage';
+import { getFunctions, provideFunctions } from '@angular/fire/functions';
+import { getMessaging, provideMessaging } from '@angular/fire/messaging';
+import { Drivers } from '@ionic/storage';
 // other module dependencies
 import { MarkdownModule } from 'ngx-markdown';
-import { ChartsModule } from 'ng2-charts';
+import { NgChartsModule } from 'ng2-charts';
 import { HammerGestureConfig, HAMMER_GESTURE_CONFIG } from '@angular/platform-browser';
 @Injectable()
 export class CustomHammerConfig extends HammerGestureConfig {}
@@ -85,63 +87,64 @@ import { NotificationService } from './service/NotificationService';
 
 
 @NgModule({
-  declarations: [AppComponent,
-    AdminHomeComponent, UserManagerComponent, UserMergerComponent,
-    CoachValidationComponent,
-    CompetitionSelectorComponent,
-    CompetitionListPage, CompetitionEditComponent, CompetitionHomePage, CompetitionCoachesPage, CompetitionRefereesPage,
-    CompetitionVotesComponent, CompetitionUpgradesComponent,
-    HomePage, HelpWidgetComponent,
-    NdrValidationComponent, NdrListComponent,
-    RefereeCoachListComponent, RefereeCoachViewComponent,
-    RefereeListPage, RefereeSelectPage, RefereeValidationComponent, RefereeViewPage, RefereeVotesComponent,
-    SettingsPage,
-    UserEditPage, UserLoginComponent, UserWaitingValidationPage,
-    CameraIconComponent, UserSelectorComponent,
-    UpgradeCriteriaComponent,
-    VotingComponent,
-  ],
-  entryComponents: [AppComponent, HomePage, RefereeSelectPage,
-    UserSelectorComponent, CompetitionSelectorComponent, HelpWidgetComponent],
-  imports: [
-    AppRoutingModule,
-    AngularFireModule.initializeApp(environment.firebase),
-    AngularFireAuthModule,
-    AngularFirestoreModule.enablePersistence(),
-    AngularFireStorageModule,
-    AngularFireFunctionsModule,
-    BrowserModule,
-    ChartsModule,
-    FormsModule,
-    HttpClientModule,
-    MarkdownModule.forRoot({ loader: HttpClient }),
-    IonicModule.forRoot(),
-    IonicStorageModule.forRoot(),
-    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
-  ],
-  providers: [
-    AppSettingsService,
-    BookmarkService,
-    CompetitionService,
-    CompetitionDayRefereeCoachVoteService,
-    CompetitionDayPanelVoteService,
-    ConnectedUserService,
-    DateService,
-    EmailService,
-    HelpService,
-    InvitationService,
-    LocalDatabaseService,
-    NotificationService,
-    OfflinesService,
-    RefereeService,
-    RefereeUpgradeService,
-    ToolService,
-    UpgradeCriteriaService,
-    UserService,
-    UserGroupService,
-    VersionService,
-    { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig },
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }],
-  bootstrap: [AppComponent]
+    declarations: [AppComponent,
+        AdminHomeComponent, UserManagerComponent, UserMergerComponent,
+        CoachValidationComponent,
+        CompetitionSelectorComponent,
+        CompetitionListPage, CompetitionEditComponent, CompetitionHomePage, CompetitionCoachesPage, CompetitionRefereesPage,
+        CompetitionVotesComponent, CompetitionUpgradesComponent,
+        HomePage, HelpWidgetComponent,
+        NdrValidationComponent, NdrListComponent,
+        RefereeCoachListComponent, RefereeCoachViewComponent,
+        RefereeListPage, RefereeSelectPage, RefereeValidationComponent, RefereeViewPage, RefereeVotesComponent,
+        SettingsPage,
+        UserEditPage, UserLoginComponent, UserWaitingValidationPage,
+        CameraIconComponent, UserSelectorComponent,
+        UpgradeCriteriaComponent,
+        VotingComponent,
+    ],
+    imports: [
+        AppRoutingModule,
+        provideFirebaseApp(() => initializeApp(environment.firebase)),
+        provideFirestore(() => getFirestore()),
+        provideAuth(() => getAuth()),
+        provideStorage(() => getStorage()),
+        provideFunctions(() => getFunctions()),
+        provideMessaging(() => getMessaging()),
+        IonicStorageModule.forRoot({ name: '__mydb', driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage] }),
+        BrowserModule,
+        NgChartsModule,
+        FormsModule,
+        HttpClientModule,
+        MarkdownModule.forRoot({ loader: HttpClient }),
+        IonicModule.forRoot(),
+        IonicStorageModule.forRoot(),
+        ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
+    ],
+    providers: [
+        AppSettingsService,
+        BookmarkService,
+        CompetitionService,
+        CompetitionDayRefereeCoachVoteService,
+        CompetitionDayPanelVoteService,
+        ConnectedUserService,
+        DateService,
+        EmailService,
+        HelpService,
+        InvitationService,
+        LocalDatabaseService,
+        NotificationService,
+        OfflinesService,
+        RefereeService,
+        RefereeUpgradeService,
+        ToolService,
+        UpgradeCriteriaService,
+        UserService,
+        UserGroupService,
+        VersionService,
+        { provide: HAMMER_GESTURE_CONFIG, useClass: CustomHammerConfig },
+        { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {}

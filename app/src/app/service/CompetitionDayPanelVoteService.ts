@@ -1,5 +1,5 @@
 import { AppSettingsService } from './AppSettingsService';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { Firestore, Query, query, where } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
@@ -14,7 +14,7 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController,
         private dateService: DateService
     ) {
@@ -33,20 +33,18 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
     }
 
     getVote(competitionId: string, day: Date, refereeId: string): Observable<ResponseWithData<CompetitionDayPanelVote>> {
-        return this.queryOne(this.getCollectionRef()
-            .where('competitionRef.competitionId', '==', competitionId)
-            .where('day', '==', this.dateService.to00h00(day))
-            .where('referee.refereeId', '==', refereeId)
-            , 'default');
+        return this.queryOne(query(this.getCollectionRef(),
+            where('competitionRef.competitionId', '==', competitionId),
+            where('day', '==', this.dateService.to00h00(day)),
+            where('referee.refereeId', '==', refereeId)));
     }
     findClosedVotesByReferee(refereeId: string): Observable<ResponseWithData<CompetitionDayPanelVote[]>> {
-        return this.query(this.getCollectionRef()
-            .where('referee.refereeId', '==', refereeId)
-            .where('closed', '==', 'true')
-            , 'default');
+        return this.query(query(this.getCollectionRef(),
+            where('referee.refereeId', '==', refereeId),
+            where('closed', '==', 'true')));
     }
     onCompetitionDelete(competitionId: string): Observable<Response[]> {
-        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default')
+        return this.query(query(this.getCollectionRef(), where('competitionRef.competitionId', '==', competitionId)))
             .pipe(mergeMap((rvs) => {
                 if (rvs.data && rvs.data.length > 0) {
                     return forkJoin(rvs.data.map(v => this.delete(v.id)));
@@ -56,6 +54,7 @@ export class CompetitionDayPanelVoteService extends RemotePersistentDataService<
             }));
     }
     findByCompetition(competitionId: string): Observable<ResponseWithData<CompetitionDayPanelVote[]>> {
-        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default');
+        return this.query(query(this.getCollectionRef(),
+            where('competitionRef.competitionId', '==', competitionId)));
     }
 }

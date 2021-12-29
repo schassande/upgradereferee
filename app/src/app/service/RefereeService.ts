@@ -1,6 +1,6 @@
 import { AppSettingsService } from './AppSettingsService';
 import { ToastController } from '@ionic/angular';
-import { AngularFirestore } from '@angular/fire/firestore';
+import { Firestore } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ResponseWithData } from './response';
 import { Injectable } from '@angular/core';
@@ -15,7 +15,7 @@ export class RefereeService extends RemotePersistentDataService<Referee> {
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController
     ) {
         super(appSettingsService, db, toastController);

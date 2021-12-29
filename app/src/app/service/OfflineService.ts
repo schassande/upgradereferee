@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { disableNetwork, enableNetwork, Firestore } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 
@@ -16,7 +16,7 @@ export class OfflinesService  {
         private appSettingsService: AppSettingsService,
         private connectedUserService: ConnectedUserService,
         private competitionService: CompetitionService,
-        private firestore: AngularFirestore,
+        private firestore: Firestore,
         private userService: UserService
     ) {}
 
@@ -28,7 +28,7 @@ export class OfflinesService  {
                 let obs: Observable<any> = null;
                 if (settings.forceOffline) {
                     // Enable the network
-                    obs = from(this.firestore.firestore.enableNetwork().then(() => console.log('Online')));
+                    obs = from(enableNetwork(this.firestore).then(() => console.log('Online')));
                 } else {
                     // preload data
                     obs = this.competitionService.preload().pipe(
@@ -41,7 +41,7 @@ export class OfflinesService  {
                             }
                         }),
                         // then disable the network
-                        mergeMap(() => from(this.firestore.firestore.disableNetwork().then(() => console.log('Offline')))),
+                        mergeMap(() => from(disableNetwork(this.firestore).then(() => console.log('Offline')))),
                     );
                 }
                 // store the offline mode

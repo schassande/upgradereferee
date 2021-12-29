@@ -1,5 +1,5 @@
 import { AppSettingsService } from './AppSettingsService';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { Firestore, limit, orderBy, query, where } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
@@ -15,7 +15,7 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController,
         private dateService: DateService
     ) {
@@ -108,12 +108,11 @@ export class UpgradeCriteriaService extends RemotePersistentDataService<UpgradeC
     }
 
     public getUpgradeCriteria(refereeLevel: RefereeLevel, applicationDate: Date): Observable<ResponseWithData<UpgradeCriteria>> {
-        return this.query(this.getCollectionRef()
-            .where('beginDate', '<=', applicationDate)
-            .where('upgradeLevel', '==', refereeLevel)
-            .orderBy('beginDate', 'desc')
-            .limit(1)
-            , 'default').pipe(
+        return this.query(query(this.getCollectionRef(),
+            where('beginDate', '<=', applicationDate),
+            where('upgradeLevel', '==', refereeLevel),
+            orderBy('beginDate', 'desc'),
+            limit(1))).pipe(
                 map(ruc => {
                     if (ruc.data && ruc.data.length > 0) {
                         return { data : ruc.data[0], error: null };

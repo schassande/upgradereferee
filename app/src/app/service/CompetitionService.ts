@@ -2,8 +2,8 @@ import { AppSettingsService } from './AppSettingsService';
 import { DateService } from './DateService';
 import { Competition, CompetitionCategory } from './../model/competition';
 import { ConnectedUserService } from './ConnectedUserService';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
-import { Observable, forkJoin, of, throwError } from 'rxjs';
+import { Firestore, Query, query, where } from '@angular/fire/firestore';
+import { Observable, forkJoin, of, throwError, from } from 'rxjs';
 import { ResponseWithData, Response } from './response';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
@@ -14,17 +14,16 @@ import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCo
 import { ToolService } from './ToolService';
 import { DataRegion } from '../model/common';
 import { CurrentApplicationName, Referee, RefereeCoachLevel, User } from '../model/user';
-import { AngularFireFunctions } from '@angular/fire/functions';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote, RefereeUpgrade } from '../model/upgrade';
-import { PrefixNot } from '@angular/compiler';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
-        private angularFireFunctions: AngularFireFunctions,
+        db: Firestore,
+        private angularFireFunctions: Functions,
         private competitionDayPanelVoteService: CompetitionDayPanelVoteService,
         private competitionDayRefereeCoachVoteService: CompetitionDayRefereeCoachVoteService,
         private connectedUserService: ConnectedUserService,
@@ -71,7 +70,7 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         let q: Query<Competition> = this.getCollectionRef();
         if (region) {
             console.log('searchCompetitions(' + text + ',' + options + ') filter by the region of the user: \'' + region + '\'');
-            q = q.where('region', '==', region);
+            q = query(q, where('region', '==', region));
         }
         let res = this.query(q, options);
         const str = this.toolService.isValidString(text) ? text.trim() : null;
@@ -120,7 +119,7 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         if (!name) {
             return of({data: null, error: null});
         }
-        return this.queryOne(this.getCollectionRef().where('name', '==', name), 'default');
+        return this.queryOne(query(this.getCollectionRef(), where('name', '==', name)));
     }
 
     public delete(competitionId: string): Observable<Response> {
@@ -154,10 +153,10 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         return false;
     }
     public getRefereeUpgradeStatus(competition: Competition, day: Date): Observable<any> {
-        return this.angularFireFunctions.httpsCallable('sendRefereeUpgradeStatus')({
+        return from(httpsCallable(this.angularFireFunctions, 'sendRefereeUpgradeStatus')({
             refereeIds: competition.referees.map(ref => ref.refereeId),
             day: this.dateService.date2string(day)
-        });
+        }));
     }
 
     public computeVoteAnalysis(competition: Competition,

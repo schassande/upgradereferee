@@ -1,5 +1,5 @@
 import { AppSettingsService } from './AppSettingsService';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { Firestore, query, where } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
@@ -14,7 +14,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController,
         private dateService: DateService
     ) {
@@ -34,15 +34,15 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
 
     getVote(competitionId: string, day: Date, coachId: string, refereeId: string)
         : Observable<ResponseWithData<CompetitionDayRefereeCoachVote>> {
-        return this.queryOne(this.getCollectionRef()
-            .where('competitionRef.competitionId', '==', competitionId)
-            .where('day', '==', this.dateService.to00h00(day))
-            .where('coach.coachId', '==', coachId)
-            .where('referee.refereeId', '==', refereeId)
-            , 'default');
+        return this.queryOne(query(this.getCollectionRef(),
+            where('competitionRef.competitionId', '==', competitionId),
+            where('day', '==', this.dateService.to00h00(day)),
+            where('coach.coachId', '==', coachId),
+            where('referee.refereeId', '==', refereeId)));
     }
     onCompetitionDelete(competitionId: string): Observable<Response[]> {
-        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default')
+        return this.query(query(this.getCollectionRef(),
+            where('competitionRef.competitionId', '==', competitionId)))
             .pipe(mergeMap((rvs) => {
                 if (rvs.data && rvs.data.length > 0) {
                     return forkJoin(rvs.data.map(v => this.delete(v.id)));
@@ -52,6 +52,7 @@ export class CompetitionDayRefereeCoachVoteService extends RemotePersistentDataS
             }));
     }
     findByCompetition(competitionId: string): Observable<ResponseWithData<CompetitionDayRefereeCoachVote[]>> {
-        return this.query(this.getCollectionRef().where('competitionRef.competitionId', '==', competitionId), 'default');
+        return this.query(query(this.getCollectionRef(), 
+            where('competitionRef.competitionId', '==', competitionId)));
     }
 }

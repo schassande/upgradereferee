@@ -1,13 +1,13 @@
 import { AppSettingsService } from './AppSettingsService';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { Firestore, limit, orderBy, Query, query, where } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
-import { CompetitionDayPanelVote, RefereeUpgrade, RefereeUpgradeStatus } from '../model/upgrade';
+import { RefereeUpgrade, RefereeUpgradeStatus } from '../model/upgrade';
 import { DateService } from './DateService';
 import { ResponseWithData } from './response';
-import { Observable, of } from 'rxjs';
-import { AngularFireFunctions } from '@angular/fire/functions';
+import { from, Observable, of } from 'rxjs';
+import { Functions, httpsCallable } from '@angular/fire/functions';
 import { map } from 'rxjs/operators';
 import { Upgradable } from '../model/coaching';
 
@@ -16,9 +16,9 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
 
     constructor(
         appSettingsService: AppSettingsService,
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController,
-        private angularFireFunctions: AngularFireFunctions,
+        private angularFireFunctions: Functions,
         private dateService: DateService
     ) {
         super(appSettingsService, db, toastController);
@@ -42,57 +42,56 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
     }
 
     public getLastRefereeUpgrade(refereeId: string): Observable<ResponseWithData<RefereeUpgrade>> {
-        return this.queryOne(this.getCollectionRef()
-            .where('referee.refereeId', '==', refereeId)
-            .orderBy('decision', 'desc')
-            .limit(1)
-            , 'default');
+        return this.queryOne(query(this.getCollectionRef(),
+            where('referee.refereeId', '==', refereeId),
+            orderBy('decision', 'desc'),
+            limit(1)));
     }
     public find10LastRefereeUpgrades(refereeId: string,
                                      upgradeStatus: RefereeUpgradeStatus = null): Observable<ResponseWithData<RefereeUpgrade[]>> {
-        let query: Query<RefereeUpgrade> = this.getCollectionRef()
-            .where('referee.refereeId', '==', refereeId)
-            .orderBy('decisionDate', 'desc')
-            .limit(10);
+        let q: Query<RefereeUpgrade> = query(this.getCollectionRef(),
+            where('referee.refereeId', '==', refereeId),
+            orderBy('decisionDate', 'desc'),
+            limit(10));
         if (upgradeStatus) {
-            query = query.where('upgradeStatus', '==', upgradeStatus);
+            q = query(q, where('upgradeStatus', '==', upgradeStatus));
         }
-        return this.query(query, 'default');
+        return this.query(q);
     }
     public computeRefereeUpgrade(refereeId: string, day: Date): Observable<RefereeUpgrade> {
-        return this.angularFireFunctions.httpsCallable('computeRefereeUpgrade')({
+        return from(httpsCallable<any,RefereeUpgrade>(this.angularFireFunctions, 'computeRefereeUpgrade')({
             refereeId,
             day: this.dateService.date2string(day)
-        }).pipe(
-            map(ru => {
+        })).pipe(
+            map((a) => {
+                const ru: RefereeUpgrade = a.data;
                 this.adjustFieldOnLoad(ru);
                 return ru;
             })
         );
     }
     public findRefereeUpgradeByDate(decisionDate: Date, decision: Upgradable): Observable<ResponseWithData<RefereeUpgrade[]>> {
-        return this.query(this.getCollectionRef()
-            .where('decisionDate', '==', decisionDate)
-            .where('decision', '==', decision)
-            , 'default');
+        return this.query(query(this.getCollectionRef(),
+            where('decisionDate', '==', decisionDate),
+            where('decision', '==', decision)));
     }
     public findRefereeUpgradeByCompetition(competitionId: string,
                                            decision: Upgradable = null): Observable<ResponseWithData<RefereeUpgrade[]>> {
-        let q: Query<RefereeUpgrade> = this.getCollectionRef()
-            .where('competitionId', '==', competitionId);
+        let q: Query<RefereeUpgrade> = query(this.getCollectionRef(),
+            where('competitionId', '==', competitionId));
         if (decision) {
-            q = q.where('decision', '==', decision);
+            q = query(q, where('decision', '==', decision));
         }
         return this.query(q, 'default');
     }
     public sendRefereeUpgrade(upgrade: RefereeUpgrade): Observable<any> {
         if (upgrade.decision === 'Yes') {
-            return this.angularFireFunctions.httpsCallable('sendRefereeUpgrade')({upgradeId: upgrade.id});
+            return from(httpsCallable(this.angularFireFunctions, 'sendRefereeUpgrade')({upgradeId: upgrade.id}));
         } else {
             return of('');
         }
     }
     findByCompetition(competitionId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
-        return this.query(this.getCollectionRef().where('competitionId', '==', competitionId), 'default');
+        return this.query(query(this.getCollectionRef(), where('competitionId', '==', competitionId)));
     }
 }

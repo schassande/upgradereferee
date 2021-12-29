@@ -1,11 +1,14 @@
-import { AngularFireFunctions } from '@angular/fire/functions';
-import { AngularFirestore, Query } from '@angular/fire/firestore';
+import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Firestore, Query, query, where } from '@angular/fire/firestore';
 import { LocalAppSettings } from './../model/settings';
 import { AppSettingsService } from './AppSettingsService';
 import { AlertController, ToastController, LoadingController } from '@ionic/angular';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { UserCredential } from '@firebase/auth-types';
-
+import { Auth,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    UserCredential } from '@angular/fire/auth';
 import { ResponseWithData, Response } from './response';
 import { Observable, of, from, Subject } from 'rxjs';
 import { ConnectedUserService } from './ConnectedUserService';
@@ -25,15 +28,15 @@ export class UserService  extends RemotePersistentDataService<User> {
     public lastSelectedReferee: { referee: User, idx: number} = {referee: null, idx: -1};
 
     constructor(
-        db: AngularFirestore,
+        db: Firestore,
         toastController: ToastController,
         private connectedUserService: ConnectedUserService,
         appSettingsService: AppSettingsService,
         private alertCtrl: AlertController,
         private dateService: DateService,
         private loadingController: LoadingController,
-        private angularFireFunctions: AngularFireFunctions,
-        private angularFireAuth: AngularFireAuth,
+        private angularFireFunctions: Functions,
+        private angularFireAuth: Auth,
         private toolService: ToolService
     ) {
         super(appSettingsService, db, toastController);
@@ -72,7 +75,7 @@ export class UserService  extends RemotePersistentDataService<User> {
             if (cred !== null  && (user.authProvider === 'FACEBOOK' || user.authProvider === 'GOOGLE')) {
                 obs = of(cred);
             } else {
-                obs = from(this.angularFireAuth.createUserWithEmailAndPassword(user.email, password));
+                obs = from(createUserWithEmailAndPassword(this.angularFireAuth, user.email, password));
             }
             return obs.pipe(
                 mergeMap((userCred: UserCredential) => {
@@ -119,7 +122,7 @@ export class UserService  extends RemotePersistentDataService<User> {
                     return of (res);
                 } else if (this.connectedUserService.getCurrentUser().id === id) {
                     // then delete the user from firestore user auth database
-                    return from(this.angularFireAuth.currentUser).pipe(
+                    return of(this.angularFireAuth.currentUser).pipe(
                         mergeMap((user) => from(user.delete())),
                         map(() => {
                             return {error: null};
@@ -140,7 +143,7 @@ export class UserService  extends RemotePersistentDataService<User> {
     public login(email: string, password: string): Observable<ResponseWithData<User>> {
         console.log('UserService.login(' + email + ', ' + password + ')');
         let credential = null;
-        return from(this.angularFireAuth.signInWithEmailAndPassword(email, password)).pipe(
+        return from(signInWithEmailAndPassword(this.angularFireAuth, email, password)).pipe(
             mergeMap( (cred: UserCredential) => {
                 credential = cred;
                 // console.log('login: cred=', JSON.stringify(cred, null, 2));
@@ -238,7 +241,7 @@ export class UserService  extends RemotePersistentDataService<User> {
 
     public resetPassword(email, sub: Subject<ResponseWithData<User>> = null) {
         // console.log('Reset password of the account', email);
-        this.angularFireAuth.sendPasswordResetEmail(email).then(() => {
+        sendPasswordResetEmail(this.angularFireAuth, email).then(() => {
             this.alertCtrl.create({message: 'An email has been sent to \'' + email + '\' to reset the password.'})
                 .then((alert) => alert.present());
             if (sub) {
@@ -305,7 +308,7 @@ export class UserService  extends RemotePersistentDataService<User> {
     }
 
     public getByEmail(email: string): Observable<ResponseWithData<User>> {
-        return this.queryOne(this.getCollectionRef().where('email', '==', email), 'default').pipe(
+        return this.queryOne(query(this.getCollectionRef(), where('email', '==', email))).pipe(
             map((ruser => {
                 // console.log('UserService.getByEmail(' + email + ')=', ruser.data);
                 return ruser;
@@ -316,7 +319,7 @@ export class UserService  extends RemotePersistentDataService<User> {
         );
     }
     public findByShortName(shortName: string): Observable<ResponseWithData<User[]>> {
-        return this.query(this.getCollectionRef().where('shortName', '==', shortName), 'default');
+        return this.query(query(this.getCollectionRef(), where('shortName', '==', shortName)));
     }
 /*
     public authWithGoogle(): Observable<ResponseWithData<User>> {
@@ -329,7 +332,7 @@ export class UserService  extends RemotePersistentDataService<User> {
 */
     public authWith(authProvider: any, authName: AuthProvider): Observable<ResponseWithData<User>> {
         let credential = null;
-        return from(this.angularFireAuth.signInWithPopup(authProvider)).pipe(
+        return from(signInWithPopup(this.angularFireAuth, authProvider)).pipe(
             mergeMap( (cred: UserCredential) => {
                 credential = cred;
                 console.log('authWith: cred=', JSON.stringify(cred, null, 2));
@@ -419,7 +422,7 @@ export class UserService  extends RemotePersistentDataService<User> {
     }
     deleteAccount(user: User): void {
         if (user.id ===  this.connectedUserService.getCurrentUser().id) {
-            from(this.angularFireAuth.currentUser).pipe(
+            of(this.angularFireAuth.currentUser).pipe(
                 mergeMap((u) => u.delete()),
                 mergeMap(() => this.delete(user.id)),
                 map(() => this.connectedUserService.userDisconnected())
@@ -428,21 +431,21 @@ export class UserService  extends RemotePersistentDataService<User> {
             this.delete(user.id).subscribe();
         }
     }
-
     public sendNewAccountToAdmin(userId: string): Observable<any> {
-        return this.angularFireFunctions.httpsCallable('sendNewAccountToAdmin')({userId});
+        return from(httpsCallable(this.angularFireFunctions, 'sendNewAccountToAdmin')({userId}));
     }
     public sendNewAccountToUser(userId: string): Observable<any> {
-        return this.angularFireFunctions.httpsCallable('sendNewAccountToUser')({userId});
+        return from(httpsCallable(this.angularFireFunctions, 'sendNewAccountToUser')({userId}));
     }
     public sendAccountValidated(userId: string): Observable<any> {
-        return this.angularFireFunctions.httpsCallable('sendAccountValidated')({userId});
+        return from(httpsCallable(this.angularFireFunctions, 'sendAccountValidated')({userId}));
     }
     public sendAccountNotValidated(userId: string): Observable<any> {
-        return this.angularFireFunctions.httpsCallable('sendAccountNotValidated')({userId});
+        return from(httpsCallable(this.angularFireFunctions, 'sendAccountNotValidated')({userId}));
     }
+
     public sendValidationRequired(userId: string, rolesToValidate: AppRole[], toEmails: string[], ccEmails: string[]) {
-        return this.angularFireFunctions.httpsCallable('sendValidationRequired')({userId, rolesToValidate, toEmails, ccEmails});
+        return httpsCallable(this.angularFireFunctions, 'sendValidationRequired')({userId, rolesToValidate, toEmails, ccEmails});
     }
 
     public sortUsers(users: User[]): User[] {
@@ -459,42 +462,39 @@ export class UserService  extends RemotePersistentDataService<User> {
     }
 
     public findPendingValidations(role: AppRole, country: string = null): Observable<ResponseWithData<User[]>> {
-        let q: Query<User> = this.getCollectionRef().where(
-                'demandingApplications',
-                'array-contains',
-                { name : CurrentApplicationName, role}
-            );
+        let q: Query<User> = query(this.getCollectionRef(),
+            where('demandingApplications', 'array-contains', { name : CurrentApplicationName, role}));
         if (country) {
-            q = q.where('country', '==', country);
+            q = query(q, where('country', '==', country));
         }
-        return this.query(q, 'default');
+        return this.query(q);
     }
     public searchUsers(criteria: UserSearchCriteria):
             Observable<ResponseWithData<User[]>> {
         let q: Query<User> = this.getCollectionRef();
         if (this.toolService.isValidString(criteria.role)) {
             console.log('filter by role ' + criteria.role + ' of ' + CurrentApplicationName);
-            q = q.where('applications', 'array-contains', {name: CurrentApplicationName, role: criteria.role});
+            q = query(q, where('applications', 'array-contains', {name: CurrentApplicationName, role: criteria.role}));
         }
         if (this.toolService.isValidString(criteria.region)) {
             console.log('filter by region ' + criteria.region);
-            q = q.where('region', '==', criteria.region);
+            q = query(q, where('region', '==', criteria.region));
         }
         if (this.toolService.isValidString(criteria.country)) {
             console.log('filter by country ' + criteria.country);
-            q = q.where('country', '==', criteria.country);
+            q = query(q, where('country', '==', criteria.country));
         }
         if (this.toolService.isValidString(criteria.refereeLevel)) {
             console.log('filter by refereeLevel ' + criteria.refereeLevel);
-            q = q.where('referee.refereeLevel', '==', criteria.refereeLevel);
+            q = query(q, where('referee.refereeLevel', '==', criteria.refereeLevel));
         }
         if (this.toolService.isValidString(criteria.refereeCoachLevel)) {
             console.log('filter by refereeCoachLevel ' + criteria.refereeCoachLevel);
-            q = q.where('refereeCoach.refereeCoachLevel', '==', criteria.refereeCoachLevel);
+            q = query(q, where('refereeCoach.refereeCoachLevel', '==', criteria.refereeCoachLevel));
         }
         if (this.toolService.isValidString(criteria.accountStatus)) {
             console.log('filter by accountStatus ' + criteria.accountStatus);
-            q = q.where('accountStatus', '==', criteria.accountStatus);
+            q = query(q, where('accountStatus', '==', criteria.accountStatus));
         }
         return super.filter(this.query(q, 'default'), this.getFilterByText(criteria.text));
     }
