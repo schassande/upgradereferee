@@ -56,6 +56,11 @@
                 <ion-select-option value="level">Level</ion-select-option>
             </ion-select>
         </ion-item>
+        <ion-item *ngIf="(isNDR || isAdmin) && applicationUser && !loading && referees && referees.length > 0">
+            <div style="text-align: right; width: 100%;">
+                <a (click)="exportRefereeUpgrades()">Export the status of the {{ referees.length}} upgradable referees</a>
+            </div>
+        </ion-item>
         <ion-item-group style="width: 100%;">
             <ion-item-divider color="light">Search result<span *ngIf="!loading && referees">&nbsp;({{referees.length}})</span></ion-item-divider>
             <div *ngIf="loading" style="margin: 20px; text-align: center;">

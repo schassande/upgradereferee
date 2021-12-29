@@ -94,4 +94,9 @@ export class RefereeUpgradeService extends RemotePersistentDataService<RefereeUp
     findByCompetition(competitionId: string): Observable<ResponseWithData<RefereeUpgrade[]>> {
         return this.query(query(this.getCollectionRef(), where('competitionId', '==', competitionId)));
     }
+    public getRefereeUpgradeStatusAsCsv(refereeIds: string[], day: Date): Observable<any> {
+        return from(httpsCallable(this.angularFireFunctions, 'sendRefereeUpgradeStatus')
+            ({ refereeIds, day: this.dateService.date2string(day) })).pipe(map(res => res.data));
+    }
+
 }

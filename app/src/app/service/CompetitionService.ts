@@ -16,6 +16,7 @@ import { DataRegion } from '../model/common';
 import { CurrentApplicationName, Referee, RefereeCoachLevel, User } from '../model/user';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote, RefereeUpgrade } from '../model/upgrade';
+import { RefereeUpgradeService } from './RefereeUpgradeService';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -29,6 +30,7 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         private connectedUserService: ConnectedUserService,
         private dateService: DateService,
         toastController: ToastController,
+        private refereeUpgradeService: RefereeUpgradeService,
         private toolService: ToolService
     ) {
         super(appSettingsService, db, toastController);
@@ -152,11 +154,11 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
         }
         return false;
     }
-    public getRefereeUpgradeStatus(competition: Competition, day: Date): Observable<any> {
-        return from(httpsCallable(this.angularFireFunctions, 'sendRefereeUpgradeStatus')({
-            refereeIds: competition.referees.map(ref => ref.refereeId),
-            day: this.dateService.date2string(day)
-        }));
+    public getRefereeUpgradeStatusAsCsv(competition: Competition, day: Date): Observable<any> {
+        return this.refereeUpgradeService.getRefereeUpgradeStatusAsCsv(
+            competition.referees.map(ref => ref.refereeId),
+            day
+        );
     }
 
     public computeVoteAnalysis(competition: Competition,

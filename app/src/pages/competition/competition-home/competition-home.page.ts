@@ -16,6 +16,7 @@ import * as moment from 'moment';
 import { CompetitionDayRefereeCoachVoteService } from 'src/app/service/CompetitionDayRefereeCoachVoteService';
 import { CompetitionDayPanelVoteService } from 'src/app/service/CompetitionDayPanelVoteService';
 import { RefereeUpgradeService } from 'src/app/service/RefereeUpgradeService';
+import { downloadContentAsFile } from 'src/pages/widget/file-downloader';
 
 @Component({
   selector: 'app-competition-home',
@@ -252,17 +253,9 @@ export class CompetitionHomePage implements OnInit {
   }
   exportRefereeUpgradeStatusAtDay(day: Date) {
     this.downloading = true;
-    this.competitionService.getRefereeUpgradeStatus(this.competition, day).subscribe(
+    this.competitionService.getRefereeUpgradeStatusAsCsv(this.competition, day).subscribe(
       (content) => {
-        // console.log(content);
-        const oMyBlob = new Blob([content], {type : 'text/csv'});
-        const url = URL.createObjectURL(oMyBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Referees_Upgrade_status_${this.dateService.date2string(day)}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
+        downloadContentAsFile(content, `Referees_Upgrade_status_${this.dateService.date2string(day)}.csv`, 'text/csv');
         this.downloading = false;
       },
       (err) => {

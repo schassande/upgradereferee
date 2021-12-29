@@ -1,11 +1,16 @@
 import { HelpService } from './../../../app/service/HelpService';
 import { Component, OnInit } from '@angular/core';
-import { ModalController, NavController } from '@ionic/angular';
+import { AlertController, ModalController, NavController } from '@ionic/angular';
 import { ResponseWithData } from '../../../app/service/response';
 import { CONSTANTES, Referee, RefereeLevel, User } from '../../../app/model/user';
 import { UserSearchCriteria, UserService } from 'src/app/service/UserService';
 import { DataRegion } from 'src/app/model/common';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
+import { DateService } from 'src/app/service/DateService';
+import { RefereeUpgradeService } from 'src/app/service/RefereeUpgradeService';
+import { downloadContentAsFile } from 'src/pages/widget/file-downloader';
+import { CompetitionService } from 'src/app/service/CompetitionService';
+import { ToolService } from 'src/app/service/ToolService';
 
 /**
  * Generated class for the RefereeListPage page.
@@ -32,12 +37,19 @@ export class RefereeListPage implements OnInit {
   loading = false;
   showFilterRegion = true;
   showFilterCountry = true;
+  isNDR = false;
+  isAdmin = false;
 
   constructor(
+    private alertCtrl: AlertController,
     private connectedUserService: ConnectedUserService,
+    private competitionService: CompetitionService,
+    private dateService: DateService,
     private helpService: HelpService,
     public modalController: ModalController,
     private navController: NavController,
+    private refereeUpgradeService: RefereeUpgradeService,
+    private toolService: ToolService,
     public userService: UserService
     ) {
   }
@@ -45,12 +57,12 @@ export class RefereeListPage implements OnInit {
   ngOnInit() {
     this.helpService.setHelp('referee-list');
     const curUser: User = this.connectedUserService.getCurrentUser();
-    const isAdmin = this.connectedUserService.isAdmin();
-    const isNDR = this.connectedUserService.isNDR();
+    this.isAdmin = this.connectedUserService.isAdmin();
+    this.isNDR = this.connectedUserService.isNDR();
     this.region = curUser.region;
-    this.showFilterRegion = isAdmin || !isNDR;
-    this.showFilterCountry = isAdmin || !isNDR;
-    if (isNDR && !isAdmin) {
+    this.showFilterRegion = this.isAdmin || !this.isNDR;
+    this.showFilterCountry = this.isAdmin || !this.isNDR;
+    if (this.isNDR && !this.isAdmin) {
       this.country = curUser.country;
     }
     this.searchReferee();
@@ -98,6 +110,26 @@ export class RefereeListPage implements OnInit {
 
   public onSearchBarInput() {
     this.searchReferee();
+  }
+  exportRefereeUpgrades() {
+    const refIds: string[] = this.referees
+      .filter(ref => this.competitionService.isUpgradableReferee(ref))
+      .map(ref => ref.id);
+    // console.log('exportRefereeUpgrades()', refIds);
+    if (refIds.length === 0) {
+      this.alertCtrl.create({message: 'No upgradable referee found.'}).then((alert) => alert.present());
+    } else {
+      let fileName = 'Referees_Upgrade_status'
+        + (this.toolService.isValidString(this.region) ? '_' + this.region : '')
+        + (this.toolService.isValidString(this.country) ? '_' + this.country : '')
+        + (this.toolService.isValidString(this.refereeLevel) ? '_' + this.refereeLevel : '')
+        + (this.toolService.isValidString(this.searchInput) ? '_' + this.searchInput.trim() : '');
+      this.refereeUpgradeService.getRefereeUpgradeStatusAsCsv(refIds, new Date()).subscribe({
+        next: (content) => downloadContentAsFile(content, 
+          `${fileName}_${this.dateService.date2string(new Date())}.csv`, 'text/csv'),
+        error: (err) => console.error(err)
+      });
+    }
   }
   onSwipe(event) {
     // console.log('onSwipe', event);
