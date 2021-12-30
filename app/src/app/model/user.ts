@@ -134,7 +134,7 @@ export interface Referee extends Person {
     };
     dataSharingAgreement?: RefereeDataSharingAgreement;
 }
-export type AuthProvider = 'EMAIL' | 'GOOGLE' | 'FACEBOOK';
+export type AuthProvider = 'EMAIL' | 'GOOGLE' | 'FACEBOOK' | 'TWITTER';
 export type AppRole = /** Depracated replaced by REFEREE_COACH */ 'USER'
     | /** Admin of the referee levels/profils */ 'PROFILE_ADMIN'
     | /** Application admin */ 'ADMIN'

@@ -1,7 +1,7 @@
 import { AppSettingsService } from './AppSettingsService';
 import { Injectable, EventEmitter } from '@angular/core';
 import { AppRole, CurrentApplicationName, User } from './../model/user';
-import { UserCredential } from '@firebase/auth-types';
+import { UserCredential } from '@angular/fire/auth';
 
 @Injectable()
 export class ConnectedUserService {
