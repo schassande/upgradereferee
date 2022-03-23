@@ -75,7 +75,9 @@
                         {{pv.competitionRef.competitionName}}
                         <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
                         <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
-                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: <span innerHTML="{{pv.commentForReferee}}"></span></div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment:
+                            <div style="white-space: pre-wrap; margin-left: 5px;" innerHTML="{{pv.commentForReferee}}"></div>
+                        </div>
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold;">Yes</span>
@@ -102,7 +104,9 @@
                         {{pv.competitionRef.competitionName}}
                         <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
                         <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
-                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: <span innerHTML="{{pv.commentForReferee}}"></span></div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment:
+                            <div style="white-space: pre-wrap; margin-left: 5px;" innerHTML="{{pv.commentForReferee}}"></div>
+                        </div>
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
@@ -129,7 +133,9 @@
                         {{pv.competitionRef.competitionName}}
                         <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
                         <div style="font-size: 0.8em;" *ngIf="pv.vote === 'Yes'">Nb Coach: {{pv.yesCoaches.length}}</div>
-                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment: <span innerHTML="{{pv.commentForReferee}}"></span></div>
+                        <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment:
+                            <div style="white-space: pre-wrap; margin-left: 5px;" innerHTML="{{pv.commentForReferee}}"></div>
+                        </div>
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
@@ -165,8 +171,12 @@
                     {{pv.competitionRef.competitionName}}
                     <div style="font-size: 0.8em;">Category: {{pv.competitionCategory}}</div>
                     <div style="font-size: 0.8em;">Yes Coach: <span *ngFor="let c of pv.yesCoaches">{{c.coachShortName}}&nbsp;</span></div>
-                    <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment for Referee: <span innerHTML="{{pv.commentForReferee}}"></span></div>
-                    <div style="font-size: 0.8em;" *ngIf="pv.commentForCoach && pv.commentForCoach.length > 2">Comment for coach: <span innerHTML="{{pv.commentForCoach}}"></span></div>
+                    <div style="font-size: 0.8em;" *ngIf="pv.commentForReferee && pv.commentForReferee.length > 2">Comment for Referee:
+                        <div style="white-space: pre-wrap; margin-left: 10px;" innerHTML="{{pv.commentForReferee}}"></div>
+                    </div>
+                    <div style="font-size: 0.8em;" *ngIf="pv.commentForCoach && pv.commentForCoach.length > 2">Comment for coach:
+                        <div style="white-space: pre-wrap; margin-left: 10px;" innerHTML="{{pv.commentForCoach}}"></div>
+                    </div>
                 </ion-label>
                 <div slot="end">
                     <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>

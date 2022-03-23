@@ -118,12 +118,12 @@
             <div class="comment-warning">Visible by the referee</div>
             <ion-item>
                 <ion-label>Public<br>comment</ion-label>
-                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
             <div class="comment-warning">Visible by the referee coaches only</div>
             <ion-item>
                 <ion-label>Private<br>comment</ion-label>
-                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="3000" (ionChange)="onVoteChange()"></ion-textarea>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
         </ion-item-group>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">
