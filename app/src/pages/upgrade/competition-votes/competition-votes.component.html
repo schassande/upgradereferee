@@ -198,5 +198,6 @@
             <ion-spinner></ion-spinner>
         </div>
     </ion-list>
+    <ion-button *ngIf="isAdmin" (click)="computeUpgrades()">Compute Upgrade</ion-button>
     <div style="height: 50px;"></div>
 </ion-content>

@@ -557,6 +557,12 @@ export class CompetitionVotesComponent implements OnInit {
       map(() => this.computeUpgrade(pvote))
     ).subscribe();
   }
+  computeUpgrades() {
+    this.panelVotes.forEach(pv => {
+      console.log("Compute upgrade " + pv.referee.refereeShortName);
+      this.computeUpgrade(pv);
+    });
+  }
   computeUpgrade(pvote: CompetitionDayPanelVote) {
     // Call a function to compute the referee upgrade on server side
     this.refereeUpgradeService.computeRefereeUpgrade(pvote.referee.refereeId, pvote.day)
