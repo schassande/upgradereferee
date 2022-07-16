@@ -84,6 +84,7 @@ import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgr
 import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
 import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
 import { NotificationService } from './service/NotificationService';
+import { UserMigrateComponent } from 'src/pages/user/user-migrate/user-migrate.component';
 
 
 @NgModule({
@@ -98,7 +99,7 @@ import { NotificationService } from './service/NotificationService';
         RefereeCoachListComponent, RefereeCoachViewComponent,
         RefereeListPage, RefereeSelectPage, RefereeValidationComponent, RefereeViewPage, RefereeVotesComponent,
         SettingsPage,
-        UserEditPage, UserLoginComponent, UserWaitingValidationPage,
+        UserEditPage, UserLoginComponent, UserWaitingValidationPage, UserMigrateComponent,
         CameraIconComponent, UserSelectorComponent,
         UpgradeCriteriaComponent,
         VotingComponent,

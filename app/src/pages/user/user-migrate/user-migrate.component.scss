@@ -1,0 +1,24 @@
+page-user-new {}
+
+.alert-danger {
+    background-color: red;
+    color: white;
+    padding: 10px;
+}
+
+.privacyRow {
+    border-bottom: solid 1px black;
+}
+
+.warningMsg {
+    text-align: center;
+    color: red;
+    padding: 5px;
+    font-style: italic;
+}
+
+.warningMsg img {
+    padding: 10px 0;
+    float: left;
+    width: 50px;
+}

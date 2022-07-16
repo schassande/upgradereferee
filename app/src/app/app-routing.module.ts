@@ -31,44 +31,47 @@ import { CompetitionUpgradesComponent } from 'src/pages/upgrade/competition-upgr
 import { NdrGuard } from './NdrGuard';
 import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.component';
 import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
+import { UserMigrateComponent } from 'src/pages/user/user-migrate/user-migrate.component';
+import { AllowedAuthGuard } from './AllowedAuthGuard';
 
 const routes: Routes = [
-  { path: 'admin', component: AdminHomeComponent, canActivate: [AuthGuard, AdminGuard] },
-  { path: 'admin/user-manager', component: UserManagerComponent, canActivate: [AuthGuard, AdminGuard] },
-  { path: 'admin/user-merger', component: UserMergerComponent, canActivate: [AuthGuard, AdminGuard] },
-  { path: 'admin/coach-validation', component: CoachValidationComponent, canActivate: [AuthGuard, AdminGuard] },
-  { path: 'admin/ndr-validation', component: NdrValidationComponent, canActivate: [AuthGuard, AdminGuard] },
+  { path: 'admin', component: AdminHomeComponent, canActivate: [AllowedAuthGuard, AdminGuard] },
+  { path: 'admin/user-manager', component: UserManagerComponent, canActivate: [AllowedAuthGuard, AdminGuard] },
+  { path: 'admin/user-merger', component: UserMergerComponent, canActivate: [AllowedAuthGuard, AdminGuard] },
+  { path: 'admin/coach-validation', component: CoachValidationComponent, canActivate: [AllowedAuthGuard, AdminGuard] },
+  { path: 'admin/ndr-validation', component: NdrValidationComponent, canActivate: [AllowedAuthGuard, AdminGuard] },
 
-  { path: 'competition/list', component: CompetitionListPage, canActivate: [AuthGuard] },
-  { path: 'competition/:id/home', component: CompetitionHomePage, canActivate: [AuthGuard] },
-  { path: 'competition/:id/edit', component: CompetitionEditComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
-  { path: 'competition/:id/coaches', component: CompetitionCoachesPage, canActivate: [AuthGuard] },
-  { path: 'competition/:id/referees', component: CompetitionRefereesPage, canActivate: [AuthGuard] },
-  { path: 'competition/:id/votes', component: CompetitionVotesComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
-  { path: 'competition/:id/upgrades', component: CompetitionUpgradesComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
+  { path: 'competition/list', component: CompetitionListPage, canActivate: [AllowedAuthGuard] },
+  { path: 'competition/:id/home', component: CompetitionHomePage, canActivate: [AllowedAuthGuard] },
+  { path: 'competition/:id/edit', component: CompetitionEditComponent, canActivate: [AllowedAuthGuard, RefereeCoachGuard] },
+  { path: 'competition/:id/coaches', component: CompetitionCoachesPage, canActivate: [AllowedAuthGuard] },
+  { path: 'competition/:id/referees', component: CompetitionRefereesPage, canActivate: [AllowedAuthGuard] },
+  { path: 'competition/:id/votes', component: CompetitionVotesComponent, canActivate: [AllowedAuthGuard, RefereeCoachGuard] },
+  { path: 'competition/:id/upgrades', component: CompetitionUpgradesComponent, canActivate: [AllowedAuthGuard, RefereeCoachGuard] },
 
-  { path: 'upgrade/voting', component: VotingComponent, canActivate: [AuthGuard, RefereeCoachGuard] },
-  { path: 'upgrade/criteria', component: UpgradeCriteriaComponent, canActivate: [AuthGuard] },
+  { path: 'upgrade/voting', component: VotingComponent, canActivate: [AllowedAuthGuard, RefereeCoachGuard] },
+  { path: 'upgrade/criteria', component: UpgradeCriteriaComponent, canActivate: [AllowedAuthGuard] },
 
-  { path: 'home', component: HomePage, canActivate: [AuthGuard]},
+  { path: 'home', component: HomePage, canActivate: [AllowedAuthGuard]},
 
-  { path: 'ndr/list', component: NdrListComponent, canActivate: [AuthGuard] },
+  { path: 'ndr/list', component: NdrListComponent, canActivate: [AllowedAuthGuard] },
 
-  { path: 'referee/list', component: RefereeListPage, canActivate: [AuthGuard] },
-  { path: 'referee/view/:id', component: RefereeViewPage, canActivate: [AuthGuard] },
-  { path: 'referee/votes/:id', component: RefereeVotesComponent, canActivate: [AuthGuard] },
+  { path: 'referee/list', component: RefereeListPage, canActivate: [AllowedAuthGuard] },
+  { path: 'referee/view/:id', component: RefereeViewPage, canActivate: [AllowedAuthGuard] },
+  { path: 'referee/votes/:id', component: RefereeVotesComponent, canActivate: [AllowedAuthGuard] },
   // MODAL { path: 'referee/select', component: RefereeSelectPage, canActivate: [AuthGuard] },
 
-  { path: 'referee-coach/list', component: RefereeCoachListComponent, canActivate: [AuthGuard] },
-  { path: 'referee-coach/view/:id', component: RefereeCoachViewComponent, canActivate: [AuthGuard] },
+  { path: 'referee-coach/list', component: RefereeCoachListComponent, canActivate: [AllowedAuthGuard] },
+  { path: 'referee-coach/view/:id', component: RefereeCoachViewComponent, canActivate: [AllowedAuthGuard] },
 
-  { path: 'settings', component: SettingsPage, canActivate: [AuthGuard]},
+  { path: 'settings', component: SettingsPage, canActivate: [AllowedAuthGuard]},
 
   { path: 'user/login', component: UserLoginComponent},
   { path: 'user/create', component: UserEditPage},
+  { path: 'user/migrate/:id', component: UserMigrateComponent, canActivate: [AuthGuard]},
   { path: 'user/waiting-validation', component: UserWaitingValidationPage},
-  { path: 'user/edit/:id', component: UserEditPage, canActivate: [AuthGuard] },
-  { path: 'user/referee-validation', component: RefereeValidationComponent, canActivate: [AuthGuard, NdrGuard] },
+  { path: 'user/edit/:id', component: UserEditPage, canActivate: [AllowedAuthGuard] },
+  { path: 'user/referee-validation', component: RefereeValidationComponent, canActivate: [AllowedAuthGuard, NdrGuard] },
 
   { path: '', redirectTo: '/home', pathMatch: 'full' },
 

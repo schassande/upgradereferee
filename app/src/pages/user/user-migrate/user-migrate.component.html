@@ -1,0 +1,94 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-button (click)="cancel()" detail>
+                <ion-icon name="arrow-back"></ion-icon>
+            </ion-button>
+        </ion-buttons>
+        <ion-title style="text-align: center;">Configure Upgrade access</ion-title>
+        <ion-buttons slot="end">
+            <ion-menu-button autoHide="false" menu="main"></ion-menu-button>
+        </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+<ion-content *ngIf="user">
+    <div *ngIf="getDemandingRoles().length > 0">
+        <p>A validation is still required for the following role:</p>
+        <ul>
+            <li *ngFor="let ar of getDemandingRoles()">{{ar.role}}</li>
+        </ul>
+    </div>
+    <ion-list style="width: 100%;">
+
+        <ion-item-group *ngIf="user.country">
+            <ion-item-divider color="light">
+                Use the application as the NDR of {{user.country}}?
+                <ion-toggle slot="end" [(ngModel)]="ndrRole" (ionChange)="onNDRRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div class="warningMsg" *ngIf="ndrRole">
+                <div>Before you can have a full access to this web application as NDR of {{user.country}}, the European Referee Commission must validated this role in the application.</div>
+            </div>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">
+                Use the application as referee?
+                <ion-toggle slot="end" [(ngModel)]="refereeRole" (ionChange)="onRefereeRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div *ngIf="refereeRole">
+                <ion-item>
+                    <ion-label>Current referee Level</ion-label>
+                    <ion-select [(ngModel)]="user.referee.refereeLevel" interface="action-sheet" [disabled]="disallowRefereeLevelChange()" (ionChange)="onRefereeLevel()">
+                        <ion-select-option value="EURO_1">European Level 1</ion-select-option>
+                        <ion-select-option value="EURO_2">European Level 2</ion-select-option>
+                        <ion-select-option value="EURO_3">European Level 3</ion-select-option>
+                        <ion-select-option value="EURO_4">European Level 4</ion-select-option>
+                        <ion-select-option value="EURO_5">European Level 5</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <ion-item>
+                    <ion-label>Referee category</ion-label>
+                    <ion-select [(ngModel)]="user.referee.refereeCategory" interface="action-sheet" [disabled]="disallowRefereeLevelChange()">
+                        <ion-select-option value="JUNIOR">Junior</ion-select-option>
+                        <ion-select-option value="OPEN">Open</ion-select-option>
+                        <ion-select-option value="SENIOR">Senior</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <div *ngIf="refereeRole && !refereeRoleInit" class="warningMsg">
+                    <div>Before you can have a full access to this web application as referee, your NDR must validated your candidacy.</div>
+                </div>
+            </div>
+        </ion-item-group>
+        <ion-item-group>
+            <ion-item-divider color="light">
+                Use the application as Referee Coach?
+                <ion-toggle slot="end" [(ngModel)]="refereeCoachRole" (ionChange)="onRefereeCoachRoleChange()"></ion-toggle>
+            </ion-item-divider>
+            <div *ngIf="refereeCoachRole">
+                <ion-item>
+                    <ion-label>Referee coach Level</ion-label>
+                    <ion-select [(ngModel)]="user.refereeCoach.refereeCoachLevel" interface="action-sheet" [disabled]="disallowRefereeCoachLevelChange()" (ionChange)="onRefereeCoachLevel()">
+                        <ion-select-option value="EURO_1">European Level 1</ion-select-option>
+                        <ion-select-option value="EURO_2">European Level 2</ion-select-option>
+                        <ion-select-option value="EURO_3">European Level 3</ion-select-option>
+                        <ion-select-option value="EURO_4">European Level 4</ion-select-option>
+                        <ion-select-option value="EURO_5">European Level 5</ion-select-option>
+                    </ion-select>
+                </ion-item>
+                <div *ngIf="refereeCoachRole && !refereeCoachRoleInit" class="warningMsg">
+                    <div>Before you can have a full access to this web application as Referee Coach, your referee coach role in the application must be validated by the Coaching commission of the European Referee Commission.</div>
+                </div>
+            </div>
+        </ion-item-group>
+        <ion-item *ngIf="user.dataStatus === 'NEW'" style="margin-top: 20px;">
+            <span> I accept the ERC manage my data and I accept the general conditions of the European upgrade system.</span>
+            <ion-checkbox slot="start" [(ngModel)]="acceptCondition"></ion-checkbox>
+        </ion-item>
+    </ion-list>
+    <div round *ngIf="error.length > 0" class="alert alert-danger">
+        <ul>
+            <li *ngFor="let er of error">{{er}}</li>
+        </ul>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+        <ion-button shape="round" (click)="save()" [disabled]="saving || !valid">Save</ion-button>
+    </div>
