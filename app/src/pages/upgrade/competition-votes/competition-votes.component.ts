@@ -26,6 +26,7 @@ export class CompetitionVotesComponent implements OnInit {
   /** The flag of data loading */
   loading = true;
   dirty = false;
+  saving = false;
   /** Id of the selected competition. This id can be given in parameter of the page. Can be null */
   competitionId: string;
   /** Competition object selected. Can be null */
@@ -153,11 +154,9 @@ export class CompetitionVotesComponent implements OnInit {
       referee => this.userService.get(referee.refereeId).pipe(
         map((ruser) => {
           if (this.checkReferee(ruser.data)) {
-            console.log('Referee ' + ruser.data.shortName + ' is upgradable');
+            // 'Referee ' + ruser.data.shortName + ' is upgradable');
             this.referees.push(ruser.data);
-          } else {
-            console.log('Referee ' + ruser.data.shortName + ' is NOT upgradable');
-          }
+          } // else 'Referee ' + ruser.data.shortName + ' is NOT upgradable');
         }))
     );
     return obs.length === 0 ? of('') : forkJoin(obs);
@@ -189,6 +188,9 @@ export class CompetitionVotesComponent implements OnInit {
       this.filteredReferees = this.referees;
       console.log('Empty referees list');
     }
+    this.filteredReferees.sort((r1, r2) => {
+      return (r1.firstName+r1.lastName).localeCompare(r2.firstName+r2.lastName);
+    })
   }
 
   private selectReferee() {
@@ -284,25 +286,14 @@ export class CompetitionVotesComponent implements OnInit {
       return of('');
     }
   }
+
   private createPanelVote() {
     console.log('createVote()');
     let commentFC = '';
     let commentFR = '';
     this.coachVotes.forEach(cv => {
-      if (cv.commentForReferee.length > 1) {
-        if (commentFR.length > 0) {
-          commentFC = commentFC + '<br>-' + cv.commentForReferee;
-        } else {
-          commentFC = '-' + cv.commentForReferee;
-        }
-      }
-      if (cv.commentForCoach.length > 1) {
-        if (commentFR.length > 0) {
-          commentFR = commentFR + '<br>-' + cv.coach.coachShortName + ':' + cv.commentForReferee;
-        } else {
-          commentFR = '-' + cv.coach.coachShortName + ':' + cv.commentForReferee;
-        }
-      }
+      commentFC = this.mergeComments(cv.commentForCoach, commentFC, '-' );
+      commentFR = this.mergeComments(cv.commentForReferee, commentFR, '-' + cv.coach.coachShortName + ':');
     });
     this.vote = {
       id: '',
@@ -318,7 +309,7 @@ export class CompetitionVotesComponent implements OnInit {
         refereeId: this.refereeId
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
-      vote: 'Abstain',
+      vote: null,
       commentForCoach: commentFC.length > 0 ? commentFC : '-',
       commentForReferee: commentFR.length > 0 ? commentFR : '-',
       closed: false,
@@ -334,8 +325,18 @@ export class CompetitionVotesComponent implements OnInit {
     } else {
       this.vote.vote = 'Abstain';
     }
+    this.savePanelVote();
   }
-
+  private mergeComments(coachComment: string, panelComment: string, prefix: string): string {
+    if (coachComment.length > 1) {
+      if (panelComment.length > 0) {
+        panelComment = panelComment + '<br>-' + coachComment;
+      } else {
+        panelComment = prefix + coachComment;
+      }
+    }
+    return panelComment;
+  }
   loadCoachVotes(): Observable<any> {
     this.loading = true;
     const coachVotesL = [];
@@ -367,7 +368,7 @@ export class CompetitionVotesComponent implements OnInit {
   private loadPanelVotesOfReferees(): Observable<any> {
     this.loading = true;
     let hasOpenVoteL = false;
-    const panelVotesL = [];
+    const panelVotesL : CompetitionDayPanelVote[] = [];
     console.log(`Looking for Panel Votes for filtered referees (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, referees=${this.filteredReferees.length})`);
     if (this.competition && this.day) {
       return forkJoin(this.filteredReferees.map(
@@ -378,7 +379,7 @@ export class CompetitionVotesComponent implements OnInit {
               console.log(`Referee ${ref.shortName} has a panel vote: ${rpvote.data.id}`);
               hasOpenVoteL = hasOpenVoteL || !rpvote.data.closed;
             } else {
-              console.log(`No panel vote for the referee ${ref.shortName}`);
+              // `No panel vote for the referee ${ref.shortName}`);
             }
           }),
         )
@@ -386,6 +387,7 @@ export class CompetitionVotesComponent implements OnInit {
         this.loading = false;
         this.dirty = false;
         this.hasOpenVote = hasOpenVoteL;
+        panelVotesL.sort((v1, v2) => v1.referee.refereeShortName.localeCompare(v2.referee.refereeShortName));
         this.panelVotes = panelVotesL;
       }));
     } else {
@@ -473,17 +475,29 @@ export class CompetitionVotesComponent implements OnInit {
       this.vote.commentForReferee = '-';
     }
     this.dirty = true;
+    this.savePanelVote();
   }
 
   savePanelVote() {
+    this.saving = true;
     this.competitionDayPanelVoteService.save(this.vote).pipe(
       map((rvote) => {
         this.vote = rvote.data;
+        this.saving = false;
         this.dirty = false;
       })
     ).subscribe();
   }
-
+  deleteVote() {
+    this.loading = true;
+    this.competitionDayPanelVoteService.delete(this.vote.id).pipe(
+      map(() => {
+        this.vote = null;
+        this.refereeId = null;
+        this.onRefereeChange();
+      })
+    ).subscribe();
+  }
   closePanelVote(pvote: CompetitionDayPanelVote) {
     this.alertCtrl.create({
       message: 'Do you really want to close the panel vote for the referee ' + pvote.referee.refereeShortName
