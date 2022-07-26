@@ -91,7 +91,6 @@ export class CompetitionHomePage implements OnInit {
       // load competition owner info
       mergeMap( () => {
         this.owner = '';
-        console.log('competition.ownerId=' + this.competition.ownerId);
         if (this.competition && this.competition.ownerId) {
           return this.userService.get(this.competition.ownerId).pipe(
             map( (ruser) => {
@@ -125,12 +124,11 @@ export class CompetitionHomePage implements OnInit {
       const upgrades = await this.refereeUpgradeService.findByCompetition(this.competition.id).toPromise();
       this.voteAnalysis = this.competitionService.computeVoteAnalysis(
         this.competition, this.referees, this.refereeCoaches, coachVotes.data, panelVotes.data, upgrades.data);
-      console.log(JSON.stringify(this.voteAnalysis, null, 2));
+      // To log analysis: JSON.stringify(this.voteAnalysis, null, 2));
     }
   }
 
   private loadReferees(): Observable<User[]> {
-    console.log('loadReferees');
     if (!this.competition.referees || this.competition.referees.length === 0) {
       this.referees = [];
       return of(this.referees);
@@ -144,7 +142,9 @@ export class CompetitionHomePage implements OnInit {
                   if (res.data) {
                     newReferees.push(res.data);
                   } else {
-                      console.error('Referee ' + ref.refereeId + ' does not exist !');
+                    this.competition.referees = this.competition.referees.filter(r => r.refereeId !== ref.refereeId);
+                    this.competitionService.save(this.competition).subscribe();
+                    console.error('Referee ' + ref.refereeId + ' does not exist !');
                   }
                   return res.data;
               }))
@@ -165,7 +165,6 @@ export class CompetitionHomePage implements OnInit {
     );
   }
   private loadRefereeCoaches(): Observable<User[]> {
-    console.log('loadRefereeCoaches');
     if (!this.competition.refereeCoaches || this.competition.refereeCoaches.length === 0) {
       this.refereeCoaches = [];
       return of(this.refereeCoaches);
