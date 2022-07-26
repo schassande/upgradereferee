@@ -35,7 +35,7 @@
                         <div style="margin-bottom: 5px;">All: {{voteAnalysis.coachVote.ratio | percent}}</div>
                         <ion-progress-bar color="success" [value]="voteAnalysis.coachVote.ratio"></ion-progress-bar>
                     </div>
-                    <div *ngIf="isRefereeCoachOfCompetition" style="margin-top: 5px;">
+                    <div *ngIf="isRefereeCoachOfCompetition && voteAnalysis && voteAnalysis.coachVote[user.id]" style="margin-top: 5px;">
                         <div style="margin-bottom: 5px;">You: {{voteAnalysis.coachVote[user.id].ratio | percent}}</div>
                         <ion-progress-bar color="success" [value]="voteAnalysis.coachVote[user.id].ratio"></ion-progress-bar>
                     </div>
@@ -47,7 +47,7 @@
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin)">
+        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin) && voteAnalysis">
             <ion-col size="4">
                 <div style="width: 100; text-align: center; margin-top: 20px;" *ngIf="voteAnalysis">
                     <div style="margin-bottom: 5px;">Panel: {{voteAnalysis.panelVote.ratio | percent}}</div>
@@ -60,7 +60,7 @@
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin)">
+        <ion-row *ngIf="upgradable && (isRefereeCoachOfCompetition || isAdmin) && voteAnalysis">
             <ion-col size="4">
                 <div style="width: 100; text-align: center; margin-top: 20px;" *ngIf="voteAnalysis">
                     <div style="margin-bottom: 5px;">Panel: {{voteAnalysis.publishedUpgrade.ratio | percent}}</div>
