@@ -55,6 +55,7 @@
                 <ion-icon style="float: left;" name="chevron-back" size="large" (click)="previousReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
                 <ion-icon style="float: right;" name="chevron-forward" size="large" (click)="nextReferee()" *ngIf="filteredReferees.length > 1"></ion-icon>
                 <ion-select [(ngModel)]="selectedRefereeId" interface="action-sheet" (ionChange)="onRefereeChange()" style="width: 60%; text-align: center; margin: auto;">
+                    <ion-select-option value="all">All</ion-select-option>
                     <ion-select-option *ngFor="let ref of filteredReferees" value="{{ref.id}}">{{ref.shortName}} - {{ref.firstName}} {{ref.lastName}}</ion-select-option>
                 </ion-select>
             </div>
@@ -83,47 +84,91 @@
                         Vote for upgrade to {{vote.upgradeLevel}}
                         <span *ngIf="vote.closed">&nbsp;(closed)</span>
                     </div>
-                    <div *ngIf="dirty || vote.dataStatus === 'NEW'">(not saved)</div>
+                    <div *ngIf="!saving && (dirty || vote.dataStatus === 'NEW')">(not saved)</div>
+                    <div *ngIf="saving">Saving...</div>
+                    <div *ngIf="!saving && !dirty && vote.dataStatus === 'CLEAN'">Saved</div>
                 </div>
+                <ion-icon slot="end" *ngIf="vote.dataStatus === 'CLEAN' || saving" name="trash" style="margin: 0 5px;" (click)="deleteVote()"></ion-icon>
             </ion-item-divider>
-            <div *ngIf="!vote.closed">
-                <ion-button style="float: right; margin: 10px 20px 0 0;" (click)="saveVote()" shape="round" size="normal" [disabled]="!(dirty || vote.dataStatus === 'NEW')">{{ vote.dataStatus === 'NEW' ? 'Create' : 'Save' }}</ion-button>
-            </div>
             <div style="clear: both;"></div>
             <div style="text-align: center;">
                 <img src="assets/imgs/badge/{{vote.upgradeLevel}}.png" alt="{{vote.upgradeLevel}}" height="70" />
             </div>
-            <ion-item>
+            <div>
                 <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
-                    <ion-item>
-                        <ion-label style="color: green; font-weight: bold;">Yes, competent</ion-label>
-                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Yes'" style="width: 30px;"></div>
-                        <ion-icon slot="start" name="checkmark-outline" size="large" color="success" *ngIf="vote.closed && vote.vote === 'Yes'"></ion-icon>
-                        <ion-radio slot="start" value="Yes" color="success" *ngIf="!vote.closed"></ion-radio>
-                    </ion-item>
-                    <ion-item>
-                        <ion-label style="color: blue; font-weight: bold;">Abstain</ion-label>
-                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'Abstein' && vote.vote !== 'Abstain'" style="width: 30px;"></div>
-                        <ion-icon slot="start" name="radio-button-on-outline" size="large" color="primary" *ngIf="vote.closed && (vote.vote === 'Abstein' || vote.vote === 'Abstain')"></ion-icon>
-                        <ion-radio slot="start" value="Abstain" color="primary" *ngIf="!vote.closed"></ion-radio>
-                    </ion-item>
-                    <ion-item>
-                        <ion-label style="color: red; font-weight: bold;">Not yet competent</ion-label>
-                        <div slot="start" *ngIf="vote.closed && vote.vote !== 'No'" style="width: 30px;"></div>
-                        <ion-icon slot="start" name="close-outline" size="large" color="danger" *ngIf="vote.closed && vote.vote === 'No'"></ion-icon>
-                        <ion-radio slot="start" value="No" color="danger" *ngIf="!vote.closed"></ion-radio>
-                    </ion-item>
+                    <ion-row>
+                        <ion-col>
+                            <ion-item>
+                                <ion-label style="color: green; font-weight: bold;">Yes</ion-label>
+                                <div slot="start" *ngIf="vote.closed && vote.vote !== 'Yes'" style="width: 30px;"></div>
+                                <ion-radio slot="start" value="Yes" color="success" *ngIf="!vote.closed"></ion-radio>
+                            </ion-item>
+                        </ion-col>
+                        <ion-col>
+                            <ion-item>
+                                <ion-label style="color: blue; font-weight: bold;">Abstain</ion-label>
+                                <div slot="start" *ngIf="vote.closed && vote.vote !== 'Abstein' && vote.vote !== 'Abstain'" style="width: 30px;"></div>
+                                <ion-radio slot="start" value="Abstain" color="primary" *ngIf="!vote.closed"></ion-radio>
+                            </ion-item>
+
+                        </ion-col>
+                        <ion-col>
+                            <ion-item>
+                                <ion-label style="color: red; font-weight: bold;">Not yet</ion-label>
+                                <div slot="start" *ngIf="vote.closed && vote.vote !== 'No'" style="width: 30px;"></div>
+                                <ion-radio slot="start" value="No" color="danger" *ngIf="!vote.closed"></ion-radio>
+                            </ion-item>
+                        </ion-col>
+                    </ion-row>
                 </ion-radio-group>
-            </ion-item>
-            <div class="comment-warning">Visible by the referee</div>
+                <ion-icon slot="start" name="close-outline" size="large" color="danger" *ngIf="vote.closed && vote.vote === 'No'"></ion-icon>
+            </div>
             <ion-item>
-                <ion-label>Public<br>comment</ion-label>
+                <ion-label>Comment</ion-label>
                 <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
             </ion-item>
-            <div class="comment-warning">Visible by the referee coaches only</div>
-            <ion-item>
-                <ion-label>Private<br>comment</ion-label>
-                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForCoach" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
+            <ion-list *ngIf="coachings">
+                <ion-item-divider color="light">Coachings during the competition ({{coachings.length}})</ion-item-divider>
+                <ion-item *ngFor="let coaching of coachings" style="border: none;">
+                    <ion-label>
+                        {{coaching.competition}}<br>{{coachingService.getCoachingDateAsString(coaching)}} &nbsp;&nbsp;{{coaching.timeSlot}} &nbsp;&nbsp;Field {{coaching.field}}, &nbsp;&nbsp;{{coaching.gameCategory}}
+                        <div> Referees: <span *ngFor="let referee of coaching.referees; last as isLast">{{referee.refereeShortName}}<span *ngIf="!isLast">, </span></span>
+                            <div *ngFor="let positiveFeedback of coaching.referees[getRefIdx(coaching)].positiveFeedbacks" class="feedback">+
+                                <span [ngClass]="{'delivered': positiveFeedback.deliver}">{{positiveFeedback.skillName}}</span></div>
+                            <div *ngFor="let feedback of coaching.referees[getRefIdx(coaching)].feedbacks" class="feedback">-{{feedback.appliedLater ? '&gt;+': ''}}
+                                <span [ngClass]="{'delivered': feedback.deliver}">{{feedback.problemShortDesc}}</span></div>
+                        </div>
+                    </ion-label>
+                </ion-item>
+            </ion-list>
+            <ion-list *ngIf="assessments">
+                <ion-item-divider color="light">Assessements during the competition ({{assessments.length}})</ion-item-divider>
+                <ion-item *ngFor="let assessment of assessments" style="border: none;">
+                    <ion-label>
+                        {{assessment.competition}}
+                        <br>{{dateService.date2string(assessment.date)}} &nbsp;&nbsp;{{assessment.timeSlot}} &nbsp;&nbsp;Field {{assessment.field}}, &nbsp;&nbsp;{{assessment.gameCategory}}
+                        <br>{{assessment.profileName}}: {{assessment.competency}}
+                    </ion-label>
+                </ion-item>
+            </ion-list>
+        </ion-item-group>
+        <ion-item-group style="border-left: 1px solid lightgrey; border-right: 1px solid lightgrey;" *ngIf="summary">
+            <ion-item-divider color="light">
+                <div style="text-align: center; padding: 10px; width: 100%;font-size: 1.3em; font-weight: bold;">
+                    Summary ({{summaryPercent}}%)
+                </div>
+            </ion-item-divider>
+            <ion-item *ngFor="let v of summary" (click)="onRefereeSelected(v.referee.id)">
+                <ion-label>{{v.referee.firstName}} {{v.referee.lastName}} ({{v.referee.referee.refereeCategory | lowercase}})</ion-label>
+                <div slot="end" *ngIf="v.status === 'LOADING'">
+                    <ion-spinner></ion-spinner>
+                </div>
+                <div slot="end" *ngIf="v.status === 'LOADED'">
+                    <ion-icon name="close-outline" color="danger" *ngIf="v.vote.vote === 'No'"></ion-icon>
+                    <ion-icon name="radio-button-on-outline" color="primary" *ngIf="v.vote.vote === 'Abstein' || v.vote.vote === 'Abstain'"></ion-icon>
+                    <ion-icon name="checkmark-outline" color="success" *ngIf="v.vote.vote === 'Yes'"></ion-icon>
+                </div>
+                <div slot="end" *ngIf="v.status === 'NOT_FOUND'">TODO</div>
             </ion-item>
         </ion-item-group>
         <div *ngIf="loading" style="margin: 20px auto; text-align: center;">

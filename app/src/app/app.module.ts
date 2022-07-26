@@ -85,6 +85,8 @@ import { UserMergerComponent } from 'src/pages/admin/user-merger/user-merger.com
 import { NdrListComponent } from 'src/pages/ndr/ndr-list/ndr-list.component';
 import { NotificationService } from './service/NotificationService';
 import { UserMigrateComponent } from 'src/pages/user/user-migrate/user-migrate.component';
+import { AssessmentService } from './service/AssessmentService';
+import { CoachingService } from './service/CoachingService';
 
 
 @NgModule({
@@ -124,7 +126,9 @@ import { UserMigrateComponent } from 'src/pages/user/user-migrate/user-migrate.c
     ],
     providers: [
         AppSettingsService,
+        AssessmentService,
         BookmarkService,
+        CoachingService,
         CompetitionService,
         CompetitionDayRefereeCoachVoteService,
         CompetitionDayPanelVoteService,

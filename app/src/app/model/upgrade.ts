@@ -51,7 +51,7 @@ export interface CompetitionDayVote {
     /** The level to upgrade */
     upgradeLevel: RefereeLevel;
     /** The vote value */
-    vote: Upgradable;
+    vote: Upgradable| undefined;
     /** Does the vote is closed */
     closed: boolean;
     /** Comment about the vote */

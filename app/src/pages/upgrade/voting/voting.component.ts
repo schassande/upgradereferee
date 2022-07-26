@@ -3,9 +3,13 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
-import { Competition } from 'src/app/model/competition';
+import { Assessment } from 'src/app/model/assessment';
+import { Coaching } from 'src/app/model/coaching';
+import { Competition, RefereeRef } from 'src/app/model/competition';
 import { CompetitionDayRefereeCoachVote } from 'src/app/model/upgrade';
 import { ApplicationRole, CurrentApplicationName, RefereeLevel, User } from 'src/app/model/user';
+import { AssessmentService } from 'src/app/service/AssessmentService';
+import { CoachingService } from 'src/app/service/CoachingService';
 import { CompetitionDayRefereeCoachVoteService } from 'src/app/service/CompetitionDayRefereeCoachVoteService';
 import { CompetitionService } from 'src/app/service/CompetitionService';
 import { ConnectedUserService } from 'src/app/service/ConnectedUserService';
@@ -13,6 +17,12 @@ import { DateService } from 'src/app/service/DateService';
 import { ResponseWithData } from 'src/app/service/response';
 import { UserService } from 'src/app/service/UserService';
 
+type VoteSummaryStatus = 'LOADING' | 'LOADED' | 'NOT_FOUND';
+interface VoteSummary {
+  status: VoteSummaryStatus;
+  referee: User;
+  vote?: CompetitionDayRefereeCoachVote;
+}
 @Component({
   selector: 'app-voting',
   styleUrls: ['./voting.component.scss'],
@@ -26,6 +36,7 @@ export class VotingComponent implements OnInit {
   inputCompetitionId: string;
 
   dirty = false;
+  saving = false;
   /** Competition object selected. Can be null */
   competition: Competition;
   competitionId: string;
@@ -50,8 +61,15 @@ export class VotingComponent implements OnInit {
   /** Show or not the combox to select a referee */
   showRefereeSelector = false;
 
+  coachings: Coaching[];
+  errorfindCoachings: any;
+  assessments: Assessment[];
+  errorfindAssessments: any;
+
   /** The */
   vote: CompetitionDayRefereeCoachVote;
+  summary: VoteSummary[] = null;
+  summaryPercent: number;
 
   loading = true;
 
@@ -62,6 +80,8 @@ export class VotingComponent implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private assessmentService: AssessmentService,
+    public coachingService: CoachingService,
     private competitionDayRefereeCoachVoteService: CompetitionDayRefereeCoachVoteService,
     private competitionService: CompetitionService,
     private connectedUserService: ConnectedUserService,
@@ -277,6 +297,9 @@ export class VotingComponent implements OnInit {
       this.filteredReferees = this.referees;
       console.log('Empty referees list');
     }
+    this.filteredReferees.sort((r1, r2) => {
+      return (r1.firstName+r1.lastName).localeCompare(r2.firstName+r2.lastName);
+    })
   }
 
   private adjustReferee(): any {
@@ -388,7 +411,6 @@ export class VotingComponent implements OnInit {
   }
 
   private loadVote(): Observable<any> {
-    // console.log('BEGIN loadVote()');
     this.loading = true;
     this.vote = null;
     console.log(`Looking for Vote (competition=${this.competitionId}, day=${this.dateService.date2string(this.day)}, coach=${this.coach.id}, referee=${this.referee})`);
@@ -413,6 +435,32 @@ export class VotingComponent implements OnInit {
     }
   }
 
+  public loadSumary() {
+    console.log('loadSumary()');
+    if (!this.competitionId || this.referee !== null || !this.day) {
+      console.log('loadSumary() do nothing: ' + this.competitionId + ', ' + this.referee + ', ' + this.day);
+      return of('');
+    }
+    this.summary = this.filteredReferees.map(ref => {
+      const v: VoteSummary = {
+        status : 'LOADING',
+        vote: null,
+        referee: ref
+      };
+      this.competitionDayRefereeCoachVoteService.getVote(
+        this.competitionId, this.day, this.coach.id, ref.id).pipe(
+          map((rvote) => { 
+            v.vote = rvote.data;
+            v.status = rvote.data ? 'LOADED' : 'NOT_FOUND';
+            const notLoading = this.summary.filter(elem => elem.status !== 'LOADING').length
+            const loaded = this.summary.filter(elem => elem.status === 'LOADED').length
+            this.summaryPercent = notLoading > 0 ? Math.trunc(loaded * 100 / notLoading) : 0;
+          })
+        ).subscribe();
+      return v
+    });
+  }
+
   private createVote() {
     // console.log('createVote()');
     this.vote = {
@@ -429,7 +477,7 @@ export class VotingComponent implements OnInit {
         refereeId: this.referee.id
       },
       upgradeLevel: this.referee.referee.nextRefereeLevel,
-      vote: 'Abstain',
+      vote: undefined,
       commentForCoach: '-',
       commentForReferee: '-',
       closed: false,
@@ -453,7 +501,6 @@ export class VotingComponent implements OnInit {
       this.competition = this.competitions.find(c => c.id === this.competitionId);
     }
     if (this.competition) {
-      // console.log('onCompetitionChange() => ' + this.competitionId);
       this.showDaySelector = this.competition.days.length > 1;
       this.isCoachOfCompetition = this.competition.refereeCoaches.filter(rc => rc.coachId === this.coach.id).length > 0;
       return this.loadReferees().pipe(
@@ -471,31 +518,49 @@ export class VotingComponent implements OnInit {
   }
 
   onDayChange($event: any) {
-    // console.log('BEGIN onDayChange()');
     const dateStr = $event.target.value;
     if (dateStr !== this.dateService.date2string(this.day)) {
-      // console.log('onDayChange()', dateStr);
       this.day = this.dateService.string2date(dateStr, null);
       this.loadVote().subscribe();
     }
   }
 
   onUpgradeLevelChange() {
-    // console.log('BEGIN onUpgradeLevelChange()');
     this.computeFilteredReferees();
-    this.adjustReferee();
-    this.loadVote().subscribe();
+    if (this.selectedRefereeId ==='all') {
+      this.referee = null;  
+      this.loadSumary();
+    } else {
+      this.adjustReferee();
+      this.summary = null;
+      this.referee = this.referees.find(r => r.id === this.selectedRefereeId);
+      this.loadVote().subscribe();
+    }
   }
-
+  onRefereeSelected(refereeId: string) {
+   this.selectedRefereeId = refereeId;
+   this.onRefereeChange();
+  }
   onRefereeChange() {
-    // console.log('BEGIN onRefereeChange()');
-    this.referee = this.referees.find(r => r.id === this.selectedRefereeId);
-    // console.log('onRefereeChange(): ', this.referee);
-    this.loadVote().subscribe();
+    if (this.selectedRefereeId ==='all') {
+      this.referee = null;  
+      this.loadSumary();
+    } else {
+      this.summary = null;
+      this.referee = this.referees.find(r => r.id === this.selectedRefereeId);
+      this.loadVote().subscribe();
+      this.coachingService.getCoachingByReferee(this.selectedRefereeId).subscribe((response: ResponseWithData<Coaching[]>) => {
+        this.errorfindCoachings = response.error;
+        this.coachings = this.coachingService.sortCoachings(response.data, true).filter(c => c.competitionId === this.competitionId);
+      });
+      this.assessmentService.getAssessmentByReferee(this.selectedRefereeId).subscribe((response: ResponseWithData<Assessment[]>) => {
+        this.errorfindAssessments = response.error;
+        this.assessments = this.assessmentService.sortAssessments(response.data, true).filter(c => c.competitionId === this.competitionId);
+      });
+    }
   }
   previousDay() {
     let idx = this.competition.days.indexOf(this.day);
-    // console.log('previousDay(): ' + idx);
     if (idx >= 0) {
       if (idx === 0) {
         idx = this.competition.days.length - 1;
@@ -535,21 +600,39 @@ export class VotingComponent implements OnInit {
       idx = (idx + 1 ) % this.filteredReferees.length;
       this.referee = this.filteredReferees[idx];
       this.selectedRefereeId = this.referee.id;
-      // console.log('New referee selected at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
       this.onRefereeChange();
     }
   }
   onVoteChange() {
-    // console.log('onVoteChange()\n' +  JSON.stringify(this.vote, null, 2));
     this.dirty = true;
+    this.saveVote();
   }
   saveVote() {
+    if (this.saving || !this.vote.vote) {
+      return;
+    }
+    this.saving = true;
     this.competitionDayRefereeCoachVoteService.save(this.vote).pipe(
       map((rvote) => {
         this.vote = rvote.data;
+        this.saving = false;
         this.dirty = false;
       })
     ).subscribe();
+  }
+  deleteVote() {
+    if (this.saving || !this.vote) {
+      return;
+    }
+    this.loading = true;
+    this.vote.dataStatus = 'REMOVED';
+    this.competitionDayRefereeCoachVoteService.delete(this.vote.id).pipe(
+      mergeMap(() => this.loadVote())
+    ).subscribe();
+  }
+
+  getRefIdx(coaching: Coaching) {
+    return coaching.refereeIds.indexOf(this.referee.id);
   }
 
   navBack() {
