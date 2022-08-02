@@ -478,8 +478,14 @@ export class CompetitionVotesComponent implements OnInit {
     this.savePanelVote();
   }
 
-  savePanelVote() {
+  savePanelVote(count = 3) {
     this.saving = true;
+    if (this.saving && count > 0) {
+      setTimeout(() => {
+        this.savePanelVote(count-1);
+      }, 1000);
+      return;
+    }
     this.competitionDayPanelVoteService.save(this.vote).pipe(
       map((rvote) => {
         this.vote = rvote.data;

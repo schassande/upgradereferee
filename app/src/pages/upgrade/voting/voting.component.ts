@@ -607,8 +607,14 @@ export class VotingComponent implements OnInit {
     this.dirty = true;
     this.saveVote();
   }
-  saveVote() {
-    if (this.saving || !this.vote.vote) {
+  saveVote(count = 3) {
+    if (!this.vote.vote) {
+      return;
+    }
+    if (this.saving && count > 0) {
+      setTimeout(() => {
+        this.saveVote(count-1);
+      }, 1000);
       return;
     }
     this.saving = true;
