@@ -81,7 +81,8 @@
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold;">Yes</span>
-                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote == 'No'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote !== 'Yes' && pv.vote !== 'No'" style="color: blue; font-weight: bold;">Abs</span>
                     </div>
                 </ion-item>
             </ion-list>
@@ -110,7 +111,8 @@
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
-                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote === 'No'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote !== 'Yes' && pv.vote !== 'No'" style="color: blue; font-weight: bold;">Abs</span>
                     </div>
                 </ion-item>
             </ion-list>
@@ -139,7 +141,8 @@
                     </ion-label>
                     <div slot="end">
                         <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
-                        <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote === 'No'" style="color: red; font-weight: bold;">Not Yet</span>
+                        <span *ngIf="pv.vote !== 'Yes' && pv.vote !== 'No'" style="color: blue; font-weight: bold;">Abs</span>
                     </div>
                 </ion-item>
             </ion-list>
@@ -180,7 +183,8 @@
                 </ion-label>
                 <div slot="end">
                     <span *ngIf="pv.vote === 'Yes'" style="color: green; font-weight: bold; font-size: 1.1em;">Yes</span>
-                    <span *ngIf="pv.vote !== 'Yes'" style="color: red; font-weight: bold;">Not Yet</span>
+                    <span *ngIf="pv.vote === 'No'" style="color: red; font-weight: bold;">Not Yet</span>
+                    <span *ngIf="pv.vote !== 'Yes' && pv.vote !== 'No'" style="color: blue; font-weight: bold;">Abs</span>
                 </div>
             </ion-item>
         </ion-list>
