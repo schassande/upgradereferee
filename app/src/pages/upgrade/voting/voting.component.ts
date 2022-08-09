@@ -5,9 +5,9 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { Assessment } from 'src/app/model/assessment';
 import { Coaching } from 'src/app/model/coaching';
-import { Competition, RefereeRef } from 'src/app/model/competition';
+import { Competition } from 'src/app/model/competition';
 import { CompetitionDayRefereeCoachVote } from 'src/app/model/upgrade';
-import { ApplicationRole, CurrentApplicationName, RefereeLevel, User } from 'src/app/model/user';
+import { CurrentApplicationName, RefereeLevel, User } from 'src/app/model/user';
 import { AssessmentService } from 'src/app/service/AssessmentService';
 import { CoachingService } from 'src/app/service/CoachingService';
 import { CompetitionDayRefereeCoachVoteService } from 'src/app/service/CompetitionDayRefereeCoachVoteService';
@@ -580,6 +580,41 @@ export class VotingComponent implements OnInit {
       this.loadVote().subscribe();
     }
   }
+  previousLevel() {
+    const beginUpgradeLevel: string = this.upgradeLevel;
+    if (!this.upgradeLevel || beginUpgradeLevel === '') {
+      this.upgradeLevel = this.upgradeLevels[this.upgradeLevels.length-1];
+    } else {
+      let idx = this.upgradeLevels.indexOf(this.upgradeLevel);
+      if (idx >= 0) {
+        idx--;
+        if (idx < 0) {
+          this.upgradeLevel = undefined;
+        } else {
+          this.upgradeLevel = this.upgradeLevels[idx];
+        }
+      }
+    }
+    this.onUpgradeLevelChange();
+  }
+  nextLevel() {
+    const beginUpgradeLevel: string = this.upgradeLevel;
+    if (!this.upgradeLevel || beginUpgradeLevel === '') {
+      this.upgradeLevel = this.upgradeLevels[0];
+      this.onUpgradeLevelChange();
+    } else {
+      let idx = this.upgradeLevels.indexOf(this.upgradeLevel);
+      if (idx >= 0) {
+        idx++;
+        if (idx >= this.upgradeLevels.length) {
+          this.upgradeLevel = undefined;
+        } else {
+          this.upgradeLevel = this.upgradeLevels[idx];
+        }
+        this.onUpgradeLevelChange();
+      }
+    }
+  }
   previousReferee() {
     let idx = this.filteredReferees.findIndex(r => r.id === this.referee.id);
     if (idx >= 0) {
@@ -608,7 +643,7 @@ export class VotingComponent implements OnInit {
     this.saveVote();
   }
   saveVote(count = 3) {
-    if (!this.vote.vote) {
+    if (!this.vote.vote || this.vote.closed) {
       return;
     }
     if (this.saving && count > 0) {

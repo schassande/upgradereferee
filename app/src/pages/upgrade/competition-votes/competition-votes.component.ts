@@ -407,13 +407,71 @@ export class CompetitionVotesComponent implements OnInit {
     this.refereeId = refereeId;
     this.onRefereeChange();
   }
-
+  previousDay() {
+    let idx = this.competition.days.indexOf(this.day);
+    idx--;
+    if (idx > this.competition.days.length) {
+      this.day = this.competition.days[0];
+    } else if (idx < 0) {
+      this.day = this.competition.days[this.competition.days.length-1];
+    } else {
+      this.day = this.competition.days[idx];
+    }
+    this.loadAllVotes();
+  }
+  nextDay() {
+    let idx = this.competition.days.indexOf(this.day);
+    idx++;
+    if (idx < 0) {
+      this.day = this.competition.days[0];
+    } else if (idx >= this.competition.days.length) {
+      this.day = this.competition.days[this.competition.days.length-1];
+    } else {
+      this.day = this.competition.days[idx];
+    }
+    this.loadAllVotes();
+  }
   onDayChange($event: any) {
     const dateStr = $event.target.value;
     if (dateStr !== this.dateService.date2string(this.day)) {
       console.log('onDayChange()', dateStr);
       this.day = this.dateService.string2date(dateStr, null);
       this.loadAllVotes();
+    }
+  }
+  previousLevel() {
+    const beginUpgradeLevel: string = this.upgradeLevel;
+    if (!this.upgradeLevel || beginUpgradeLevel === '') {
+      this.upgradeLevel = this.upgradeLevels[this.upgradeLevels.length-1];
+    } else {
+      let idx = this.upgradeLevels.indexOf(this.upgradeLevel);
+      if (idx >= 0) {
+        idx--;
+        if (idx < 0) {
+          this.upgradeLevel = undefined;
+        } else {
+          this.upgradeLevel = this.upgradeLevels[idx];
+        }
+      }
+    }
+    this.onUpgradeLevelChange();
+  }
+  nextLevel() {
+    const beginUpgradeLevel: string = this.upgradeLevel;
+    if (!this.upgradeLevel || beginUpgradeLevel === '') {
+      this.upgradeLevel = this.upgradeLevels[0];
+      this.onUpgradeLevelChange();
+    } else {
+      let idx = this.upgradeLevels.indexOf(this.upgradeLevel);
+      if (idx >= 0) {
+        idx++;
+        if (idx >= this.upgradeLevels.length) {
+          this.upgradeLevel = undefined;
+        } else {
+          this.upgradeLevel = this.upgradeLevels[idx];
+        }
+        this.onUpgradeLevelChange();
+      }
     }
   }
 
@@ -438,12 +496,13 @@ export class CompetitionVotesComponent implements OnInit {
       let idx = this.filteredReferees.findIndex(r => r.id === this.refereeId);
       if (idx >= 0) {
         if (idx === 0) {
-          idx = this.filteredReferees.length - 1;
+          this.referee = undefined;
+          this.refereeId = '-';
         } else {
           idx = idx - 1;
+          this.referee = this.filteredReferees[idx];
+          this.refereeId = this.referee.id;
         }
-        this.referee = this.filteredReferees[idx];
-        this.refereeId = this.referee.id;
         this.onRefereeChange();
       }
     }
@@ -457,9 +516,14 @@ export class CompetitionVotesComponent implements OnInit {
       let idx = this.filteredReferees.findIndex(r => r.id === this.refereeId);
       // console.log('Current referee at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
       if (idx >= 0) {
-        idx = (idx + 1 ) % this.filteredReferees.length;
-        this.referee = this.filteredReferees[idx];
-        this.refereeId = this.referee.id;
+        idx ++;
+        if (idx >= this.filteredReferees.length) {
+          this.referee = undefined;
+          this.refereeId = '-';
+        } else {
+          this.referee = this.filteredReferees[idx];
+          this.refereeId = this.referee.id;
+        }
         // console.log('New referee selected at ' + idx + ' over ' + this.referees.length + '. referee id: ' + this.refereeId);
         this.onRefereeChange();
       }
