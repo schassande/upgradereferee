@@ -3,20 +3,21 @@ import { DateService } from './DateService';
 import { Competition, CompetitionCategory } from './../model/competition';
 import { ConnectedUserService } from './ConnectedUserService';
 import { Firestore, Query, query, where } from '@angular/fire/firestore';
-import { Observable, forkJoin, of, throwError, from } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
 import { ResponseWithData, Response } from './response';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
-import { mergeMap } from 'rxjs/operators';
+import { mergeMap, map } from 'rxjs/operators';
 import { CompetitionDayPanelVoteService } from './CompetitionDayPanelVoteService';
 import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
 import { ToolService } from './ToolService';
 import { DataRegion } from '../model/common';
 import { CurrentApplicationName, Referee, RefereeCoachLevel, User } from '../model/user';
-import { Functions, httpsCallable } from '@angular/fire/functions';
+import { Functions } from '@angular/fire/functions';
 import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote, RefereeUpgrade } from '../model/upgrade';
 import { RefereeUpgradeService } from './RefereeUpgradeService';
+import { Upgradable } from '../model/coaching';
 
 @Injectable()
 export class CompetitionService extends RemotePersistentDataService<Competition> {
@@ -286,6 +287,100 @@ export class CompetitionService extends RemotePersistentDataService<Competition>
     public valueIn(str: string, ...values: string[]): boolean {
         return values.filter(v => str === v).length > 0;
     }
+    public autoComputePanelVote(competition: Competition, referee: Referee, day: Date, updateIfExists = false): Observable<ResponseWithData<CompetitionDayPanelVote>>  {
+        const refereeId = referee.id;
+        const coachVotes: CompetitionDayRefereeCoachVote[] = [];
+        let totalYes = 0;
+        let totalNo = 0;
+        let panelVote: Upgradable;
+        let commentFC = '';
+        let commentFR = '';
+        console.log(`Looking for Coach Votes (competition=${competition.id}, day=${this.dateService.date2string(day)}, referee=${refereeId})`);
+        return forkJoin(competition.refereeCoaches.map(
+            rc => this.competitionDayRefereeCoachVoteService.getVote(competition.id, day, rc.coachId, referee.id).pipe(
+              map(rcvote => {
+                if (rcvote.data) {
+                  coachVotes.push(rcvote.data);
+                }
+              }),
+            )
+        )).pipe(
+            map(() => {
+                // compute result
+                coachVotes.forEach((v: CompetitionDayRefereeCoachVote) => {
+                    switch (v.vote){
+                        case 'Yes': totalYes++; break;
+                        case 'No': totalNo++; break;
+                    }
+                });
+                const delta = totalYes - totalNo;
+                if (delta > 0) {
+                    panelVote = 'Yes';
+                } else if (delta < 0) {
+                    panelVote = 'No';
+                } else {
+                    panelVote = 'Abstain';
+                }
+                coachVotes.forEach(cv => {
+                    commentFC = this.mergeComments(cv.commentForCoach, commentFC, '-' );
+                    commentFR = this.mergeComments(cv.commentForReferee, commentFR, '-' + cv.coach.coachShortName + ':');
+                });
+            }),
+            // load panel vote
+            mergeMap(() => this.competitionDayPanelVoteService.getVote(competition.id, day, refereeId)),
+            mergeMap((rvote) => {
+                let vote: CompetitionDayPanelVote = rvote.data;
+                if (!vote) {
+                    // panel vote does not exist => create one
+                    vote = {
+                        id: '',
+                        dataStatus: 'NEW',
+                        creationDate: new Date(),
+                        lastUpdate: new Date(),
+                        version: 0,
+                        competitionRef: { 
+                            competitionId: competition.id,
+                            competitionName: competition.name
+                        },
+                        competitionCategory: this.getCompetitionCategory(competition, referee),
+                        day: this.dateService.to00h00(day),
+                        referee: {
+                            refereeShortName: referee.shortName,
+                            refereeId: refereeId
+                        },
+                        upgradeLevel: referee.referee.nextRefereeLevel,
+                        vote: panelVote,
+                        commentForCoach: commentFC.length > 0 ? commentFC : '-',
+                        commentForReferee: commentFR.length > 0 ? commentFR : '-',
+                        closed: false,
+                        coaches: competition.refereeCoaches,
+                        yesCoaches: coachVotes.filter(cv => cv.vote === 'Yes').map(cv => cv.coach),
+                        isMultiDayCompetition: competition.days.length > 1
+                    };
+                } else if (!updateIfExists) {
+                    // panel vote exist and must NOT be updated
+                    return of({data: vote, error: null});
+                } else {
+                    // panel vote exist and must be updated
+                    vote.vote = panelVote;
+                    vote.coaches = competition.refereeCoaches;
+                    vote.yesCoaches = coachVotes.filter(cv => cv.vote === 'Yes').map(cv => cv.coach);
+                }
+                // save the updated or created panel vote.
+                return this.competitionDayPanelVoteService.save(vote);
+            })
+        );
+    }
+    private mergeComments(coachComment: string, panelComment: string, prefix: string): string {
+        if (coachComment.length > 1) {
+          if (panelComment.length > 0) {
+            panelComment = panelComment + '<br>-' + coachComment;
+          } else {
+            panelComment = prefix + coachComment;
+          }
+        }
+        return panelComment;
+    }    
 }
 export interface VoteAnalysis {
     day?: Date;

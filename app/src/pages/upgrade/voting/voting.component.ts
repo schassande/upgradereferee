@@ -4,7 +4,7 @@ import { NavController } from '@ionic/angular';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, mergeMap } from 'rxjs/operators';
 import { Assessment } from 'src/app/model/assessment';
-import { Coaching } from 'src/app/model/coaching';
+import { Coaching, Upgradable } from 'src/app/model/coaching';
 import { Competition } from 'src/app/model/competition';
 import { CompetitionDayRefereeCoachVote } from 'src/app/model/upgrade';
 import { CurrentApplicationName, RefereeLevel, User } from 'src/app/model/user';
@@ -636,6 +636,24 @@ export class VotingComponent implements OnInit {
       this.referee = this.filteredReferees[idx];
       this.selectedRefereeId = this.referee.id;
       this.onRefereeChange();
+    }
+  }
+  get commentForReferee() {
+    return this.vote.commentForReferee;
+  }
+  set commentForReferee(str: string) {
+    if (this.vote.commentForReferee !== str) {
+      this.vote.commentForReferee = str;
+      this.onVoteChange();
+    }
+  }
+  get coachVote() {
+    return this.vote.vote;
+  }
+  set coachVote(v: Upgradable) {
+    if (this.vote.vote !== v) {
+      this.vote.vote = v;
+      this.onVoteChange();
     }
   }
   onVoteChange() {

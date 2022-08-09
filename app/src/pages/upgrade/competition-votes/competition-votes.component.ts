@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, ParamMap, Params } from '@angular/router';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import { AlertController, NavController } from '@ionic/angular';
 import { forkJoin, Observable, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap } from 'rxjs/operators';
-import { Competition, CompetitionCategory } from 'src/app/model/competition';
+import { Competition } from 'src/app/model/competition';
 import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote } from 'src/app/model/upgrade';
+import { Upgradable } from 'src/app/model/coaching';
 import { CurrentApplicationName, Referee, RefereeLevel, User } from 'src/app/model/user';
 import { CompetitionDayPanelVoteService } from 'src/app/service/CompetitionDayPanelVoteService';
 import { CompetitionDayRefereeCoachVoteService } from 'src/app/service/CompetitionDayRefereeCoachVoteService';
@@ -53,6 +54,8 @@ export class CompetitionVotesComponent implements OnInit {
   isPanelDirector = false;
   isAdmin = false;
   canVote = false;
+  autoComputePanelVotesCounter = 0
+  autoComputePanelVotesDoing = false;
 
   ///////////////////////////////////////////
   // FIELD USED WHEN A REFEREE IS SELECTED //
@@ -529,9 +532,31 @@ export class CompetitionVotesComponent implements OnInit {
       }
     }
   }
+  get commentForReferee(): string {
+    return this.vote.commentForReferee;
+  }
+  set commentForReferee(str: string) {
+    if (this.vote.commentForReferee !== str) {
+      this.vote.commentForReferee = str;
+      this.onVoteChange();
+    } else {
+      console.log('set commentForReferee: equal');
+    }
+  }
+  get panelVote(): Upgradable {
+    return this.vote.vote;
+  }
+  set panelVote(v: Upgradable) {
+    if (this.vote.vote !== v) {
+      this.vote.vote = v;
+      this.onVoteChange();
+    } else {
+      console.log('set panelVote: equal');
+    }
+  }
 
   onVoteChange() {
-    console.log('onVoteChange(): ' +  this.dirty);
+    console.log('onVoteChange()');
     if (!this.toolService.isValidString(this.vote.commentForCoach)) {
       this.vote.commentForCoach = '-';
     }
@@ -561,7 +586,7 @@ export class CompetitionVotesComponent implements OnInit {
   deleteVote() {
     this.loading = true;
     this.competitionDayPanelVoteService.delete(this.vote.id).pipe(
-      map(() => {
+      map((rv) => {
         this.vote = null;
         this.refereeId = null;
         this.onRefereeChange();
@@ -650,14 +675,31 @@ export class CompetitionVotesComponent implements OnInit {
   computeUpgrade(pvote: CompetitionDayPanelVote) {
     // Call a function to compute the referee upgrade on server side
     this.refereeUpgradeService.computeRefereeUpgrade(pvote.referee.refereeId, pvote.day)
-      .subscribe(
-        data => console.log('computeRefereeUpgrade Ok', data),
-        err => console.log('computeRefereeUpgrade Error', err));
+      .subscribe({
+        next: data => console.log('computeRefereeUpgrade Ok', data),
+        error: err => console.log('computeRefereeUpgrade Error', err)
+      });
   }
   private computeHasOpen() {
     this.hasOpenVote = this.panelVotes.filter(pv => !pv.closed).length > 0;
   }
-
+  autoComputePanelVotes() {
+    if (!this.refereesWithoutPanelVote) {
+      return;
+    }
+    this.autoComputePanelVotesCounter = 0;
+    this.autoComputePanelVotesDoing = true;
+    forkJoin(this.refereesWithoutPanelVote.map((r: Referee) => 
+      this.competitionService.autoComputePanelVote(this.competition, r, this.day, false).pipe(
+        map(() => this.autoComputePanelVotesCounter ++)
+      )
+    )).pipe(
+      map(() => {
+        this.autoComputePanelVotesDoing = false;
+        this.onRefereeChange();
+      })
+    ).subscribe();
+  }
   navBack() {
     this.navController.navigateRoot([`/competition/${this.competitionId}/home`]);
   }

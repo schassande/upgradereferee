@@ -85,7 +85,7 @@
             </ion-item-divider>
             <div style="clear: both;"></div>
             <div style="font-size: 1.3em; font-weight: bold;">
-                <ion-radio-group [(ngModel)]="vote.vote" [disabled]="vote.closed" name="vote" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
+                <ion-radio-group [(ngModel)]="coachVote" [disabled]="vote.closed" name="vote" style="width: 100%; margin-bottom: 10px;">
                     <ion-row style="margin-top: 10px;">
                         <ion-col col="4" style="text-align: center;">
                             <div>
@@ -117,7 +117,7 @@
             </div>
             <ion-item>
                 <ion-label>Comment</ion-label>
-                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="500" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="commentForReferee" [debounce]="2000"></ion-textarea>
             </ion-item>
             <ion-list *ngIf="coachings">
                 <ion-item-divider color="light">Coachings during the competition ({{coachings.length}})</ion-item-divider>

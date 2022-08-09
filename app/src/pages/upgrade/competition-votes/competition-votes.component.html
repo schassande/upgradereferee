@@ -110,7 +110,7 @@
                 <ion-col size="2" style="text-align: center;" class="voteAbstain">{{totalAbstain}}</ion-col>
                 <ion-col size="2" style="text-align: center;" class="voteYes">{{totalYes}}</ion-col>
             </ion-row>
-            <ion-radio-group *ngIf="vote" [(ngModel)]="vote.vote" name="votePanel" (ionChange)="onVoteChange()" style="width: 100%; margin-bottom: 10px;">
+            <ion-radio-group *ngIf="vote" [(ngModel)]="panelVote" name="votePanel" style="width: 100%; margin-bottom: 10px;">
                 <ion-row class="coachVotes-row coachVotes-row-panel">
                     <ion-col size="6" style="text-align: right; font-weight: bold;">Panel</ion-col>
                     <ion-col size="2" style="text-align: center;">
@@ -131,7 +131,7 @@
         <div *ngIf="vote">
             <ion-item>
                 <ion-label>Public<br>comment</ion-label>
-                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="vote.commentForReferee" [debounce]="2000" (ionChange)="onVoteChange()"></ion-textarea>
+                <ion-textarea type="textarea" class="comment" autoGrow="true" inputmode="text" maxlength="200" rows="5" wrap="soft" [disabled]="vote.closed" [(ngModel)]="commentForReferee" [debounce]="2000"></ion-textarea>
             </ion-item>
             <div *ngIf="isPanelDirector || isAdmin" style="text-align: right;">
                 <ion-button *ngIf="vote.closed" (click)="computeUpgrade(vote)" shape="round" size="normal">ReCompute</ion-button>
@@ -147,6 +147,15 @@
     <!-- ============= LIST OF PANEL VOTES ======================================================================= -->
     <!-- ========================================================================================================= -->
     <div *ngIf="!referee && (panelVotes.length > 0 || refereesWithoutPanelVote.length > 0)">
+        <div *ngIf="refereesWithoutPanelVote.length > 0" style="text-align: center;">
+            <ion-button shape="round" (click)="autoComputePanelVotes()" [disabled]="autoComputePanelVotesDoing">
+                <span>Auto compute panel votes</span>
+                <span *ngIf="autoComputePanelVotesDoing">
+                    &nbsp;{{autoComputePanelVotesCounter / this.refereesWithoutPanelVote.length | percent}}
+                    &nbsp;<ion-spinner></ion-spinner>
+                </span>
+            </ion-button>
+        </div>
         <ion-grid fixed="true" class="rsPanelVotes">
             <ion-row class="title-row" style="text-align: left;">
                 <ion-col size="8" style="text-align: left;">Panel Upgrade votes</ion-col>

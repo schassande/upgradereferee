@@ -3,11 +3,17 @@ import { Firestore, Query, query, where } from '@angular/fire/firestore';
 import { Injectable } from '@angular/core';
 import { RemotePersistentDataService } from './RemotePersistentDataService';
 import { ToastController } from '@ionic/angular';
-import { CompetitionDayPanelVote } from '../model/upgrade';
+import { CompetitionDayPanelVote, CompetitionDayRefereeCoachVote } from '../model/upgrade';
 import { DateService } from './DateService';
 import { ResponseWithData, Response } from './response';
 import { Observable, forkJoin, of } from 'rxjs';
-import { mergeMap } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
+import { User } from 'firebase/auth';
+import { Competition } from '../model/competition';
+import { CompetitionDayRefereeCoachVoteService } from './CompetitionDayRefereeCoachVoteService';
+import { Referee } from '../model/user';
+import { CompetitionService } from './CompetitionService';
+import { Upgradable } from '../model/coaching';
 
 @Injectable()
 export class CompetitionDayPanelVoteService extends RemotePersistentDataService<CompetitionDayPanelVote> {
