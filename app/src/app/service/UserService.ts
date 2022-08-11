@@ -310,10 +310,19 @@ export class UserService  extends RemotePersistentDataService<User> {
     public getByEmail(email: string): Observable<ResponseWithData<User>> {
         return this.queryOne(query(this.getCollectionRef(), where('email', '==', email))).pipe(
             map((ruser => {
-                // console.log('UserService.getByEmail(' + email + ')=', ruser.data);
+                console.log('UserService.getByEmail(' + email + ')=', ruser.data);
+                if (!ruser.data && !ruser.error) {
+                    return { 
+                        data: null, 
+                        error: {
+                            errorCode: 9,
+                            error: 'User with the email ' + email + ' doest not exist in the database.'
+                        }};
+                }
                 return ruser;
             })),
             catchError((err) => {
+                console.log('UserService.getByEmail(' + email + ') error catched: ', err);
                 return of({ error: err, data: null});
             }),
         );
